@@ -17,6 +17,11 @@ body {
   font-size: 14px;
   background-color: #eff2f1; }
 
+  ::-webkit-scrollbar{
+
+    display: none;
+  }
+
 a {
   text-decoration: none;
   -webkit-transition: .3s all ease;
