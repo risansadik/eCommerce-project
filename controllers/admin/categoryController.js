@@ -151,7 +151,69 @@ const getUnlistCategory = async (req, res) => {
 
 }
 
+const getEditCategory = async (req,res) => {
 
+    try {
+        
+        const id = req.query.id;
+        const category = await Category.findOne({_id:id});
+        res.render('edit-category',{category:category});
+    } catch (error) {
+
+        res.redirect('/pageError');
+        
+    }
+}
+
+const editCategory = async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { categoryName, description } = req.body;
+  
+      // Check if either categoryName or description is empty
+      if (!categoryName || !description) {
+        return res.status(400).json({ error: "Name and description cannot be empty" });
+      }
+  
+      // Fetch the current category to compare with new values
+      const currentCategory = await Category.findById(id);
+  
+      if (!currentCategory) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+  
+      // Check if name and description are the same as the current category
+      if (currentCategory.name === categoryName && currentCategory.description === description) {
+        return res.status(400).json({ error: "No changes were made" });
+      }
+  
+      // Check if another category with the same name exists (excluding the current category by ID)
+      const existingCategory = await Category.findOne({
+        name: categoryName,
+        _id: { $ne: id }
+      });
+  
+      if (existingCategory) {
+        return res.status(400).json({ error: "Category with the same name already exists" });
+      }
+  
+      // Proceed with the update
+      const updatedCategory = await Category.findByIdAndUpdate(
+        id,
+        { name: categoryName, description: description },
+        { new: true }
+      );
+  
+      if (updatedCategory) {
+        return res.status(200).json({ success: "Category updated successfully" });
+      } else {
+        return res.status(404).json({ error: "Category not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
 module.exports = {
 
     categoryInfo,
@@ -159,5 +221,7 @@ module.exports = {
     addCategoryOffer,
     removeCategoryOffer,
     getListCategory,
-    getUnlistCategory
+    getUnlistCategory,
+    getEditCategory,
+    editCategory
 }

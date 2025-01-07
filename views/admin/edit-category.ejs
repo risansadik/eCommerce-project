@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Male Fashion Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #1a1d21;
+            color: #ffffff;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #22262a;
+            padding: 20px 0;
+        }
+
+        .logo {
+            padding: 0 20px;
+            margin-bottom: 30px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            color: #8b949e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .nav-item:hover {
+            background-color: #2d333b;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .col-md-6 {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .mt-60 {
+            margin-top: 60px;
+        }
+
+        .mt-30 {
+            margin-top: 30px;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8b949e;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background-color: #2d333b;
+            border: 1px solid #444c56;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2ea043;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .d-grid {
+            display: grid;
+        }
+
+        .text-end {
+            text-align: end;
+        }
+
+        .col-md-5 {
+            width: 41.666667%;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #2ea043;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: #3fb950;
+        }
+
+        .border {
+            border: 1px solid #444c56;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #2d333b;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .col-md-5 {
+                width: 100%;
+            }
+            .col-md-6 {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">Male fashion.</div>
+        <a href="#" class="nav-item">Dashboard</a>
+        <a href="#" class="nav-item">Customers</a>
+        <a href="#" class="nav-item">Category</a>
+        <a href="#" class="nav-item">Brands</a>
+        <a href="#" class="nav-item">Add product</a>
+        <a href="#" class="nav-item">Products</a>
+        <a href="#" class="nav-item">Coupon</a>
+        <a href="#" class="nav-item">Banner</a>
+        <a href="#" class="nav-item">Orders</a>
+    </nav>
+    <main class="main-content">
+        <div class="user-avatar"></div>
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-md-6 mt-60">
+              <form id="editCategoryForm">
+                <div class="mb-4 mt-30">
+                  <label for="product_name" class="form-label">Name</label>
+                  <input type="text" name="categoryName" value="<%= category.name %>" class="form-control border" />
+                </div>
+      
+                <div class="mb-4">
+                  <label class="form-label">Description</label>
+                  <textarea name="description" class="form-control border"><%= category.description %></textarea>
+                </div>
+      
+                <div class="d-grid text-end mt-30 col-md-5">
+                  <button class="btn btn-primary" type="submit">Update category</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+      
+      <script>
+        document.getElementById('editCategoryForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+      
+          const form = e.target;
+          const formData = new FormData(form);
+          const data = {
+            categoryName: formData.get('categoryName'),
+            description: formData.get('description')
+          };
+      
+          try {
+            const response = await fetch(`/admin/editCategory/<%= category._id %>`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            });
+      
+            const result = await response.json();
+      
+            if (response.ok) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: result.success,
+                confirmButtonColor: '#2ea043'
+              }).then(() => {
+                window.location.href = '/admin/category';
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: result.error,
+                confirmButtonColor: '#e74c3c'
+              });
+            }
+          } catch (error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong!',
+              confirmButtonColor: '#e74c3c'
+            });
+          }
+        });
+      </script>
+      
+</body>
+</html>
