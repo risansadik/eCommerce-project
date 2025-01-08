@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <style>
         * {
@@ -14,6 +15,11 @@
             color: white;
             display: flex;
             min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar {
+
+            display: none;
         }
 
         .sidebar {
@@ -86,7 +92,8 @@
             margin-bottom: 8px;
         }
 
-        input, textarea {
+        input,
+        textarea {
             width: 100%;
             padding: 10px;
             background-color: #2d3748;
@@ -141,14 +148,15 @@
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
-        <a href="#" class="sidebar-item">Dashboard</a>
+        <a href="/admin/" class="sidebar-item">Dashboard</a>
         <a href="/admin/users" class="sidebar-item">Customers</a>
         <a href="/admin/category" class="sidebar-item">Category</a>
-        <a href="#" class="sidebar-item">Brands</a>
-        <a href="#" class="sidebar-item">Add product</a>
-        <a href="#" class="sidebar-item">Product</a>
+        <a href="/admin/brands" class="sidebar-item">Brands</a>
+        <a href="/admin/addProducts" class="sidebar-item">Add product</a>
+        <a href="/admin/products" class="sidebar-item">Product</a>
         <a href="#" class="sidebar-item">Coupon</a>
         <a href="#" class="sidebar-item">Banner</a>
         <a href="#" class="sidebar-item">Orders</a>
@@ -222,4 +230,5 @@
         </div>
     </div>
 </body>
+
 </html>

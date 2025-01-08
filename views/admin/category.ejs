@@ -251,6 +251,11 @@
             color: #6c757d;
         }
 
+        ::-webkit-scrollbar {
+
+            display: none;
+        }
+
         .text-center {
             text-align: center !important;
         }
@@ -268,9 +273,9 @@
             <a href="/admin/" class="nav-item">Dashboard</a>
             <a href="/admin/users" class="nav-item">Customers</a>
             <a href="/admin/category" class="nav-item">Category</a>
-            <a href="#" class="nav-item">Brands</a>
-            <a href="#" class="nav-item">Add product</a>
-            <a href="#" class="nav-item">Products</a>
+            <a href="/admin/brands" class="nav-item">Brands</a>
+            <a href="/admin/addProducts" class="nav-item">Add product</a>
+            <a href="admin/products" class="nav-item">Products</a>
             <a href="#" class="nav-item">Coupon</a>
             <a href="#" class="nav-item">Banner</a>
             <a href="#" class="nav-item">Orders</a>
@@ -343,33 +348,37 @@
                                 <td class="text-start">
                                     <%if(category.categoryOffer===0){%>
                                         <button class="btn btn-info">
-                                            <a href="#" class="text-white" onclick="addOffer('<%=category._id%>')" style="text-decoration: none;" >Add
+                                            <a href="#" class="text-white" onclick="addOffer('<%=category._id%>')"
+                                                style="text-decoration: none;">Add
                                                 Offer</a>
                                         </button>
                                         <%}else{%>
                                             <button class="btn btn-info">
                                                 <a href="#" class="text-white"
-                                                    onclick="removeOffer('<%=category._id%>')" style="text-decoration: none;" >Remove</a>
+                                                    onclick="removeOffer('<%=category._id%>')"
+                                                    style="text-decoration: none;">Remove</a>
                                             </button>
                                             <%}%>
                                 </td>
                                 <td>
                                     <%if(category.isListed){%>
-                                    <span class="badge alert-success">Listed</span>
-                                    <%}else{%>
-                                    <span class="badge alert-danger">Unlisted</span>
-                                    <%}%>
+                                        <span class="badge alert-success">Listed</span>
+                                        <%}else{%>
+                                            <span class="badge alert-danger">Unlisted</span>
+                                            <%}%>
                                 </td>
                                 <td>
                                     <%if(category.isListed){%>
-                                    <button class="btn btn-danger">
-                                        <a href="/admin/listCategory?id=<%=category._id%>" class="text-white" style="text-decoration: none;">Unlist</a>
-                                    </button>
-                                    <%}else{%>
-                                    <button class="btn btn-success">
-                                        <a href="/admin/unlistCategory?id=<%=category._id%>" class="text-white" style="text-decoration: none;">List</a>
-                                    </button>
-                                    <%}%>
+                                        <button class="btn btn-danger">
+                                            <a href="/admin/listCategory?id=<%=category._id%>" class="text-white"
+                                                style="text-decoration: none;">Unlist</a>
+                                        </button>
+                                        <%}else{%>
+                                            <button class="btn btn-success">
+                                                <a href="/admin/unlistCategory?id=<%=category._id%>" class="text-white"
+                                                    style="text-decoration: none;">List</a>
+                                            </button>
+                                            <%}%>
                                 </td>
                                 <td>
                                     <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-info">Edit</a>
@@ -383,28 +392,62 @@
 
         <div class="pagination-container">
             <% if (currentPage> 1) { %>
-                <a href="?page=<%= currentPage - 1 %>" style="text-decoration: none;" >&laquo;</a>
+                <a href="?page=<%= currentPage - 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>"
+                    style="text-decoration: none;">&laquo;</a>
                 <% } %>
+
                     <% for (let i=1; i <=totalPages; i++) { %>
                         <% if (i===currentPage) { %>
                             <span class="current-page">
                                 <%= i %>
                             </span>
                             <% } else { %>
-                                <a href="?page=<%= i %>" style="text-decoration: none;">
+                                <a href="?page=<%= i %>&search=<%= typeof search !== 'undefined' ? search : '' %>"
+                                    style="text-decoration: none;">
                                     <%= i %>
                                 </a>
                                 <% } %>
                                     <% } %>
+
                                         <% if (currentPage < totalPages) { %>
-                                            <a href="?page=<%= currentPage + 1 %>" style="text-decoration: none;" >&raquo;</a>
+                                            <a href="?page=<%= currentPage + 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>"
+                                                style="text-decoration: none;">&raquo;</a>
                                             <% } %>
         </div>
-
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchForm = document.querySelector('.search-container form');
+            const searchInput = searchForm.querySelector('input[name="search"]');
+
+            // Pre-fill search input with current search term from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSearch = urlParams.get('search');
+            if (currentSearch) {
+                searchInput.value = currentSearch;
+            }
+
+            // Handle search on Enter key
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.submit();
+                }
+            });
+
+            // Optional: Handle empty search
+            searchInput.addEventListener('input', function () {
+                if (this.value.trim() === '') {
+                    // Uncomment the next line if you want to auto-submit when search is cleared
+                    // searchForm.submit();
+                }
+            });
+        });
+    </script>
 
 
     <script>

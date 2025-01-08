@@ -21,23 +21,43 @@ const userAuth = (req,res,next) => {
 
 }
 
-const adminAuth = (req,res,next) => {
-    
-    User.findOne({isAdmin:true})
-    .then(data => {
-        if(data){
-            console.log('Session user : ',req.session.admin)
-            next();
-        }else{
-            res.redirect('/admin/login')
-        }
-    })
-    .catch(error => {
-        console.log('Error in adminAuth middleware',error);
-        res.status(500).send('internal server error');
+const adminAuth = (req, res, next) => {
+    try {
         
-    })
-}
+        if (!req.session.admin) {
+            return res.redirect('/admin/login');
+        }
+
+        
+        User.findOne({ _id: req.session.admin._id, isAdmin: true })
+            .then(admin => {
+                if (!admin) {
+                    
+                    req.session.destroy(err => {
+                        if (err) {
+                            console.log('Error destroying session:', err);
+                        }
+                        return res.redirect('/admin/login');
+                    });
+                } else {
+                   
+                    next();
+                }
+            })
+            .catch(error => {
+                console.log('Error in adminAuth middleware:', error);
+                req.session.destroy(err => {
+                    if (err) {
+                        console.log('Error destroying session:', err);
+                    }
+                    return res.redirect('/admin/login');
+                });
+            });
+    } catch (error) {
+        console.log('Unexpected error in adminAuth:', error);
+        return res.redirect('/admin/login');
+    }
+};
 
 
 module.exports = {

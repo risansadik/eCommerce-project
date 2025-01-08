@@ -1,188 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-                background-color: #1a1e23;
-                color: #e2e8f0;
-                font-family: Arial, sans-serif;
-                display: flex;
-            }
-    
-            .sidebar {
-                width: 250px;
-                background-color: #1a1e23;
-                height: 100vh;
-                padding: 20px;
-                border-right: 1px solid #2d3748;
-            }
-    
-            .logo {
-                font-size: 24px;
-                color: #fff;
-                margin-bottom: 40px;
-                padding-left: 10px;
-            }
-    
-            .nav-menu {
-                list-style: none;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-    
-            .nav-link {
-                display: block;
-                width: 100%;
-                padding: 12px 16px;
-                color: #e2e8f0;
-                text-decoration: none;
-                border-radius: 4px;
-                transition: background-color 0.3s;
-                font-size: 14px;
-            }
-    
-            .nav-link:hover {
-                background-color: #2d3748;
-                color: #e2e8f0;
-            }
-    
-            .nav-link.active {
-                background-color: #2d3748;
-            }
-    
-            /* Adjust main content for sidebar */
-            .main-content {
-                flex: 1;
-                padding: 20px;
-            }
-            
-            .dashboard-container {
-                max-width: 1200px;
-                margin: 0 auto;
-            }
-    
-            .search-section {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 20px;
-            }
-    
-            .search-box {
-                display: flex;
-                align-items: center;
-                flex: 1;
-                margin-right: 20px;
-            }
-    
-            .search-input {
-                background-color: #2d3748;
-                border: 1px solid #4a5568;
-                border-radius: 4px;
-                padding: 8px 12px;
-                color: white;
-                width: 300px;
-            }
-    
-            .search-button {
-                background-color: #3182ce;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                margin-left: 10px;
-                cursor: pointer;
-            }
-    
-            .user-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-    
-            .user-table th {
-                text-align: left;
-                padding: 12px;
-                border-bottom: 1px solid #4a5568;
-                color: #a0aec0;
-            }
-    
-            .user-table td {
-                padding: 12px;
-                border-bottom: 1px solid #2d3748;
-            }
-    
-            .btn {
-                padding: 6px 12px;
-                border-radius: 4px;
-                border: none;
-                cursor: pointer;
-                margin-right: 5px;
-            }
-    
-            .btn-block {
-                background-color: #e53e3e;
-                color: white;
-            }
-    
-            .btn-unblock {
-                background-color: #48bb78;
-                color: white;
-            }
-    
-            .create-user-form {
-                background-color: #2d3748;
-                padding: 20px;
-                border-radius: 8px;
-                margin-left: 20px;
-                width: 300px;
-            }
-    
-            .form-group {
-                margin-bottom: 15px;
-            }
-    
-            .form-group label {
-                display: block;
-                margin-bottom: 5px;
-                color: #a0aec0;
-            }
-    
-            .form-group input {
-                width: 100%;
-                padding: 8px;
-                background-color: #1a1e23;
-                border: 1px solid #4a5568;
-                border-radius: 4px;
-                color: white;
-            }
-    
-            .create-button {
-                background-color: #3182ce;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                width: 100%;
-                cursor: pointer;
-            }
-        </style>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1e23;
+            color: #e2e8f0;
+            font-family: Arial, sans-serif;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1a1e23;
+            height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #2d3748;
+        }
+
+        .logo {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-link {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            color: #e2e8f0;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .nav-link.active {
+            background-color: #2d3748;
+        }
+
+        /* Adjust main content for sidebar */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .search-input {
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: white;
+            width: 300px;
+        }
+
+        .search-button {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #4a5568;
+            color: #a0aec0;
+        }
+
+        .user-table td {
+            padding: 12px;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .btn-block {
+            background-color: #e53e3e;
+            color: white;
+        }
+
+        .btn-unblock {
+            background-color: #48bb78;
+            color: white;
+        }
+
+        .create-user-form {
+            background-color: #2d3748;
+            padding: 20px;
+            border-radius: 8px;
+            margin-left: 20px;
+            width: 300px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a0aec0;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            background-color: #1a1e23;
+            border: 1px solid #4a5568;
+            border-radius: 4px;
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+
+            display: none;
+        }
+
+        .create-button {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            width: 100%;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
     <!-- Add sidebar -->
     <div class="sidebar">
         <div class="nav-menu">
             <a href="/admin/" class="nav-link">Dashboard</a>
-            <a href="/admin/user-management" class="nav-link active">Customers</a>
+            <a href="/admin/users" class="nav-link active">Customers</a>
             <a href="/admin/category" class="nav-link">Category</a>
-            <a href="/admin/products-management" class="nav-link">Brands</a>
-            <a href="/admin/coupon-management" class="nav-link">Add product</a>
+            <a href="/admin/brands" class="nav-link">Brands</a>
+            <a href="/admin/addProducts" class="nav-link">Add product</a>
             <a href="/admin/offer-management" class="nav-link">Products</a>
             <a href="/admin/order-management" class="nav-link">Coupon</a>
             <a href="/admin/order-management" class="nav-link">Banner</a>
@@ -197,11 +204,15 @@
         <div class="dashboard-container">
             <div class="search-section">
                 <div class="search-box">
-                    <input type="text" placeholder="Search users" class="search-input">
-                    <button class="search-button">Search</button>
+                    <form action="/admin/users" method="get" class="d-flex">
+                        <input type="text" placeholder="Search users" class="search-input" name="search"
+                            value="<%= typeof search !== 'undefined' ? search : '' %>">
+                        <button type="submit" class="search-button">Search</button>
+                    </form>
                 </div>
             </div>
 
+            <!-- User table -->
             <table class="user-table">
                 <thead>
                     <tr>
@@ -212,50 +223,116 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <%for(let i=0;i<data.length;i++){%>
+                    <% if (data.length===0) { %>
                         <tr>
-                            <td><%=data[i].name%></td>
-                            <td><%=data[i].email%></td>
-                            <td><%=data[i].phone%></td>
-                            <td>
-                                <%if(data[i].isBlocked===false){%>
-                                    <button class="btn btn-block">
-                                        <a href="/admin/blockCustomer?id=<%=data[i]._id%>" style="text-decoration: none; color: white;">Block</a>
-                                        </button>
-                                    <%}else{%>
-                                        <button class="btn btn-unblock">
-                                            <a href="/admin/unblockCustomer?id=<%=data[i]._id%>" style="text-decoration: none; color: white;">Unblock</a></button>
-                                        <%}%>
-                            </td>
+                            <td colspan="4" class="text-center">No users found</td>
                         </tr>
-                        <%}%>
+                        <% } else { %>
+                            <% data.forEach(user=> { %>
+                                <tr>
+                                    <td>
+                                        <%= user.name %>
+                                    </td>
+                                    <td>
+                                        <%= user.email %>
+                                    </td>
+                                    <td>
+                                        <%= user.phone %>
+                                    </td>
+                                    <td>
+                                        <% if(!user.isBlocked) { %>
+                                            <button class="btn btn-block">
+                                                <a href="/admin/blockCustomer?id=<%= user._id %>"
+                                                    style="text-decoration: none; color: white;">Block</a>
+                                            </button>
+                                            <% } else { %>
+                                                <button class="btn btn-unblock">
+                                                    <a href="/admin/unblockCustomer?id=<%= user._id %>"
+                                                        style="text-decoration: none; color: white;">Unblock</a>
+                                                </button>
+                                                <% } %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } %>
                 </tbody>
             </table>
 
             <div class="container mt-3">
                 <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-                        <% for(let i = 1; i <= totalPages; i++) { %>
-                            <li class="page-item <%= (i === page) ? 'active' : '' %>">
-                                <a class="page-link" href="?page=<%= i %>&search=<%= search %>"><%= i %></a>
+                    <ul class="pagination justify-content-center mb-20">
+                        <% if (page> 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= page-1 %>&search=<%= search %>">&laquo;</a>
                             </li>
-                        <% } %>
+                            <% } %>
+
+                                <% for(let i=1; i <=totalPages; i++) { %>
+                                    <li class="page-item <%= (i === page) ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %>&search=<%= search %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                    <% } %>
+
+                                        <% if (page < totalPages) { %>
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                    href="?page=<%= page+1 %>&search=<%= search %>">&raquo;</a>
+                                            </li>
+                                            <% } %>
                     </ul>
-                    
                 </nav>
             </div>
-        </div>
-    </div>
+            <!-- Keep your script tags -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+                crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+                integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+                crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+                integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+                crossorigin="anonymous"></script>
 
-    <!-- Keep your script tags -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-        crossorigin="anonymous"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const searchInput = document.querySelector('.search-input');
+                    const searchButton = document.querySelector('.search-button');
+
+                    // Handle search button click
+                    searchButton.addEventListener('click', function () {
+                        performSearch();
+                    });
+
+                    // Handle Enter key press in search input
+                    searchInput.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') {
+                            performSearch();
+                        }
+                    });
+
+                    function performSearch() {
+                        const searchTerm = searchInput.value.trim();
+                        const currentUrl = new URL(window.location.href);
+
+                        // Update or add search parameter
+                        currentUrl.searchParams.set('search', searchTerm);
+                        // Reset to first page when searching
+                        currentUrl.searchParams.set('page', '1');
+
+                        // Navigate to the new URL
+                        window.location.href = currentUrl.toString();
+                    }
+
+                    // Pre-fill search input with current search term from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentSearch = urlParams.get('search');
+                    if (currentSearch) {
+                        searchInput.value = currentSearch;
+                    }
+                });
+            </script>
 </body>
+
 </html>

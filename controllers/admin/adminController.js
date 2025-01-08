@@ -11,33 +11,43 @@ const loadLogin = (req,res) => {
     res.render("admin-login",{message:null});
 }
 
-const login = async (req,res) => {
-
+const login = async (req, res) => {
     try {
-        
-        const {email,password} = req.body;
-        const admin = await User.findOne({email,isAdmin:true});
-        if(admin){
-            const passwordMatch = await bcrypt.compare(password,admin.password);
-            if (passwordMatch){
-                req.session.admin = true
-                return res.redirect('/admin')
-            }else{
-                return res.render('admin-login',{message : "Incorrect password"})
+        const email = req.body.email;
+        const password = req.body.password;
+
+        const adminData = await User.findOne({ email: email, isAdmin: true });
+
+        if (adminData) {
+            const passwordMatch = await bcrypt.compare(password, adminData.password);
+            
+            if (passwordMatch) {
+                // Set admin session
+                req.session.admin = {
+                    _id: adminData._id,
+                    email: adminData.email,
+                    isAdmin: true
+                };
+                
+                // Ensure session is saved before redirect
+                req.session.save((err) => {
+                    if (err) {
+                        console.log('Session save error:', err);
+                        return res.redirect('/admin/login');
+                    }
+                    return res.redirect('/admin/'); // Redirect to dashboard
+                });
+            } else {
+                return res.render('admin-login', { message: 'Invalid Password' });
             }
-        }else{
-
-            return res.render('admin-login',{message : 'Invalid credentials'});
+        } else {
+            return res.render('admin-login', { message: 'Invalid Email' });
         }
-
     } catch (error) {
-
-        console.log('login error',error);
-        return res.redirect('/pageError');
-        
+        console.log('Error in admin login:', error);
+        return res.redirect('/admin/pageError');
     }
-}
-
+};
 const loadDashboard = async (req,res) => {
 
     if(req.session.admin){

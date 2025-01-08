@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <style>
+        /* Previous CSS remains the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #1a1d21;
+            color: #ffffff;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1a1d21;
+            padding: 20px 0;
+            border-right: 1px solid #2d3339;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            padding: 0 20px;
+            margin-bottom: 30px;
+            color: #ffffff;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #8b949e;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #2d3339;
+        }
+
+        .nav-item.active {
+            background-color: #2d3339;
+            color: #ffffff;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+        }
+
+        .search-container {
+            margin-bottom: 25px;
+        }
+
+        .search-form {
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-box {
+            width: 500px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid #2d3339;
+            background-color: #2d3339;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #0095ff;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            text-align: left;
+            padding: 15px 20px;
+            background-color: #2d3339;
+            font-weight: normal;
+            color: #8b949e;
+        }
+
+        .table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #2d3339;
+            vertical-align: top;
+        }
+
+        .button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button-primary {
+            background-color: #0095ff;
+            color: white;
+            width: 100px;
+        }
+
+        .button-danger {
+            background-color: #dc3545;
+            color: white;
+            width: 80px;
+        }
+
+        .button-success {
+            background-color: #28a745;
+            color: white;
+            width: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar remains the same -->
+        <div class="sidebar">
+            <a href="/admin/" class="nav-item"><span class="nav-icon"></span>Dashboard</a>
+            <a href="/admin/users" class="nav-item"><span class="nav-icon"></span>Customers</a>
+            <a href="/admin/category" class="nav-item"><span class="nav-icon"></span>Category</a>
+            <a href="/admin/brands" class="nav-item"><span class="nav-icon"></span>Brands</a>
+            <a href="/admin/addProducts" class="nav-item"><span class="nav-icon"></span>Add product</a>
+            <a href="/admin/products" class="nav-item active"><span class="nav-icon"></span>Products</a>
+            <a href="#" class="nav-item"><span class="nav-icon"></span>Coupon</a>
+            <a href="#" class="nav-item"><span class="nav-icon"></span>Banner</a>
+            <a href="#" class="nav-item"><span class="nav-icon"></span>Orders</a>
+        </div>
+
+        <div class="main-content">
+            <h1 class="page-title">Products</h1>
+
+            <!-- Updated search form with functionality -->
+            <div class="search-container">
+                <form action="" method="get" class="search-form">
+                    <input type="text" class="search-box" placeholder="Search products or brands" name="search">
+                </form>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product name</th>
+                        <th>Brand</th>
+                        <th>Category</th>
+                        <th>Sale Price</th>
+                        <th>Offer Price</th>
+                        <th>Offer</th>
+                        <th>Quantity</th>
+                        <th>Action</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <%for(let i=data.length-1;i>=0;i--){%>
+                        <tr>
+                            <td><%=data[i].productName%></td>
+                            <td><%=data[i].brand%></td>
+                            <td><%=data[i].category.name%></td>
+                            <td><%=data[i].salePrice%></td>
+                            <td></td>
+                            <td>
+                                <button class="button button-primary" onclick="handleAddOffer()">Add Offer</button>
+                                <button class="button button-primary" onclick="handleRemoveOffer()">Remove</button>
+                            </td>
+                            <td></td>
+                            <td>
+                                <button class="button button-danger" onclick="handleBlock()">Block</button>
+                                <button class="button button-success" onclick="handleUnblock()">Unblock</button>
+                            </td>
+                            <td>
+                                <button class="button button-primary" onclick="handleEdit()">Edit</button>
+                            </td>
+                        </tr>
+                        <%}%>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pagination-container">
+        <% if (currentPage> 1) { %>
+            <a href="?page=<%= currentPage - 1 %>" style="text-decoration: none;">&laquo;</a>
+            <% } %>
+                <% for (let i=1; i <=totalPages; i++) { %>
+                    <% if (i===currentPage) { %>
+                        <span class="current-page">
+                            <%= i %>
+                        </span>
+                        <% } else { %>
+                            <a href="?page=<%= i %>" style="text-decoration: none;">
+                                <%= i %>
+                            </a>
+                            <% } %>
+                                <% } %>
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="?page=<%= currentPage + 1 %>"
+                                            style="text-decoration: none;">&raquo;</a>
+                                        <% } %>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+        // Add Offer functionality
+        function handleAddOffer() {
+            Swal.fire({
+                title: 'Add Offer',
+                input: 'text',
+                inputPlaceholder: 'Enter offer details',
+                showCancelButton: true,
+                confirmButtonText: 'Add',
+                showLoaderOnConfirm: true,
+                preConfirm: (offer) => {
+                    // Here you can add AJAX call to your backend
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve();
+                        }, 500);
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Success', 'Offer added successfully', 'success');
+                }
+            });
+        }
+
+        // Remove Offer functionality
+        function handleRemoveOffer() {
+            Swal.fire({
+                title: 'Remove Offer',
+                text: 'Are you sure you want to remove this offer?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Here you can add AJAX call to your backend
+                    Swal.fire('Removed!', 'Offer has been removed.', 'success');
+                }
+            });
+        }
+
+        // Block functionality
+        function handleBlock() {
+            Swal.fire({
+                title: 'Block Product',
+                text: 'Are you sure you want to block this product?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, block it',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Here you can add AJAX call to your backend
+                    Swal.fire('Blocked!', 'Product has been blocked.', 'success');
+                }
+            });
+        }
+
+        // Unblock functionality
+        function handleUnblock() {
+            Swal.fire({
+                title: 'Unblock Product',
+                text: 'Are you sure you want to unblock this product?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, unblock it',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Here you can add AJAX call to your backend
+                    Swal.fire('Unblocked!', 'Product has been unblocked.', 'success');
+                }
+            });
+        }
+
+        // Edit functionality
+        function handleEdit() {
+            Swal.fire({
+                title: 'Edit Product',
+                html: `
+                    <input id="productName" class="swal2-input" placeholder="Product Name">
+                    <input id="price" class="swal2-input" placeholder="Price">
+                    <input id="quantity" class="swal2-input" placeholder="Quantity">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Save Changes',
+                focusConfirm: false,
+                preConfirm: () => {
+                    // Here you can add AJAX call to your backend
+                    return {
+                        name: document.getElementById('productName').value,
+                        price: document.getElementById('price').value,
+                        quantity: document.getElementById('quantity').value
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Saved!', 'Product has been updated.', 'success');
+                }
+            });
+        }
+
+        // Search functionality
+        document.querySelector('.search-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const searchTerm = this.querySelector('input[name="search"]').value;
+            console.log('Searching for:', searchTerm);
+        });
+    </script>
+</body>
+
+</html>
