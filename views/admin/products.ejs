@@ -187,22 +187,50 @@
 
                     <%for(let i=data.length-1;i>=0;i--){%>
                         <tr>
-                            <td><%=data[i].productName%></td>
-                            <td><%=data[i].brand%></td>
-                            <td><%=data[i].category.name%></td>
-                            <td><%=data[i].salePrice%></td>
-                            <td></td>
                             <td>
-                                <button class="button button-primary" onclick="handleAddOffer()">Add Offer</button>
-                                <button class="button button-primary" onclick="handleRemoveOffer()">Remove</button>
-                            </td>
-                            <td></td>
-                            <td>
-                                <button class="button button-danger" onclick="handleBlock()">Block</button>
-                                <button class="button button-success" onclick="handleUnblock()">Unblock</button>
+                                <%=data[i].productName%>
                             </td>
                             <td>
-                                <button class="button button-primary" onclick="handleEdit()">Edit</button>
+                                <%=data[i].brand%>
+                            </td>
+                            <td>
+                                <%=data[i].category.name%>
+                            </td>
+                            <td>
+                                <%=data[i].salePrice%>
+                            </td>
+                            <td>
+
+                                <%if(locals.data[i].productOffer){%>
+
+                                    <%=data[i].productOffer%>
+
+                                        <%}else{%>
+                                            0%
+
+                                            <%}%>
+                            </td>
+                            <td>
+
+                                <%if(locals.data[i].productOffer===0){%>
+                                    <button class="button button-primary" onclick="addOffer('<%=data[i]._id%>')">Add
+                                        Offer</button>
+
+                                    <%}else{%>
+                                        <button class="button button-primary"
+                                            onclick="removeOffer('<%=data[i]._id%>')">Remove</button>
+
+                                        <%}%>
+                            </td>
+                            <td>
+                                <%=data[i].quantity%>
+                            </td>
+                            <td>
+                                <button class="button button-danger" onclick="">Block</button>
+                                <button class="button button-success" onclick="">Unblock</button>
+                            </td>
+                            <td>
+                                <button class="button button-primary" onclick="">Edit</button>
                             </td>
                         </tr>
                         <%}%>
@@ -237,115 +265,121 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script>
-        // Add Offer functionality
-        function handleAddOffer() {
-            Swal.fire({
-                title: 'Add Offer',
-                input: 'text',
-                inputPlaceholder: 'Enter offer details',
-                showCancelButton: true,
-                confirmButtonText: 'Add',
-                showLoaderOnConfirm: true,
-                preConfirm: (offer) => {
-                    // Here you can add AJAX call to your backend
-                    return new Promise((resolve) => {
-                        setTimeout(() => {
-                            resolve();
-                        }, 500);
-                    });
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Success', 'Offer added successfully', 'success');
-                }
-            });
-        }
 
-        // Remove Offer functionality
-        function handleRemoveOffer() {
-            Swal.fire({
-                title: 'Remove Offer',
-                text: 'Are you sure you want to remove this offer?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, remove it',
-                cancelButtonText: 'No, cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Here you can add AJAX call to your backend
-                    Swal.fire('Removed!', 'Offer has been removed.', 'success');
+// Frontend JavaScript fixes
+async function addOffer(productId) {
+    try {
+        const { value: percentage } = await Swal.fire({
+            title: 'Add Product Offer',
+            input: 'number',
+            inputLabel: 'Offer Percentage',
+            inputPlaceholder: "Enter percentage (0-100)",
+            inputAttributes: {
+                min: 0,
+                max: 100,
+                step: 1
+            },
+            validationMessage: 'Please enter a valid percentage between 0 and 100',
+            showCancelButton: true,
+            confirmButtonText: 'Add Offer',
+            showLoaderOnConfirm: true,
+            preConfirm: (value) => {
+                if (!value || value < 0 || value > 100) {
+                    Swal.showValidationMessage('Please enter a valid percentage between 0 and 100');
                 }
-            });
-        }
-
-        // Block functionality
-        function handleBlock() {
-            Swal.fire({
-                title: 'Block Product',
-                text: 'Are you sure you want to block this product?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, block it',
-                cancelButtonText: 'No, cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Here you can add AJAX call to your backend
-                    Swal.fire('Blocked!', 'Product has been blocked.', 'success');
-                }
-            });
-        }
-
-        // Unblock functionality
-        function handleUnblock() {
-            Swal.fire({
-                title: 'Unblock Product',
-                text: 'Are you sure you want to unblock this product?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, unblock it',
-                cancelButtonText: 'No, cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Here you can add AJAX call to your backend
-                    Swal.fire('Unblocked!', 'Product has been unblocked.', 'success');
-                }
-            });
-        }
-
-        // Edit functionality
-        function handleEdit() {
-            Swal.fire({
-                title: 'Edit Product',
-                html: `
-                    <input id="productName" class="swal2-input" placeholder="Product Name">
-                    <input id="price" class="swal2-input" placeholder="Price">
-                    <input id="quantity" class="swal2-input" placeholder="Quantity">
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Save Changes',
-                focusConfirm: false,
-                preConfirm: () => {
-                    // Here you can add AJAX call to your backend
-                    return {
-                        name: document.getElementById('productName').value,
-                        price: document.getElementById('price').value,
-                        quantity: document.getElementById('quantity').value
-                    };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Saved!', 'Product has been updated.', 'success');
-                }
-            });
-        }
-
-        // Search functionality
-        document.querySelector('.search-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const searchTerm = this.querySelector('input[name="search"]').value;
-            console.log('Searching for:', searchTerm);
+                return value;
+            }
         });
+
+        if (!percentage) return; // User cancelled
+
+        const response = await fetch("/admin/addProductOffer", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                percentage,
+                productId
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.status) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: data.message || 'Offer added successfully',
+                timer: 2000
+            });
+            location.reload();
+        } else {
+            throw new Error(data.message || 'Failed to add offer');
+        }
+    } catch (error) {
+        console.error('Error in addOffer:', error);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'An error occurred while adding the offer'
+        });
+    }
+}
+
+async function removeOffer(productId) {
+    try {
+        const result = await Swal.fire({
+            title: 'Remove Offer',
+            text: "Are you sure you want to remove this offer?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, remove it',
+            showLoaderOnConfirm: true
+        });
+
+        if (!result.isConfirmed) return;
+
+        const response = await fetch('/admin/removeProductOffer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId })
+        });
+
+        const data = await response.json();
+
+        if (data.status) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: data.message || 'Offer removed successfully',
+                timer: 2000
+            });
+            location.reload();
+        } else {
+            throw new Error(data.message || 'Failed to remove offer');
+        }
+    } catch (error) {
+        console.error('Error in removeOffer:', error);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'An error occurred while removing the offer'
+        });
+    }
+}
+
+
+
+
+
     </script>
+
+
 </body>
 
 </html>

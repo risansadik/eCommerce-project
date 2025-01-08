@@ -112,30 +112,30 @@ const getAllProducts = async (req, res) => {
                 { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
             ],
         }).limit(limit * 1)
-        .skip((page - 1) * limit)
-        .populate('category')
-        .exec();
+            .skip((page - 1) * limit)
+            .populate('category')
+            .exec();
 
         const count = await Product.find({
-            $or:[
-                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
-                {brand:{$regex:new RegExp(".*"+search+".*","i")}},
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
             ],
         }).countDocuments();
 
 
-        const category = await Category.find({isListed:true});
-        const brand = await Brand.find({isBlocked:false});
+        const category = await Category.find({ isListed: true });
+        const brand = await Brand.find({ isBlocked: false });
 
-        if(category && brand){
-            res.render('products',{
-                data:productData,
-                currentPage:page,
-                totalPages:Math.ceil(count/limit),
-                cat:category,
-                brand:brand,
+        if (category && brand) {
+            res.render('products', {
+                data: productData,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                cat: category,
+                brand: brand,
             })
-        }else{
+        } else {
             res.render('page-404');
         }
 
@@ -143,10 +143,118 @@ const getAllProducts = async (req, res) => {
 
         res.redirect('/admin/pageError');
     }
-}
+};
+
+
+const addProductOffer = async (req, res) => {
+    try {
+        const { productId, percentage } = req.body;
+        
+        // Input validation
+        if (!productId || !percentage || percentage < 0 || percentage > 100) {
+            return res.status(400).json({ 
+                status: false, 
+                message: "Invalid input parameters" 
+            });
+        }
+
+        const findProduct = await Product.findById(productId);
+        if (!findProduct) {
+            return res.status(404).json({ 
+                status: false, 
+                message: "Product not found" 
+            });
+        }
+
+        const findCategory = await Category.findById(findProduct.category);
+        if (!findCategory) {
+            return res.status(404).json({ 
+                status: false, 
+                message: "Category not found" 
+            });
+        }
+
+        // Check if category offer is better
+        if (findCategory.categoryOffer > percentage) {
+            return res.status(400).json({ 
+                status: false, 
+                message: "Category offer is better than the proposed product offer" 
+            });
+        }
+
+        // Calculate new sale price
+        const discountAmount = Math.floor(findProduct.regularPrice * (percentage / 100));
+        const newSalePrice = findProduct.regularPrice - discountAmount;
+
+        // Update product
+        findProduct.salePrice = newSalePrice;
+        findProduct.productOffer = parseInt(percentage);
+        await findProduct.save();
+
+        return res.json({
+            status: true,
+            message: "Offer added successfully"
+        });
+
+    } catch (error) {
+        console.error('Error in addProductOffer:', error);
+        return res.status(500).json({
+            status: false,
+            message: "Internal Server Error"
+        });
+    }
+};
+
+const removeProductOffer = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        
+        // Input validation
+        if (!productId) {
+            return res.status(400).json({ 
+                status: false, 
+                message: "Product ID is required" 
+            });
+        }
+
+        const findProduct = await Product.findById(productId);
+        if (!findProduct) {
+            return res.status(404).json({ 
+                status: false, 
+                message: "Product not found" 
+            });
+        }
+
+        // Reset price to regular price if offer exists
+        if (findProduct.productOffer > 0) {
+            findProduct.salePrice = findProduct.regularPrice;
+            findProduct.productOffer = 0;
+            await findProduct.save();
+        }
+
+        return res.json({
+            status: true,
+            message: "Offer removed successfully"
+        });
+
+    } catch (error) {
+        console.error('Error in removeProductOffer:', error);
+        return res.status(500).json({
+            status: false,
+            message: "Internal Server Error"
+        });
+    }
+};
+
+
+
+
+
 module.exports = {
 
     getProductAddPage,
     addProducts,
-    getAllProducts
+    getAllProducts,
+    addProductOffer,
+    removeProductOffer
 }
