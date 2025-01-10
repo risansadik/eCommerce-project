@@ -1,4 +1,6 @@
 const User = require('../../models/userSchema');
+const Category = require('../../models/categorySchema');
+const Product = require('../../models/productSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
@@ -7,6 +9,17 @@ const bcrypt = require('bcrypt');
 const loadHomePage = async (req, res) => {
     try {
         const user = req.session.user;
+        const categories = await Category.find({isListed:true});
+        let productData = await Product.find(
+            {
+                isBlocked:false,
+                category:{$in:categories.map(category => category._id)},quantity:{$gt:0}
+            });
+
+
+            productData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+            productData = productData.slice(0,4);
+            console.log("Products being sent to template:", productData);
 
 
         if (user) {
@@ -15,7 +28,7 @@ const loadHomePage = async (req, res) => {
 
             
             if (userData) {
-                return res.render('home', { user: userData });
+                return res.render('home', { user: userData ,products:productData});
             } else {
                 
                 console.log("User data not found");
@@ -23,8 +36,10 @@ const loadHomePage = async (req, res) => {
             }
         } else {
            
-            return res.render('home');
+            return res.render('home',{products:productData});
         }
+
+        
 
     } catch (error) {
         console.log('Error loading home page:', error);
@@ -268,6 +283,47 @@ const logout = async (req,res) => {
 }
 
 
+const getShopPage = async (req,res) => {
+
+    try {
+        
+        res.render('shop');
+    } catch (error) {
+
+        res.redirect('/pageNotFound')
+        
+    }
+}
+const getProductDetails = async (req, res) => {
+    try {
+        const productId = req.query.id; 
+        const user = req.session.user;
+        
+        
+        const productData = await Product.findById(productId);
+        
+        if (!productData) {
+            return res.redirect('/pageNotFound');
+        }
+
+        if (user) {
+            const userData = await User.findById(user);
+            if (userData) {
+                return res.render('product-details', {
+                    user: userData,
+                    product: productData  
+                });
+            }
+        }
+        
+        res.render('product-details', { product: productData }); 
+    } catch (error) {
+        console.error('Error in getProductDetails:', error);
+        res.redirect('/pageNotFound');
+    }
+};
+
+
 module.exports = {
     loadHomePage,
     pageNotFound,
@@ -277,6 +333,8 @@ module.exports = {
     resendOtp,
     verifyOtp,
     signin,
-    logout
+    logout,
+    getShopPage,
+    getProductDetails
 
 }

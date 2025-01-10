@@ -16,7 +16,7 @@ const userAuth = (req,res,next) => {
         })
     }else{
 
-        res.redirect('/login');
+        res.redirect('/signin');
     }
 
 }
@@ -59,9 +59,27 @@ const adminAuth = (req, res, next) => {
     }
 };
 
+const blockAuth =  async (req,res,next)=> {
+
+    const blockedUser = await User.findOne({isBlocked:true});
+
+    if(req.session.user && blockedUser){
+
+        res.redirect('/signin');
+        req.session.destroy(err => {
+
+            console.log(err);
+        })
+    }else{
+
+        next();
+    }
+}
+
 
 module.exports = {
 
     userAuth,
-    adminAuth
+    adminAuth,
+    blockAuth
 }
