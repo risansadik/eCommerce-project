@@ -11,10 +11,9 @@ const getProductAddPage = async (req, res) => {
     try {
 
         const category = await Category.find({ isListed: true });
-        const brand = await Brand.find({ isBlocked: false });
-        res.render("product-brand", {
+        res.render("add-product", {
             cat: category,
-            brand: brand
+
         });
 
 
@@ -28,77 +27,104 @@ const getProductAddPage = async (req, res) => {
 const addProducts = async (req, res) => {
     try {
         const products = req.body;
+        
+        // Validate required fields
+        if (!products.productName || !products.description || !products.category || 
+            !products.regularPrice || !products.salePrice || !products.color) {
+            return res.status(400).json({
+                success: false,
+                message: "All required fields must be provided"
+            });
+        }
+
+        // Check if product exists
         const productExists = await Product.findOne({
             productName: products.productName,
         });
 
-        if (!productExists) {
-            const images = [];
-
-            if (req.files && req.files.length > 0) {
-                for (let i = 0; i < req.files.length; i++) {
-                    const originalImagePath = req.files[i].path;
-                    const resizedImagePath = path.join('public', 'uploads', 'product-images', 'resized-' + req.files[i].filename);
-
-                    try {
-                        await sharp(originalImagePath)
-                            .resize({ width: 440, height: 440 })
-                            .toFile(resizedImagePath);
-                        images.push('resized-' + req.files[i].filename);
-                    } catch (sharpError) {
-                        console.error('Sharp error:', sharpError);
-                        return res.status(500).json({
-                            success: false,
-                            message: "Error processing images"
-                        });
-                    }
-                }
-            }
-
-            const categoryId = await Category.findOne({ name: products.category });
-
-            if (!categoryId) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid category name"
-                });
-            }
-
-            const newProduct = new Product({
-                productName: products.productName,
-                description: products.description,
-                // brand: products.brand,
-                category: categoryId._id,
-                regularPrice: products.regularPrice,
-                salePrice: products.salePrice,
-                createdAt: new Date(),
-                quantity: products.quantity,
-                size: products.size,
-                color: products.color,
-                productImage: images,
-                status: 'Available',
-            });
-
-            await newProduct.save();
-            return res.status(200).json({
-                success: true,
-                message: "Product added successfully!"
-            });
-        } else {
+        if (productExists) {
             return res.status(400).json({
                 success: false,
                 message: "Product already exists, please try with another name"
             });
         }
+
+        const images = [];
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                const originalImagePath = req.files[i].path;
+                const resizedImagePath = path.join('public', 'uploads', 'product-images', 'resized-' + req.files[i].filename);
+
+                try {
+                    await sharp(originalImagePath)
+                        .resize({ width: 440, height: 440 })
+                        .toFile(resizedImagePath);
+                    images.push('resized-' + req.files[i].filename);
+                } catch (sharpError) {
+                    console.error('Sharp error:', sharpError);
+                    return res.status(500).json({
+                        success: false,
+                        message: "Error processing images"
+                    });
+                }
+            }
+        }
+
+        // Validate prices
+        const regularPrice = parseFloat(products.regularPrice);
+        const salePrice = parseFloat(products.salePrice);
+        
+        if (isNaN(regularPrice) || regularPrice <= 0 || isNaN(salePrice) || salePrice <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid price values"
+            });
+        }
+
+        if (salePrice >= regularPrice) {
+            return res.status(400).json({
+                success: false,
+                message: "Sale price must be less than regular price"
+            });
+        }
+
+        // Validate quantity
+        const quantity = parseInt(products.quantity);
+        if (isNaN(quantity) || quantity < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid quantity"
+            });
+        }
+
+        // Create new product
+        const newProduct = new Product({
+            productName: products.productName,
+            description: products.description,
+            category: products.category, // Now expecting category ID directly
+            regularPrice: regularPrice,
+            salePrice: salePrice,
+            quantity: quantity,
+            color: products.color,
+            productImage: images,
+            status: 'Available',
+        });
+
+        await newProduct.save();
+        
+        return res.status(200).json({
+            success: true,
+            message: "Product added successfully!"
+        });
+
     } catch (error) {
         console.error('Error saving product:', error);
         return res.status(500).json({
             success: false,
-            message: "Error saving product"
+            message: error.message || "Error saving product"
         });
     }
-}
-
+};
 const getAllProducts = async (req, res) => {
     try {
      
@@ -110,21 +136,21 @@ const getAllProducts = async (req, res) => {
         const searchQuery = {
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-                { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+               
             ],
         };
 
        
         const count = await Product.countDocuments(searchQuery);
 
-        // Get products with pagination
+     
         const productData = await Product.find(searchQuery)
             .limit(limit)
             .skip((page - 1) * limit)
             .populate('category')
             .exec();
 
-        // Get categories and brands
+        
         const category = await Category.find({ isListed: true });
 
         console.log("Product Data:", productData.map(p => ({
@@ -133,14 +159,13 @@ const getAllProducts = async (req, res) => {
         })));
 
 
-        if (category && brand) {
+        if (category) {
             res.render('products', {
                 data: productData,
                 currentPage: page,
                 totalPages: Math.ceil(count / limit),
                 cat: category,
-                brand: brand,
-                search: search // Pass search to template
+                search: search 
             });
         } else {
             res.render('page-404');
@@ -290,11 +315,9 @@ const getEditProduct = async (req, res) => {
         const id = req.query.id;
         const product = await Product.findOne({ _id: id });
         const category = await Category.find({});
-        const brand = await Brand.find({});
         res.render('edit-product', {
             product: product,
             cat: category,
-            brand: brand
         });
     } catch (error) {
         console.error('Error in getEditProduct:', error);
@@ -302,7 +325,6 @@ const getEditProduct = async (req, res) => {
     }
 };
 
-// Add this to your editProduct controller
 const editProduct = async (req, res) => {
     try {
         const id = req.params.id;
@@ -339,15 +361,42 @@ const editProduct = async (req, res) => {
             });
         }
 
+        // Validate numeric fields
+        const regularPrice = parseFloat(data.regularPrice);
+        const salePrice = parseFloat(data.salePrice);
+        const quantity = parseInt(data.quantity);
+
+        if (isNaN(regularPrice) || regularPrice <= 0) {
+            return res.json({
+                success: false,
+                message: "Invalid regular price"
+            });
+        }
+
+        if (isNaN(salePrice) || salePrice <= 0) {
+            return res.json({
+                success: false,
+                message: "Invalid sale price"
+            });
+        }
+
+        if (isNaN(quantity) || quantity < 0) {
+            return res.json({
+                success: false,
+                message: "Invalid quantity"
+            });
+        }
+
         const updateFields = {
             productName: data.productName,
             description: data.descriptionData,
-            brand: data.brand,
-            category: category._id,
-            regularPrice: data.regularPrice,
-            salePrice: data.salePrice,
-            quantity: data.quantity,
-            color: data.color
+            category: category._id, // Store the category ObjectId
+            regularPrice: regularPrice,
+            salePrice: salePrice,
+            quantity: quantity,
+            color: data.color,
+            // Update status based on quantity
+            status: quantity > 0 ? "Available" : "out of stock"
         };
 
         // Handle image updates

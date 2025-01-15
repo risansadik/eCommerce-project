@@ -18,7 +18,7 @@ const loadHomePage = async (req, res) => {
 
 
             productData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-            productData = productData.slice(0,4);
+            productData = productData.slice(0);
             console.log("Products being sent to template:", productData);
 
 

@@ -106,7 +106,7 @@
             </div>
 
             <div class="resend">
-                Didn't get the code? <a href="#" onclick="resendOTP(); return false;">Click here</a>
+                Didn't get the code? <a href="#" id="disable" onclick="resendOTP(); return false;">Click here</a>
             </div>
 
             <button class="verify-btn">Verify OTP</button>
@@ -119,18 +119,29 @@
     <script>
         let timeLeft = 57;
         const timerElement = document.getElementById('timer');
+        const resendLink = document.getElementById('disable');
         let timerInterval;
+
+        
     
         function startTimer() {
+
+            resendLink.style.pointerEvents = 'none';
+            resendLink.style.opacity = '0.5';
             timerInterval = setInterval(() => {
                 if (timeLeft > 0) {
                     timeLeft--;
                     timerElement.textContent = timeLeft;
                 } else {
                     clearInterval(timerInterval);
+                    resendLink.style.pointerEvents = 'auto';
+                    resendLink.style.opacity = '1';
                 }
             }, 1000);
+
         }
+
+       
     
         function resetTimer() {
             clearInterval(timerInterval);
@@ -158,8 +169,10 @@
                 }
             }
         }
-    
+
+        document.getElementById('disable').disable = true;
         startTimer();
+        document.getElementById('disable').disable = false;
     
         function resendOTP() {
             fetch('/resend-otp', {

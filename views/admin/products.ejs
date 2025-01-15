@@ -181,7 +181,6 @@
             <a href="/admin/" class="nav-item"><span class="nav-icon"></span>Dashboard</a>
             <a href="/admin/users" class="nav-item"><span class="nav-icon"></span>Customers</a>
             <a href="/admin/category" class="nav-item"><span class="nav-icon"></span>Category</a>
-           
             <a href="/admin/addProducts" class="nav-item"><span class="nav-icon"></span>Add product</a>
             <a href="/admin/products" class="nav-item active"><span class="nav-icon"></span>Products</a>
             <a href="#" class="nav-item"><span class="nav-icon"></span>Coupon</a>
@@ -195,7 +194,7 @@
             <!-- Updated search form with functionality -->
             <div class="search-container">
                 <form action="/admin/products" method="get" class="search-form">
-                    <input type="text" class="search-box" placeholder="Search products or brands" name="search"
+                    <input type="text" class="search-box" placeholder="Search products" name="search"
                         value="<%= locals.search || '' %>">
                 </form>
             </div>
@@ -204,7 +203,6 @@
                 <thead>
                     <tr>
                         <th>Product name</th>
-                        <th>Brand</th>
                         <th>Category</th>
                         <th>Sale Price</th>
                         <th>Offer Price</th>
@@ -221,9 +219,6 @@
                         <tr>
                             <td>
                                 <%=data[i].productName%>
-                            </td>
-                            <td>
-                                <%=data[i].brand%>
                             </td>
                             <td>
                                 <%=data[i].category.name%>

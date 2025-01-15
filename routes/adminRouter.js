@@ -3,7 +3,6 @@ const router = express.Router();
 const adminController = require('../controllers/admin/adminController');
 const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
-
 const productController = require('../controllers/admin/productController');
 const { userAuth, adminAuth } = require('../middlewares/auth');
 const multer = require('multer');
@@ -34,7 +33,6 @@ router.get('/listCategory', adminAuth, categoryController.getListCategory);
 router.get('/unlistCategory', adminAuth, categoryController.getUnlistCategory);
 router.get('/editCategory', adminAuth, categoryController.getEditCategory);
 router.post('/editCategory/:id', adminAuth, categoryController.editCategory);
-
 
 
 //product management

@@ -234,19 +234,6 @@
                     <div id="productName-error" class="error-message"></div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label">Brand</label>
-                    <select class="form-control" name="brand">
-
-                        <%for(let i=0;i<brand.length;i++){%>
-
-                            <option value="<%=brand[i].brandName%>">
-                                <%=brand[i].brandName%>
-                            </option>
-                            <%}%>
-                    </select>
-                    <div id="brand-error" class="error-message"></div>
-                </div>
 
                 <div class="mb-4">
                     <label class="form-label">Full description</label>
@@ -288,20 +275,16 @@
                 <div class="mb-4">
                     <label class="form-label">Category</label>
                     <select class="form-control" name="category">
-
-                        <option value="">select a category</option>
-                        <%for(let i=0;i<cat.length;i++){%>
-                            <option value="<%=cat[i].name%>">
-
+                     
+                        <%for(let i=0; i < cat.length; i++) {%>
+                            <option value="<%=cat[i].name%>" 
+                                    <%= product.category.toString() === cat[i]._id.toString() ? 'selected' : '' %>>
                                 <%=cat[i].name%>
-
-
                             </option>
-                            <%}%>
+                        <%}%>
                     </select>
                     <div id="category-error" class="error-message"></div>
                 </div>
-            </div>
 
             <div class="card">
                 <div class="card-header">
@@ -823,6 +806,8 @@
                 }
             });
         }
+
+        
     </script>
 
 

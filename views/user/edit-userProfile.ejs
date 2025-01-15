@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Editor - Alternative Design</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.css"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.js"></script>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .field-label {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .field-value {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #2c5840;
+        }
+
+        .edit-form {
+            display: none;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .edit-button {
+            background-color: #2c5840;
+            color: white;
+        }
+
+        .edit-button:hover {
+            background-color: #2c5840;
+        }
+
+        .save-button {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .save-button:hover {
+            background-color: #27ae60;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h1>Profile Details</h1>
+        </div>
+
+        <!-- Display Profile -->
+        <div id="profileDisplay">
+            <form id="update-user">
+                <div class="profile-section">
+
+
+
+                    <span class="field-label">Username</span>
+                    <input type="text" class="edit-input" id="name" placeholder="Enter username" name="name"
+                        value="<%=name%>">
+
+                    <%if(!isGoogle){%>
+
+
+                        <span class="field-label">Mobile Number</span>
+                        <input type="tel" class="edit-input" id="phone" placeholder="Enter mobile number" name="phone"
+                            value="<%=phone%>" minlength="10">
+
+                        <span class="field-label">Change Password</span>
+                        <input type="password" class="edit-input" id="pass" placeholder="Enter new password" name="pass"
+                            min="8">
+
+                        <span class="field-label">Confirm Password</span>
+                        <input type="password" class="edit-input" id="cPass" placeholder="Confirm new password"
+                            name="cPass" minlength="8">
+                        <%}%>
+
+
+
+                </div>
+                <button type="submit" class="button edit-button" id="edit-profile">Edit Profile</button>
+            </form>
+        </div>
+
+        <script>
+
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+
+
+            if (window.performance && window.performance.navigation.type === 2) {
+                window.location.href = '/userProfile';
+            }
+            document.getElementById('update-user').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const userId = "<%=id%>";
+                const formData = {
+                    name: document.getElementById('name').value,
+                    phone: document.getElementById('phone')?.value || '',
+                    password: document.getElementById('pass')?.value || '',
+                    cPassword: document.getElementById('cPass')?.value || ''
+                };
+
+
+                if (formData.password || formData.cPassword) {
+                    if (formData.password !== formData.cPassword) {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Password Mismatch',
+                            text: 'Passwords do not match!',
+                            confirmButtonColor: '#2c5840'
+                        });
+                        return;
+                    }
+                    if (formData.password.length < 6) {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Password',
+                            text: 'Password must be at least 6 characters long',
+                            confirmButtonColor: '#2c5840'
+                        });
+                        return;
+                    }
+                }
+
+                // Show loading state
+                Swal.fire({
+                    title: 'Updating Profile',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+                    const response = await fetch(`/edit-userProfile/${userId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Profile updated successfully',
+                            confirmButtonColor: '#2c5840'
+                        });
+                        window.history.replaceState(null, '', '/userProfile');
+                        window.location.replace('/userProfile');
+                    } else {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Update Failed',
+                            text: data.message || 'Error updating profile',
+                            confirmButtonColor: '#2c5840'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating your profile',
+                        confirmButtonColor: '#2c5840'
+                    });
+                }
+            });
+
+            window.addEventListener('unload', function () {
+                window.history.replaceState(null, '', '/userProfile');
+            });
+        </script>
+
+
+</body>
+
+</html>

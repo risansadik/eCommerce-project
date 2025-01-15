@@ -22,20 +22,20 @@ const login = async (req, res) => {
             const passwordMatch = await bcrypt.compare(password, adminData.password);
             
             if (passwordMatch) {
-                // Set admin session
+          
                 req.session.admin = {
                     _id: adminData._id,
                     email: adminData.email,
                     isAdmin: true
                 };
                 
-                // Ensure session is saved before redirect
+              
                 req.session.save((err) => {
                     if (err) {
                         console.log('Session save error:', err);
                         return res.redirect('/admin/login');
                     }
-                    return res.redirect('/admin/'); // Redirect to dashboard
+                    return res.redirect('/admin/'); 
                 });
             } else {
                 return res.render('admin-login', { message: 'Invalid Password' });

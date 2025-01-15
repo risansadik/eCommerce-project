@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #437A59;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 20px;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .sidebar-item.active {
+            background-color: #f0f0f0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .add-button {
+            background-color: #437A59;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .address-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .delete-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #ff4444;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.2s ease;
+        }
+
+        .delete-icon:hover {
+            color: #cc0000;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin: 0;
+            color: #333;
+        }
+
+        .field-group {
+            margin-bottom: 15px;
+        }
+
+        .field-label {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .field-value {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .edit-button {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            background-color: #437A59;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">Brossoc</div>
+        <div class="nav-items">
+            <div>Home</div>
+            <div>Shop</div>
+            <div>About us</div>
+            <div>Contact us</div>
+        </div>
+        <div class="nav-icons">
+            <span><i class="fa-solid fa-heart"></i></span>
+            <span><i class="fa-solid fa-user"></i></span>
+            <span><i class="fa-solid fa-cart-shopping"></i></span>
+        </div>
+    </div>
+    <div class="container">
+        <div class="sidebar">
+            <a href="/userProfile" class="sidebar-item"><span><i class="fa-solid fa-gauge"></i></span>Dashboard</a>
+            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-box"></i></span> Orders</a>
+            <a href="#" class="sidebar-item active"><span><i class="fa-solid fa-location-dot"></i></span> My Address</a>
+            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-wallet"></i></span> Wallet</a>
+            <a href="#" class="sidebar-item"><span><i class="fa-sharp fa-solid fa-users"></i></span> Referral</a>
+            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+        </div>
+        <div class="main-content">
+            <div class="page-header">
+                <h2 class="section-title">My Addresses</h2>
+               <a href="/addAddress" style="text-decoration: none;"><button class="add-button"><i class="fa-solid fa-plus"></i>
+                        Add New Address
+
+                </button></a>
+            </div>
+
+            <div class="address-grid">
+                <%if(addresses && addresses.length > 0){%>
+                    <% addresses.forEach((address, index) => {%>
+                        <div class="content-card">
+                            <a href="#" onclick="confirmDelete('<%= index %>', event)" class="delete-icon">
+                                <i class="fas fa-times"></i>
+                            </a>
+                            <div class="field-group">
+                                <div class="field-label">Full Name</div>
+                                <div class="field-value">
+                                    <%= address.name %>
+                                </div>
+                            </div>
+        
+                            <div class="field-group">
+                                <div class="field-label">Address</div>
+                                <div class="field-value">
+                                    <%= address.landmark%><br>
+                                    <%=address.city%>, <%=address.state%><br>
+                                    <%=address.pincode%>
+                                </div>
+                            </div>
+        
+                            <div class="field-group">
+                                <div class="field-label">Contact Information</div>
+                                <div class="field-value">
+                                    Primary: <%= address.phone%><br>
+                                    Alternative: <%=address.altPhone%>
+                                </div>
+                            </div>
+        
+                            <button class="edit-button">Edit</button>
+                        </div>
+                    <%});%>
+                <% } else { %>
+                    <div>No addresses found. Please add an address.</div>
+                <% } %>
+            </div>
+        
+        </div>
+    </div>
+</body>
+
+<script>
+   function confirmDelete(addressIndex, event) {
+    event.preventDefault();
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#437A59',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            
+            const headers = {
+                'Content-Type': 'application/json'
+               
+            };
+
+            fetch(`/deleteAddress/${addressIndex}`, {
+                method: 'DELETE',
+                headers: headers,
+                credentials: 'include' 
+            })
+            .then(async response => {
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to delete address');
+                }
+                
+                return data;
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: 'Your address has been deleted.',
+                        icon: 'success'
+                    }).then(() => {
+                        location.reload();
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Something went wrong',
+                    icon: 'error'
+                });
+            });
+        }
+    });
+}
+
+</script>
+
+</html>

@@ -30,7 +30,7 @@ const sendVerificationEmail = async (email, otp) => {
                 user: process.env.NODEMAILER_EMAIL,
                 pass: process.env.NODEMAILER_PASSWORD,
             },
-            debug: true 
+            debug: true
         });
 
         // Verify transporter configuration
@@ -166,22 +166,129 @@ const postNewPassword = async (req, res) => {
     try {
         const { newPass1, newPass2 } = req.body;
         const email = req.session.email;
-        
+
         if (newPass1 === newPass2) {
             const passwordHash = await securePassword(newPass1);
             await User.updateOne({ email: email }, { $set: { password: passwordHash } });
             res.json({ success: true });
         } else {
-            res.json({ 
-                success: false, 
+            res.json({
+                success: false,
                 message: "Passwords do not match"
             });
         }
     } catch (error) {
-        res.json({ 
-            success: false, 
+        res.json({
+            success: false,
             message: "An error occurred while changing your password"
         });
+    }
+};
+
+const loadDashboard = async (req, res) => {
+    try {
+     
+        
+       const user = req.user || await User.findOne({_id:req.session.user});
+
+       if(user){
+
+        res.render('dashboard',{
+
+            id:user._id,
+            name:user.name,
+            email:user.email,
+            phone:user.phone,
+            isGoogle:req.user
+            
+        })
+
+           
+        }else{
+
+            res.status(404).send('User not found')
+        }
+    
+
+    } catch (error) {
+
+        console.log("error during loading dashboard", error);
+        res.redirect('/pageNotFound')
+
+    }
+}
+
+const getUserEditPage = async (req,res) => {
+
+   
+    try {
+
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+
+        const user = req.user || await User.findOne({_id:req.session.user});
+
+        if(user){
+
+            res.render('edit-userProfile',{
+
+                id:user._id,
+                user:user,
+                name:user.name,
+                phone:user.phone,
+                isGoogle:req.user
+            });
+        }
+       
+    } catch (error) {
+
+        console.log('get edit profile error : ',error);
+        res.redirect('/pageNotFound');
+        
+    }
+}
+
+const editUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const {name, phone, password, cPassword} = req.body;
+        
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({success: false, message: "User not found"});
+        }
+
+       
+        const updateData = {
+            name: name,
+            phone: phone
+        };
+
+       
+        if (!user.googleId && password) {
+            if (password !== cPassword) {
+                return res.status(400).json({success: false, message: "Passwords don't match"});
+            }
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            updateData,
+            {new: true}
+        );
+
+        return res.json({
+            success: true,
+            message: "User updated successfully",
+            user: updatedUser
+        });
+
+    } catch (error) {
+        console.log('Edit user error:', error);
+        return res.status(500).json({success: false, message: "Internal server error"});
     }
 };
 
@@ -192,5 +299,8 @@ module.exports = {
     getResetPassPage,
     resendOtp,
     postNewPassword,
+    loadDashboard,
+    getUserEditPage,
+    editUser
 
 };

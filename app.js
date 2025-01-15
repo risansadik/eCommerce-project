@@ -9,9 +9,11 @@ const nocache = require('nocache');
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
 
-app.use(nocache());
+
 
 db();
+
+app.use(nocache());
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -26,9 +28,20 @@ app.use(session({
     }
 }))
 
+app.use((req, res, next) => {
+    if (!req.session) {
+        return next(new Error('Session initialization failed'));
+    }
+    next();
+});
+
+
+
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+
 
 app.use((req, res, next) => {
     res.locals.user = req.user || null; 

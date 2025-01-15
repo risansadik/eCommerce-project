@@ -212,6 +212,8 @@ const editCategory = async (req, res) => {
             { new: true }
         );
 
+        await updatedCategory.save();
+
         if (updatedCategory) {
             return res.status(200).json({ success: "Category updated successfully" });
         } else {
