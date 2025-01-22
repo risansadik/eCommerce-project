@@ -62,6 +62,8 @@
 			margin-right: 15px;
 			padding-left: 10px;
 		}
+
+	
 	</style>
 </head>
 
@@ -69,24 +71,29 @@
 
 	<!-- Start Header/Navigation -->
 	<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+        <div class="container">
+            <a class="navbar-brand" href="/">Brossoc<span>.</span></a>
 
-		<div class="container">
-			<a class="navbar-brand" href="/">Brossoc<span>.</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" 
+                aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni"
-				aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-
-			<div class="collapse navbar-collapse" id="navbarsFurni">
-				<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-					<li class="nav-item active">
-						<a class="nav-link" href="/">Home</a>
-					</li>
-					<li><a class="nav-link" href="/shop">Shop</a></li>
-					<li><a class="nav-link" href="about.html">About us</a></li>
-					<li><a class="nav-link" href="contact.html">Contact us</a></li>
-				</ul>
+            <div class="collapse navbar-collapse" id="navbarsFurni">
+                <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
+                    <li class="nav-item <%= locals.currentPath === '/' ? 'active' : '' %>">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item <%= locals.currentPath === '/shop' ? 'active' : '' %>">
+                        <a class="nav-link" href="/shop">Shop</a>
+                    </li>
+                    <li class="nav-item <%= locals.currentPath === '/about' ? 'active' : '' %>">
+                        <a class="nav-link" href="about.html">About us</a>
+                    </li>
+                    <li class="nav-item <%= locals.currentPath === '/contact' ? 'active' : '' %>">
+                        <a class="nav-link" href="contact.html">Contact us</a>
+                    </li>
+                </ul>
 
 				<% if (locals.user) { %>
 					<div class="dropdown">
@@ -112,3 +119,25 @@
 		</div>
 
 	</nav>
+
+	<script>
+        // Get the current path
+        const currentPath = window.location.pathname;
+        
+        // Remove all active classes first
+        document.querySelectorAll('.custom-navbar-nav .nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Add active class based on current path
+        let activeLink;
+        if (currentPath === '/') {
+            activeLink = document.querySelector('.custom-navbar-nav .nav-item:first-child');
+        } else {
+            activeLink = document.querySelector(`.custom-navbar-nav .nav-item a[href="${currentPath}"]`)?.parentElement;
+        }
+        
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    </script>

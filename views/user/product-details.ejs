@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -131,7 +133,7 @@
         .product-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #111827;
+            color: #4A665B;
             line-height: 1.25;
         }
 
@@ -202,7 +204,7 @@
         .add-to-cart-btn {
             flex: 1;
             padding: 0.625rem;
-            background: #16a34a;
+            background: #4A665B;
             color: white;
             border: none;
             border-radius: 0.375rem;
@@ -213,7 +215,7 @@
         }
 
         .add-to-cart-btn:hover {
-            background: #15803d;
+            background: rgb(10, 15, 10);
         }
 
         .actions {
@@ -342,8 +344,22 @@
         .zoomed-image.active {
             opacity: 1;
         }
+
+        .error-message {
+            color: #dc2626;
+            /* Red color */
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .stock-message {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -383,30 +399,36 @@
                         <span class="sale-price">₹<%= product.salePrice %></span>
                     </div>
                 </div>
-                <p class="description">Nulls eget sem vitae phasellus cursus. Nam vitae lectus ligula aliquam consequat
-                    mauris feugiat.</p>
+                <p class="description">
+                    <%=product.description%>
+                </p>
 
                 <!-- Size Selector -->
                 <div class="form-group">
                     <label class="form-label">Size</label>
                     <select class="form-select" id="sizeSelect">
                         <option value="">Choose an option</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
+                        <% product.sizeVariants.forEach(variant=> { %>
+                            <option value="<%= variant.size %>" data-quantity="<%= variant.quantity %>"
+                                <%=variant.quantity===0 ? 'disabled' : '' %>>
+                                <%= variant.size %>
+                                    <%= variant.quantity===0 ? '(Out of Stock)' : '' %>
+                            </option>
+                            <% }); %>
                     </select>
+                    <div id="size-message" class="text-sm mt-1 text-red-600"></div>
                 </div>
 
-
-                <!-- Quantity and Add to Cart -->
                 <div class="add-to-cart-section">
                     <div class="form-group quantity-input">
                         <label class="form-label">Quantity</label>
-                        <input type="number" min="1" value="1" class="form-input" id="quantityInput">
+                        <input type="number" min="1" value="1" class="form-input" id="quantityInput" disabled>
+                        <div id="quantity-message" class="text-sm mt-1 text-red-600"></div>
                     </div>
-                    <button class="add-to-cart-btn">ADD TO CART</button>
+                    <button class="add-to-cart-btn" id="addToCartBtn" disabled>ADD TO CART</button>
                 </div>
+
+
 
                 <!-- Actions -->
                 <div class="actions">
@@ -419,7 +441,7 @@
                         </svg>
                         Wishlist
                     </button>
-            
+
                 </div>
 
                 <!-- Reviews Section -->
@@ -475,52 +497,61 @@
     </div>
 
     <script>
-       
+
         const images = [
-      <% if (product.productImage && product.productImage.length > 0) { %>
+    <% if (product.productImage && product.productImage.length > 0) { %>
         <% product.productImage.forEach((image, index) => { %>
             '/uploads/product-images/<%= image %>' <%= index < product.productImage.length - 1 ? ',' : '' %>
         <% }); %>
-      <% } %>
-    ];
+    <% } %>
+];
         let currentImageIndex = 0;
 
         function updateMainImage() {
-            document.getElementById('mainImage').src = images[currentImageIndex];
+            const mainImage = document.getElementById('mainImage');
+            const zoomedImage = document.getElementById('zoomedImage');
 
-            // Update thumbnails
-            document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
-                thumb.classList.toggle('active', index === currentImageIndex);
-            });
-        }
+            if (mainImage && zoomedImage) {
+                mainImage.src = images[currentImageIndex];
+                zoomedImage.src = images[currentImageIndex];
 
-        const originalSelectImage = window.selectImage || function () { };
-        window.selectImage = function (index) {
-            originalSelectImage(index);
+                // Update thumbnails
+                document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+                    thumb.classList.toggle('active', index === currentImageIndex);
+                });
 
-            // Update both main and zoomed images
-            const images = document.querySelectorAll('.thumbnail img');
-            if (images[index]) {
-                const newSrc = images[index].src;
-                document.getElementById('mainImage').src = newSrc;
-                document.getElementById('zoomedImage').src = newSrc;
-
-               
+                // Reinitialize zoom functionality
                 setTimeout(initializeZoom, 100);
             }
-        };
+        }
 
         function prevImage() {
-            currentImageIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1;
-            updateMainImage();
+            if (images.length > 1) {
+                currentImageIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1;
+                updateMainImage();
+            }
         }
 
         function nextImage() {
-            currentImageIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1;
-            updateMainImage();
+            if (images.length > 1) {
+                currentImageIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1;
+                updateMainImage();
+            }
         }
 
-       
+        function selectImage(index) {
+            if (index >= 0 && index < images.length) {
+                currentImageIndex = index;
+                updateMainImage();
+            }
+        }
+
+        // Initialize the gallery when the document loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateMainImage();
+            initializeZoom();
+        });
+
         const quantityInput = document.getElementById('quantityInput');
         quantityInput.addEventListener('change', (e) => {
             const value = parseInt(e.target.value);
@@ -529,7 +560,7 @@
             }
         });
 
-        
+
         const wishlistBtn = document.getElementById('wishlistBtn');
         const heartIcon = wishlistBtn.querySelector('.heart-icon');
         let isWishlist = false;
@@ -541,34 +572,334 @@
 
         function initializeZoom() {
             const container = document.getElementById('imageContainer');
+            const mainImage = document.getElementById('mainImage');
             const zoomedImage = document.getElementById('zoomedImage');
 
-            if (!container || !zoomedImage) return;
+            if (!container || !mainImage || !zoomedImage) return;
 
-            const ZOOM_LEVEL = 2.5; 
+            const ZOOM_LEVEL = 2; // Reduced zoom level for smoother effect
 
-            container.addEventListener('mousemove', (e) => {
+            // Add transition for smoother zoom effect
+            zoomedImage.style.transition = 'transform 0.1s ease-out';
+
+            let isZoomed = false;
+            let containerRect = container.getBoundingClientRect();
+
+            function updateZoom(e) {
+                if (!isZoomed) return;
+
                 const rect = container.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Calculate zoom position
+                // Calculate zoom position as percentages
                 const xPercent = (x / rect.width) * 100;
                 const yPercent = (y / rect.height) * 100;
 
-                // Apply the transform
-                zoomedImage.style.transform = `scale(${ZOOM_LEVEL})`;
+                // Apply transform with easing
                 zoomedImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                zoomedImage.style.transform = `scale(${ZOOM_LEVEL})`;
+            }
+
+            // Add touch support
+            let touchTimeout;
+            container.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                isZoomed = true;
                 zoomedImage.classList.add('active');
+                updateZoom(touch);
+
+                // Auto-disable zoom after 5 seconds of touch
+                clearTimeout(touchTimeout);
+                touchTimeout = setTimeout(() => {
+                    isZoomed = false;
+                    zoomedImage.classList.remove('active');
+                }, 5000);
             });
 
-            container.addEventListener('mouseleave', () => {
+            container.addEventListener('touchmove', (e) => {
+                if (!isZoomed) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                updateZoom(touch);
+            });
+
+            container.addEventListener('touchend', () => {
+                isZoomed = false;
                 zoomedImage.classList.remove('active');
+                clearTimeout(touchTimeout);
+            });
+
+            // Mouse events
+            container.addEventListener('mouseenter', () => {
+                isZoomed = true;
+                zoomedImage.classList.add('active');
+                containerRect = container.getBoundingClientRect();
+            });
+
+            container.addEventListener('mousemove', updateZoom);
+
+            container.addEventListener('mouseleave', () => {
+                isZoomed = false;
+                zoomedImage.classList.remove('active');
+            });
+
+            // Update on window resize
+            window.addEventListener('resize', () => {
+                containerRect = container.getBoundingClientRect();
             });
         }
 
-        
-        document.addEventListener('DOMContentLoaded', initializeZoom);
+        // Add these styles to your existing CSS
+        const additionalStyles = `
+.zoomed-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+    z-index: 10;
+}
+
+.zoomed-image.active {
+    opacity: 1;
+}
+
+.main-image-container {
+    cursor: zoom-in;
+    overflow: hidden;
+    position: relative;
+}
+`;
+
+        // Add the styles programmatically
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = additionalStyles;
+        document.head.appendChild(styleSheet);
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sizeSelect = document.getElementById('sizeSelect');
+            const quantityInput = document.getElementById('quantityInput');
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            const quantityMessage = document.getElementById('quantity-message');
+
+            let selectedVariant = null;
+
+            sizeSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+
+                if (!this.value) {
+                    resetForm();
+                    return;
+                }
+
+                const availableQuantity = parseInt(selectedOption.dataset.quantity);
+                selectedVariant = {
+                    size: this.value,
+                    quantity: availableQuantity
+                };
+
+                quantityInput.disabled = false;
+                quantityInput.max = Math.min(5, availableQuantity);
+                quantityInput.value = 1;
+                quantityMessage.textContent = '';
+                updateAddToCartButton();
+            });
+
+            // Listen for both input and change events
+            ['input', 'change'].forEach(eventType => {
+                quantityInput.addEventListener(eventType, handleQuantityChange);
+            });
+
+            // Handle manual input using keydown
+            quantityInput.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    setTimeout(handleQuantityChange, 0);
+                }
+            });
+
+            function handleQuantityChange() {
+                let value = parseInt(quantityInput.value);
+                const availableQuantity = selectedVariant ? selectedVariant.quantity : 0;
+                const maxAllowed = Math.min(5, availableQuantity);
+
+                // Clear previous message
+                quantityMessage.textContent = '';
+
+                if (!value || value < 1) {
+                    value = 1;
+                    quantityInput.value = value;
+                    quantityMessage.textContent = 'Minimum 1 item required';
+                } else if (value > 5) {
+                    value = 5;
+                    quantityInput.value = value;
+                    quantityMessage.textContent = 'Maximum 5 items allowed per order';
+                } else if (value > availableQuantity) {
+                    value = availableQuantity;
+                    quantityInput.value = value;
+                    quantityMessage.textContent = 'Not enough stock available';
+                }
+
+                updateAddToCartButton();
+            }
+
+            function resetForm() {
+                quantityInput.disabled = true;
+                quantityInput.value = 1;
+                addToCartBtn.disabled = true;
+                quantityMessage.textContent = '';
+                selectedVariant = null;
+            }
+
+            function updateAddToCartButton() {
+                const quantity = parseInt(quantityInput.value);
+                addToCartBtn.disabled = !selectedVariant ||
+                    isNaN(quantity) ||
+                    quantity < 1 ||
+                    quantity > Math.min(5, selectedVariant.quantity);
+            }
+
+            function showMessage(message, type) {
+                // You can implement this based on your UI needs
+                // For example, using SweetAlert2 or a custom toast
+                alert(message);
+            }
+
+            function updateCartCount(count) {
+                // Implement this if you have a cart count display in your header
+                const cartCountElement = document.getElementById('cartCount');
+                if (cartCountElement) {
+                    cartCountElement.textContent = count;
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            const sizeSelect = document.getElementById('sizeSelect');
+            const quantityInput = document.getElementById('quantityInput');
+            const sizeMessage = document.getElementById('size-message');
+            const quantityMessage = document.getElementById('quantity-message');
+
+            // Handle add to cart
+            addToCartBtn.addEventListener('click', async function (e) {
+                e.preventDefault();
+
+                // Validate size selection
+                if (!sizeSelect.value) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Size Required',
+                        text: 'Please select a size before adding to cart',
+                        confirmButtonColor: '#4A665B'
+                    });
+                    return;
+                }
+
+                // Validate quantity
+                const quantity = parseInt(quantityInput.value);
+                if (!quantity || quantity < 1) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Quantity',
+                        text: 'Please select a valid quantity',
+                        confirmButtonColor: '#4A665B'
+                    });
+                    return;
+                }
+
+                if (quantity > 5) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Quantity Limit Exceeded',
+                        text: 'Maximum 5 items allowed per order',
+                        confirmButtonColor: '#4A665B'
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/addCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            productId: '<%= product._id %>',
+                            size: sizeSelect.value,
+                            quantity: quantity
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to add to cart');
+                    }
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Product added to cart successfully',
+                            confirmButtonColor: '#4A665B'
+                        }).then((result) => {
+                            if (result.isConfirmed && data.redirect) {
+                                window.location.href = data.redirect;
+                            }
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error.message || 'Something went wrong! Please try again.',
+                        confirmButtonColor: '#4A665B'
+                    });
+                }
+            });
+
+            // Handle quantity input validation
+            quantityInput.addEventListener('input', function () {
+                const value = parseInt(this.value);
+                if (value > 5) {
+                    this.value = 5;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Maximum Limit',
+                        text: 'Maximum 5 items allowed per order',
+                        confirmButtonColor: '#4A665B'
+                    });
+                } else if (value < 1) {
+                    this.value = 1;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Minimum Quantity',
+                        text: 'Minimum 1 item required',
+                        confirmButtonColor: '#4A665B'
+                    });
+                }
+            });
+
+            // Handle size selection validation
+            sizeSelect.addEventListener('change', function () {
+                if (!this.value) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Size Required',
+                        text: 'Please select a size',
+                        confirmButtonColor: '#4A665B'
+                    });
+                }
+            });
+        });
     </script>
 </body>
+
 </html>

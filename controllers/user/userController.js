@@ -9,44 +9,47 @@ const bcrypt = require('bcrypt');
 const loadHomePage = async (req, res) => {
     try {
         const user = req.session.user;
-        const categories = await Category.find({isListed:true});
-        let productData = await Product.find(
-            {
-                isBlocked:false,
-                category:{$in:categories.map(category => category._id)},quantity:{$gt:0}
-            });
+        const categories = await Category.find({ isListed: true });
 
+        const query = {
+            isBlocked: false,
+            category: { $in: categories.map(category => category._id) },
+            'sizeVariants': {
+                $elemMatch: {
+                    'quantity': { $gt: 0 }
+                }
+            },
+            displayLocation: { $in: ['home', 'both'] }
+        };
 
-            productData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-            productData = productData.slice(0);
-            console.log("Products being sent to template:", productData);
+        let productData = await Product.find(query)
+            .populate('category')
+            .sort({ createdAt: -1 });
 
+        console.log(`Found ${productData.length} products for home page`);
+
+        const renderData = {
+            products: productData,
+            error: null
+        };
 
         if (user) {
-           
             const userData = await User.findById(user);
-
-            
             if (userData) {
-                return res.render('home', { user: userData ,products:productData});
-            } else {
-                
-                console.log("User data not found");
-                return res.redirect('/signin');
+                renderData.user = userData;
             }
-        } else {
-           
-            return res.render('home',{products:productData});
         }
 
-        
+        return res.render('home', renderData);
 
     } catch (error) {
-        console.log('Error loading home page:', error);
-        res.status(500).send('Server error');
+        console.error('Error loading home page:', error);
+        return res.render('home', {
+            products: [],
+            error: 'An error occurred while loading the page.'
+        });
     }
 };
-
 const pageNotFound = async (req, res) => {
 
     try {
@@ -169,7 +172,7 @@ const signup = async (req, res) => {
 const verifyOtp = async (req, res) => {
     try {
         const { userOtp } = req.session;
-        const { otp } = req.body;  
+        const { otp } = req.body;
 
         if (!userOtp) {
             return res.status(400).json({ success: false, message: "OTP not found in session." });
@@ -225,7 +228,7 @@ const signin = async (req, res) => {
 
         const findUser = await User.findOne({ email: trimmedEmail });
 
-        
+
         if (!findUser) {
             console.log("User not found");
             return res.render("sign-in", { message: "User not found" });
@@ -245,7 +248,7 @@ const signin = async (req, res) => {
 
         req.session.user = findUser._id;
 
-        
+
 
         console.log("User logged in successfully:", findUser._id);
 
@@ -263,45 +266,122 @@ const signin = async (req, res) => {
     }
 };
 
-const logout = async (req,res) => {
+const logout = async (req, res) => {
 
     try {
-        
+
         req.session.destroy((err) => {
-            if(err){
-                console.log("Session destruction error",err.message);
+            if (err) {
+                console.log("Session destruction error", err.message);
                 return res.redirect("/pageNotFound");
             }
             return res.redirect("/signin")
         })
     } catch (error) {
 
-        console.log("Logout error",error);
+        console.log("Logout error", error);
         res.redirect('/pageNotFound')
-        
+
     }
 }
 
 
-const getShopPage = async (req,res) => {
-
+const getShopPage = async (req, res) => {
     try {
-        
-        res.render('shop');
-    } catch (error) {
+        const user = req.session.user;
+        const sortOption = req.query.sort; // Get sort parameter from URL
 
-        res.redirect('/pageNotFound')
+        // Get listed categories
+        const categories = await Category.find({ isListed: true });
+        console.log('Found categories:', categories.map(c => c._id));
+
+        // Build product query
+        const query = {
+            isBlocked: false,
+            category: { $in: categories.map(category => category._id) },
+            'sizeVariants': {
+                $elemMatch: {
+                    'quantity': { $gt: 0 }
+                }
+            },
+            displayLocation: { $in: ['shop', 'both'] }
+        };
+
+        // Add category filter if provided in URL
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+
+        console.log('Product query:', JSON.stringify(query, null, 2));
+
         
+        let sortObj = { createdAt: -1 }; 
+        if (sortOption) {
+            switch (sortOption) {
+                case 'low':
+                    sortObj = { salePrice: 1 };
+                    break;
+                case 'high':
+                    sortObj = { salePrice: -1 };
+                    break;
+            }
+        }
+
+        let productData = await Product.find(query)
+            .populate('category')
+            .sort(sortObj);
+
+        console.log(`Found ${productData.length} products`);
+
+        if (productData.length > 0) {
+            console.log('Sample product:', {
+                name: productData[0].productName,
+                images: productData[0].images,
+                price: productData[0].salePrice,
+                location: productData[0].displayLocation
+            });
+        }
+
+        // Prepare render object
+        const renderObj = {
+            products: productData,
+            categories: categories,
+            selectedCategory: req.query.category || null,
+            selectedSort: sortOption || null, 
+            error: null
+        };
+
+        // Add user data if logged in
+        if (user) {
+            const userData = await User.findById(user);
+            if (userData) {
+                renderObj.user = userData;
+                return res.render('shop', renderObj);
+            } else {
+                console.log("User data not found");
+                return res.redirect('/signin');
+            }
+        } else {
+            return res.render('shop', renderObj);
+        }
+
+    } catch (error) {
+        console.error('Shop page error:', error);
+        return res.render('shop', {
+            products: [],
+            categories: [],
+            error: 'An error occurred while loading products.'
+        });
     }
-}
+};
 const getProductDetails = async (req, res) => {
     try {
-        const productId = req.query.id; 
+        const productId = req.query.id;
         const user = req.session.user;
-        
-        
+
+
         const productData = await Product.findById(productId);
-        
+
         if (!productData) {
             return res.redirect('/pageNotFound');
         }
@@ -311,12 +391,12 @@ const getProductDetails = async (req, res) => {
             if (userData) {
                 return res.render('product-details', {
                     user: userData,
-                    product: productData  
+                    product: productData
                 });
             }
         }
-        
-        res.render('product-details', { product: productData }); 
+
+        res.render('product-details', { product: productData });
     } catch (error) {
         console.error('Error in getProductDetails:', error);
         res.redirect('/pageNotFound');

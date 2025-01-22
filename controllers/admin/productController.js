@@ -13,6 +13,9 @@ const getProductAddPage = async (req, res) => {
         const category = await Category.find({ isListed: true });
         res.render("add-product", {
             cat: category,
+            product: {
+                sizeVariants: []
+            }
 
         });
 
@@ -23,102 +26,83 @@ const getProductAddPage = async (req, res) => {
 
     }
 }
-
 const addProducts = async (req, res) => {
     try {
-        const products = req.body;
-        
-        // Validate required fields
-        if (!products.productName || !products.description || !products.category || 
-            !products.regularPrice || !products.salePrice || !products.color) {
+        // Log the entire request body for debugging
+        console.log('Full request body:', req.body);
+        console.log('Uploaded files:', req.files);
+
+        // Extract sizes and quantities, checking both array notation and regular names
+        const sizes = req.body.sizes || req.body['sizes[]'];
+        const quantities = req.body.quantities || req.body['quantities[]'];
+
+        console.log('Received sizes:', sizes);
+        console.log('Received quantities:', quantities);
+
+        // Ensure sizes and quantities are always arrays
+        const sizeArray = Array.isArray(sizes) ? sizes : [sizes];
+        const quantityArray = Array.isArray(quantities) ? quantities : [quantities];
+
+        // Create size variants array with better validation
+        const sizeVariants = sizeArray
+            .map((size, index) => {
+                const sizeValue = size ? size.toString().trim() : '';
+                const quantityValue = quantityArray[index] ? parseInt(quantityArray[index]) : 0;
+
+                return {
+                    size: sizeValue,
+                    quantity: quantityValue
+                };
+            })
+            .filter(variant => variant.size !== '');
+
+        console.log('Processed size variants:', sizeVariants);
+
+        // Validate size variants
+        if (!sizeVariants || sizeVariants.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "All required fields must be provided"
+                message: "Please add at least one size variant with a valid size and quantity"
             });
         }
 
-        // Check if product exists
-        const productExists = await Product.findOne({
-            productName: products.productName,
-        });
+        // Calculate total quantity
+        const totalQuantity = sizeVariants.reduce((sum, variant) => sum + variant.quantity, 0);
 
-        if (productExists) {
+        if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "Product already exists, please try with another name"
+                message: "Please upload at least one product image"
             });
         }
 
-        const images = [];
-        if (req.files && req.files.length > 0) {
-            for (let i = 0; i < req.files.length; i++) {
-                const originalImagePath = req.files[i].path;
-                const resizedImagePath = path.join('public', 'uploads', 'product-images', 'resized-' + req.files[i].filename);
-
-                try {
-                    await sharp(originalImagePath)
-                        .resize({ width: 440, height: 440 })
-                        .toFile(resizedImagePath);
-                    images.push('resized-' + req.files[i].filename);
-                } catch (sharpError) {
-                    console.error('Sharp error:', sharpError);
-                    return res.status(500).json({
-                        success: false,
-                        message: "Error processing images"
-                    });
-                }
-            }
-        }
-
-        // Validate prices
-        const regularPrice = parseFloat(products.regularPrice);
-        const salePrice = parseFloat(products.salePrice);
-        
-        if (isNaN(regularPrice) || regularPrice <= 0 || isNaN(salePrice) || salePrice <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid price values"
-            });
-        }
-
-        if (salePrice >= regularPrice) {
-            return res.status(400).json({
-                success: false,
-                message: "Sale price must be less than regular price"
-            });
-        }
-
-        // Validate quantity
-        const quantity = parseInt(products.quantity);
-        if (isNaN(quantity) || quantity < 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid quantity"
-            });
-        }
+        // Create array of image paths
+        const imagePaths = req.files.map(file => file.filename);
 
         // Create new product
         const newProduct = new Product({
-            productName: products.productName,
-            description: products.description,
-            category: products.category, // Now expecting category ID directly
-            regularPrice: regularPrice,
-            salePrice: salePrice,
-            quantity: quantity,
-            color: products.color,
-            productImage: images,
-            status: 'Available',
+            productName: req.body.productName,
+            description: req.body.description,
+            category: req.body.category,
+            regularPrice: parseFloat(req.body.regularPrice),
+            salePrice: parseFloat(req.body.salePrice),
+            sizeVariants: sizeVariants,
+            productImage: imagePaths, // Using productImage consistently
+            status: totalQuantity > 0 ? 'Available' : 'out of stock',
+            displayLocation: req.body.displayLocation || 'shop',
         });
 
+
+        console.log('New product object:', newProduct);
+
         await newProduct.save();
-        
+
         return res.status(200).json({
             success: true,
             message: "Product added successfully!"
         });
-
     } catch (error) {
-        console.error('Error saving product:', error);
+        console.error('Error in addProducts:', error);
         return res.status(500).json({
             success: false,
             message: error.message || "Error saving product"
@@ -127,30 +111,30 @@ const addProducts = async (req, res) => {
 };
 const getAllProducts = async (req, res) => {
     try {
-     
+
         const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;
         const limit = 4;
 
-       
+
         const searchQuery = {
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-               
+
             ],
         };
 
-       
+
         const count = await Product.countDocuments(searchQuery);
 
-     
+
         const productData = await Product.find(searchQuery)
             .limit(limit)
             .skip((page - 1) * limit)
             .populate('category')
             .exec();
 
-        
+
         const category = await Category.find({ isListed: true });
 
         console.log("Product Data:", productData.map(p => ({
@@ -165,7 +149,7 @@ const getAllProducts = async (req, res) => {
                 currentPage: page,
                 totalPages: Math.ceil(count / limit),
                 cat: category,
-                search: search 
+                search: search
             });
         } else {
             res.render('page-404');
@@ -309,7 +293,7 @@ const unblockProduct = async (req, res) => {
     }
 };
 
-// Controller fixes
+
 const getEditProduct = async (req, res) => {
     try {
         const id = req.query.id;
@@ -329,6 +313,11 @@ const editProduct = async (req, res) => {
     try {
         const id = req.params.id;
         const data = req.body;
+
+        console.log("Form data received:", {
+            sizes: data['sizes[]'],
+            quantities: data['quantities[]']
+        });
 
         // Find the product first to ensure it exists
         const product = await Product.findById(id);
@@ -364,7 +353,6 @@ const editProduct = async (req, res) => {
         // Validate numeric fields
         const regularPrice = parseFloat(data.regularPrice);
         const salePrice = parseFloat(data.salePrice);
-        const quantity = parseInt(data.quantity);
 
         if (isNaN(regularPrice) || regularPrice <= 0) {
             return res.json({
@@ -380,23 +368,49 @@ const editProduct = async (req, res) => {
             });
         }
 
-        if (isNaN(quantity) || quantity < 0) {
-            return res.json({
-                success: false,
-                message: "Invalid quantity"
-            });
+        // Process size variants
+        let sizes = data.sizes;        
+        let quantities = data.quantities;
+
+        // Ensure arrays even if single value
+        console.log("Received sizes:", sizes);
+        console.log("Received quantities:", quantities);
+        
+        // Ensure arrays even if single value
+        if (!Array.isArray(sizes)) {
+            sizes = sizes ? [sizes] : [];
         }
+        if (!Array.isArray(quantities)) {
+            quantities = quantities ? [quantities] : [];
+        }
+        
+        // Create size variants array
+        const sizeVariants = sizes.map((size, index) => {
+            if (!size || size.trim() === '') {
+                throw new Error('Size cannot be empty');
+            }
+            const quantity = parseInt(quantities[index]);
+            if (isNaN(quantity) || quantity < 0) {
+                throw new Error('Invalid quantity');
+            }
+            return {
+                size: size.trim(),
+                quantity: quantity
+            };
+        });
+
+        // Calculate total quantity
+        const totalQuantity = sizeVariants.reduce((sum, variant) => sum + variant.quantity, 0);
 
         const updateFields = {
             productName: data.productName,
             description: data.descriptionData,
-            category: category._id, // Store the category ObjectId
+            category: category._id,
             regularPrice: regularPrice,
             salePrice: salePrice,
-            quantity: quantity,
-            color: data.color,
-            // Update status based on quantity
-            status: quantity > 0 ? "Available" : "out of stock"
+            sizeVariants: sizeVariants,
+            status: totalQuantity > 0 ? "Available" : "out of stock",
+            displayLocation: data.displayLocation || product.displayLocation,
         };
 
         // Handle image updates
@@ -412,7 +426,7 @@ const editProduct = async (req, res) => {
             updateFields.productImage = [...product.productImage, ...images];
         }
 
-        // Update the product
+        // Update the product with validation
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
             updateFields,
@@ -435,7 +449,7 @@ const editProduct = async (req, res) => {
         console.error('Error in editProduct:', error);
         return res.json({
             success: false,
-            message: "An error occurred while updating the product"
+            message: error.message || "An error occurred while updating the product"
         });
     }
 };
@@ -465,45 +479,7 @@ const deleteSingleImage = async (req, res) => {
     }
 };
 
-const deleteProduct = async (req, res) => {
-    try {
-        const { productId } = req.body;
 
-        // Find the product to get image paths
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            });
-        }
-
-        // Delete associated images from filesystem
-        if (product.productImage && product.productImage.length > 0) {
-            product.productImage.forEach(imageName => {
-                const imagePath = path.join("public", "uploads", "product-images", imageName);
-                if (fs.existsSync(imagePath)) {
-                    fs.unlinkSync(imagePath);
-                }
-            });
-        }
-
-        // Delete the product from database
-        await Product.findByIdAndDelete(productId);
-
-        return res.status(200).json({
-            success: true,
-            message: "Product deleted successfully"
-        });
-
-    } catch (error) {
-        console.error('Error in deleteProduct:', error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
-};
 
 
 module.exports = {
@@ -518,5 +494,4 @@ module.exports = {
     getEditProduct,
     editProduct,
     deleteSingleImage,
-    deleteProduct
 }

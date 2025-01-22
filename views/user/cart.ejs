@@ -1,311 +1,425 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="author" content="Untree.co">
-  <link rel="shortcut icon" href="favicon.png">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <meta name="description" content="" />
-  <meta name="keywords" content="bootstrap, bootstrap4" />
 
-		<!-- Bootstrap CSS -->
-		<link href="css/bootstrap.min.css" rel="stylesheet">
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-		<link href="css/tiny-slider.css" rel="stylesheet">
-		<link href="css/style.css" rel="stylesheet">
-		<title>Furni Free Bootstrap 5 Template for Furniture and Interior Design Websites by Untree.co </title>
-	</head>
+	<meta name="description" content="" />
+	<meta name="keywords" content="bootstrap, bootstrap4" />
 
-	<body>
+	<!-- Bootstrap CSS -->
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+	<link href="css/tiny-slider.css" rel="stylesheet">
+	<link href="css/style.css" rel="stylesheet">
+	<title>Cart </title>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-		<!-- Start Header/Navigation -->
-		<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+	<style>
+		.dropdown {
+			position: relative;
+			display: inline-block;
+		}
 
-			<div class="container">
-				<a class="navbar-brand" href="index.html">Furni<span>.</span></a>
+		.dropdown-content {
+			display: none;
+			position: absolute;
+			background-color: white;
+			min-width: 160px;
+			box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			right: 0;
+		}
 
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
+		.dropdown-content a {
+			color: black;
+			padding: 12px 16px;
+			text-decoration: none;
+			display: block;
+			width: 100%;
+		}
 
-				<div class="collapse navbar-collapse" id="navbarsFurni">
-					<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-						<li class="nav-item ">
-							<a class="nav-link" href="/">Home</a>
-						</li>
-						<li><a class="nav-link" href="/shop">Shop</a></li>
-						<li><a class="nav-link" href="about.html">About us</a></li>
-						<li><a class="nav-link" href="contact.html">Contact us</a></li>
-					</ul>
+		.dropdown-content a:hover {
+			background-color: #405C54;
+		}
 
-					<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
-						<li><a class="nav-link" href="#"><img src="images/user.svg"></a></li>
-						<li><a class="nav-link" href="cart.html"><img src="images/cart.svg"></a></li>
-					</ul>
-				</div>
-			</div>
-				
-		</nav>
-		<!-- End Header/Navigation -->
+		.dropdown:hover .dropdown-content {
+			display: block;
+		}
 
-		<!-- Start Hero Section -->
-			<div class="hero">
-				<div class="container">
-					<div class="row justify-content-between">
-						<div class="col-lg-5">
-							<div class="intro-excerpt">
-								<h1>Cart</h1>
-							</div>
-						</div>
-						<div class="col-lg-7">
-							
-						</div>
-					</div>
-				</div>
-			</div>
-		<!-- End Hero Section -->
+		.username {
+			font-size: 1rem;
+			font-weight: bold;
+			color: #9daea8;
+			text-decoration: none;
+			margin-right: 15px;
+			padding-left: 10px;
+		}
+	</style>
 
-		
+</head>
 
-		<div class="untree_co-section before-footer-section">
-            <div class="container">
-              <div class="row mb-5">
-                <form class="col-md-12" method="post">
-                  <div class="site-blocks-table">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th class="product-thumbnail">Image</th>
-                          <th class="product-name">Product</th>
-                          <th class="product-price">Price</th>
-                          <th class="product-quantity">Quantity</th>
-                          <th class="product-total">Total</th>
-                          <th class="product-remove">Remove</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td class="product-thumbnail">
-                            <img src="images/product-1.png" alt="Image" class="img-fluid">
-                          </td>
-                          <td class="product-name">
-                            <h2 class="h5 text-black">Product 1</h2>
-                          </td>
-                          <td>$49.00</td>
-                          <td>
-                            <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
-                              <div class="input-group-prepend">
-                                <button class="btn btn-outline-black decrease" type="button">&minus;</button>
-                              </div>
-                              <input type="text" class="form-control text-center quantity-amount" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                              <div class="input-group-append">
-                                <button class="btn btn-outline-black increase" type="button">&plus;</button>
-                              </div>
-                            </div>
-        
-                          </td>
-                          <td>$49.00</td>
-                          <td><a href="#" class="btn btn-black btn-sm">X</a></td>
-                        </tr>
-        
-                        <tr>
-                          <td class="product-thumbnail">
-                            <img src="images/product-2.png" alt="Image" class="img-fluid">
-                          </td>
-                          <td class="product-name">
-                            <h2 class="h5 text-black">Product 2</h2>
-                          </td>
-                          <td>$49.00</td>
-                          <td>
-                            <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
-                              <div class="input-group-prepend">
-                                <button class="btn btn-outline-black decrease" type="button">&minus;</button>
-                              </div>
-                              <input type="text" class="form-control text-center quantity-amount" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                              <div class="input-group-append">
-                                <button class="btn btn-outline-black increase" type="button">&plus;</button>
-                              </div>
-                            </div>
-        
-                          </td>
-                          <td>$49.00</td>
-                          <td><a href="#" class="btn btn-black btn-sm">X</a></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </form>
-              </div>
-        
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="row mb-5">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                      <button class="btn btn-black btn-sm btn-block">Update Cart</button>
-                    </div>
-                    <div class="col-md-6">
-                      <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-12">
-                      <label class="text-black h4" for="coupon">Coupon</label>
-                      <p>Enter your coupon code if you have one.</p>
-                    </div>
-                    <div class="col-md-8 mb-3 mb-md-0">
-                      <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
-                    </div>
-                    <div class="col-md-4">
-                      <button class="btn btn-black">Apply Coupon</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6 pl-5">
-                  <div class="row justify-content-end">
-                    <div class="col-md-7">
-                      <div class="row">
-                        <div class="col-md-12 text-right border-bottom mb-5">
-                          <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <div class="col-md-6">
-                          <span class="text-black">Subtotal</span>
-                        </div>
-                        <div class="col-md-6 text-right">
-                          <strong class="text-black">$230.00</strong>
-                        </div>
-                      </div>
-                      <div class="row mb-5">
-                        <div class="col-md-6">
-                          <span class="text-black">Total</span>
-                        </div>
-                        <div class="col-md-6 text-right">
-                          <strong class="text-black">$230.00</strong>
-                        </div>
-                      </div>
-        
-                      <div class="row">
-                        <div class="col-md-12">
-                          <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='checkout.html'">Proceed To Checkout</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-		
+<body>
 
-		<!-- Start Footer Section -->
-		<footer class="footer-section">
-			<div class="container relative">
+	<!-- Start Header/Navigation -->
+	<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+		<div class="container">
+			<a class="navbar-brand" href="/">Brossoc<span>.</span></a>
 
-				<div class="sofa-img">
-					<img src="images/sofa.png" alt="Image" class="img-fluid">
-				</div>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni"
+				aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
 
-				<div class="row">
-					<div class="col-lg-8">
-						<div class="subscription-form">
-							<h3 class="d-flex align-items-center"><span class="me-1"><img src="images/envelope-outline.svg" alt="Image" class="img-fluid"></span><span>Subscribe to Newsletter</span></h3>
+			<div class="collapse navbar-collapse" id="navbarsFurni">
+				<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
+					<li class="nav-item">
+						<a class="nav-link" href="/">Home</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/shop">Shop</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="about.html">About us</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="contact.html">Contact us</a>
+					</li>
+				</ul>
 
-							<form action="#" class="row g-3">
-								<div class="col-auto">
-									<input type="text" class="form-control" placeholder="Enter your name">
-								</div>
-								<div class="col-auto">
-									<input type="email" class="form-control" placeholder="Enter your email">
-								</div>
-								<div class="col-auto">
-									<button class="btn btn-primary">
-										<span class="fa fa-paper-plane"></span>
-									</button>
-								</div>
-							</form>
-
+				<% if (locals.user) { %>
+					<div class="dropdown">
+						<a href="#" class="sign-in-link username">
+							<%= locals.user.name %>
+						</a>
+						<div class="dropdown-content">
+							<a href="/userProfile">Profile</a>
+							<a href="/logout">Logout</a>
 						</div>
 					</div>
-				</div>
-
-				<div class="row g-5 mb-5">
-					<div class="col-lg-4">
-						<div class="mb-4 footer-logo-wrap"><a href="#" class="footer-logo">Furni<span>.</span></a></div>
-						<p class="mb-4">Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant</p>
-
-						<ul class="list-unstyled custom-social">
-							<li><a href="#"><span class="fa fa-brands fa-facebook-f"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-twitter"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-instagram"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-linkedin"></span></a></li>
+					<% } else { %>
+						<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
+							<li>
+								<a class="nav-link" href="/signin">
+									<img src="images/user.svg">
+								</a>
+							</li>
 						</ul>
-					</div>
+						<% } %>
 
-					<div class="col-lg-8">
-						<div class="row links-wrap">
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">About us</a></li>
-									<li><a href="#">Services</a></li>
-									<li><a href="#">Blog</a></li>
-									<li><a href="#">Contact us</a></li>
-								</ul>
-							</div>
-
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">Support</a></li>
-									<li><a href="#">Knowledge base</a></li>
-									<li><a href="#">Live chat</a></li>
-								</ul>
-							</div>
-
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">Jobs</a></li>
-									<li><a href="#">Our team</a></li>
-									<li><a href="#">Leadership</a></li>
-									<li><a href="#">Privacy Policy</a></li>
-								</ul>
-							</div>
-
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">Nordic Chair</a></li>
-									<li><a href="#">Kruzo Aero</a></li>
-									<li><a href="#">Ergonomic Chair</a></li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="border-top copyright">
-					<div class="row pt-4">
-						<div class="col-lg-6">
-							<p class="mb-2 text-center text-lg-start">Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by <a href="https://untree.co">Untree.co</a> Distributed By <a hreff="https://themewagon.com">ThemeWagon</a>  <!-- License information: https://untree.co/license/ -->
-            </p>
-						</div>
-
-						<div class="col-lg-6 text-center text-lg-end">
-							<ul class="list-unstyled d-inline-flex ms-auto">
-								<li class="me-4"><a href="#">Terms &amp; Conditions</a></li>
-								<li><a href="#">Privacy Policy</a></li>
+							<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
+								<li>
+									<a class="nav-link" href="/cart">
+										<img src="images/cart.svg">
+									</a>
+								</li>
 							</ul>
+			</div>
+		</div>
+	</nav>
+	<!-- End Header/Navigation -->
+
+	<!-- Start Hero Section -->
+	<div class="hero">
+		<div class="container">
+			<div class="row justify-content-between">
+				<div class="col-lg-5">
+					<div class="intro-excerpt">
+						<h1>Cart</h1>
+					</div>
+				</div>
+				<div class="col-lg-7">
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- End Hero Section -->
+
+
+
+	<div class="untree_co-section before-footer-section">
+		<div class="container">
+			<div class="row mb-5">
+				<form class="col-md-12" method="post">
+					<div class="site-blocks-table">
+						<table class="table">
+							<thead>
+								<tr>
+									<th class="product-thumbnail">Image</th>
+									<th class="product-name">Product</th>
+									<th class="product-size">Size</th>
+									<th class="product-price">Price</th>
+									<th class="product-quantity">Quantity</th>
+									<th class="product-total">Total</th>
+									<th class="product-remove">Remove</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% if (typeof cart !=='undefined' && cart.items && cart.items.length> 0) { %>
+									<% cart.items.forEach(item=> { %>
+										<% if (item.productId) { %> <!-- Check if productId exists -->
+											<tr>
+												<td class="product-thumbnail">
+													<img src="/uploads/product-images/<%= item.productId.productImage[0] %>"
+														alt="Image" class="img-fluid">
+												</td>
+												<td class="product-name">
+													<h2 class="h5 text-black">
+														<%= item.productId.productName %>
+													</h2>
+												</td>
+												<td class="product-size">
+													<%= item.size %>
+												</td>
+												<td>₹<%= item.price %>
+												</td>
+												<td>
+													<div class="input-group mb-3 d-flex align-items-center quantity-container"
+														style="max-width: 120px;">
+														<div class="input-group-prepend">
+															<button class="btn btn-outline-black decrease" type="button"
+																onclick="updateQuantity('<%= item._id %>', Math.max( <%= item.quantity - 1 %>))">&minus;</button>
+														</div>
+														<input type="text"
+															class="form-control text-center quantity-amount"
+															value="<%= item.quantity %>" readonly
+															data-item-id="<%= item._id %>">
+														<div class="input-group-append">
+															<button class="btn btn-outline-black increase" type="button"
+																onclick="updateQuantity('<%= item._id %>', Math.min( <%= item.quantity + 1 %>))">&plus;</button>
+														</div>
+													</div>
+												</td>
+												<td>₹<%= item.totalPrice %>
+												</td>
+												<td>
+													<button type="button" class="btn btn-black btn-sm"
+														onclick="removeCartItem('<%= item._id %>')">X</button>
+												</td>
+											</tr>
+											<% } %>
+												<% }); %>
+													<% } else { %>
+														<tr>
+															<td colspan="7" class="text-center py-5">
+																<h3>Your cart is empty</h3>
+																<a href="/shop" class="btn btn-primary mt-3">Continue
+																	Shopping</a>
+															</td>
+														</tr>
+														<% } %>
+							</tbody>
+						</table>
+					</div>
+				</form>
+			</div>
+
+			<div class="row">
+				<div class="col-md-6">
+					<div class="row mb-5">
+						<div class="col-md-6">
+							<button class="btn btn-outline-black btn-sm btn-block"
+								onclick="window.location='/shop'">Continue Shopping</button>
 						</div>
+					</div>
+				</div>
+
+				<div class="col-md-6 pl-5">
+					<div class="row justify-content-end">
+						<div class="col-md-7">
+							<div class="row">
+								<div class="col-md-12 text-right border-bottom mb-5">
+									<h3 class="text-black h4 text-uppercase">Cart Totals</h3>
+								</div>
+							</div>
+							<div class="row mb-5">
+								<div class="col-md-6">
+									<span class="text-black">Total</span>
+								</div>
+								<div class="col-md-6 text-right">
+									<strong class="text-black">₹<%= cartTotal || 0 %></strong>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-12">
+									<button class="btn btn-black btn-lg py-3 btn-block"
+										onclick="window.location='checkout'">Proceed To Checkout</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Start Footer Section -->
+	<footer class="footer-section">
+		<div class="container relative">
+
+			<div class="sofa-img">
+				<img src="/images/black-hoodie-removebg-preview.png" alt="Image" class="img-fluid">
+			</div>
+			<div class="row">
+				<div class="col-lg-8">
+					<div class="subscription-form">
+						<h3 class="d-flex align-items-center"><span class="me-1"><img src="images/envelope-outline.svg"
+									alt="Image" class="img-fluid"></span><span>Subscribe to Newsletter</span></h3>
+
+						<form action="#" class="row g-3">
+							<div class="col-auto">
+								<input type="text" class="form-control" placeholder="Enter your name">
+							</div>
+							<div class="col-auto">
+								<input type="email" class="form-control" placeholder="Enter your email">
+							</div>
+							<div class="col-auto">
+								<button class="btn btn-primary">
+									<span class="fa fa-paper-plane"></span>
+								</button>
+							</div>
+						</form>
 
 					</div>
 				</div>
+			</div>
+
+			<div class="row g-5 mb-5">
+				<div class="col-lg-4">
+					<div class="mb-4 footer-logo-wrap"><a href="#" class="footer-logo">Brossoc<span>.</span></a></div>
+					<p class="mb-4">Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus
+						malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.
+						Pellentesque habitant</p>
+
+					<ul class="list-unstyled custom-social">
+						<li><a href="#"><span class="fa fa-brands fa-facebook-f"></span></a></li>
+						<li><a href="#"><span class="fa fa-brands fa-twitter"></span></a></li>
+						<li><a href="#"><span class="fa fa-brands fa-instagram"></span></a></li>
+						<li><a href="#"><span class="fa fa-brands fa-linkedin"></span></a></li>
+					</ul>
+				</div>
+
+				
 
 			</div>
-		</footer>
-		<!-- End Footer Section -->	
 
 
-		<script src="js/bootstrap.bundle.min.js"></script>
-		<script src="js/tiny-slider.js"></script>
-		<script src="js/custom.js"></script>
-	</body>
+
+		</div>
+	</footer>
+	<!-- End Footer Section -->
+
+	<script>
+		async function updateQuantity(itemId, newQuantity) {
+
+			if (newQuantity < 1) {
+				Swal.fire({
+					icon: 'warning',
+					title: 'Invalid Quantity',
+					text: 'Quantity cannot be less than 1',
+					confirmButtonColor: '#4A665B'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						location.reload();
+					}
+				});
+				return;
+			}
+
+			if (newQuantity > 5) {
+				Swal.fire({
+					icon: 'warning',
+					title: 'Quantity Limit',
+					text: 'Maximum 5 items allowed per product',
+					confirmButtonColor: '#4A665B'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						location.reload();
+					}
+				});
+				return;
+			}
+
+			try {
+				const response = await fetch('/updateCart', {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ itemId, quantity: newQuantity })
+				});
+
+				const data = await response.json();
+
+				if (!response.ok) {
+					throw new Error(data.message || 'Error updating quantity');
+				}
+
+				if (data.success) {
+					location.reload();
+				} else {
+					throw new Error(data.message || 'Error updating quantity');
+				}
+			} catch (error) {
+				Swal.fire({
+					icon: 'error',
+					title: 'Error',
+					text: error.message || 'Error updating quantity',
+					confirmButtonColor: '#4A665B'
+				});
+			}
+		}
+		async function removeCartItem(itemId) {
+			const result = await Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#4A665B',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, remove it!'
+			});
+
+			if (result.isConfirmed) {
+				try {
+					const response = await fetch(`/removeCart/${itemId}`, {
+						method: 'DELETE'
+					});
+
+					const data = await response.json();
+					if (data.success) {
+						Swal.fire({
+							icon: 'success',
+							title: 'Removed!',
+							text: 'Item has been removed from cart.',
+							confirmButtonColor: '#4A665B'
+						}).then(() => {
+							location.reload();
+						});
+					} else {
+						Swal.fire({
+							icon: 'error',
+							title: 'Error',
+							text: data.message || 'Error removing item',
+							confirmButtonColor: '#4A665B'
+						});
+					}
+				} catch (error) {
+					Swal.fire({
+						icon: 'error',
+						title: 'Error',
+						text: 'Error removing item',
+						confirmButtonColor: '#4A665B'
+					});
+				}
+			}
+		}
+	</script>
+	<script src="js/bootstrap.bundle.min.js"></script>
+	<script src="js/tiny-slider.js"></script>
+	<script src="js/custom.js"></script>
+</body>

@@ -171,6 +171,66 @@
             border-color: #0095ff;
             color: white;
         }
+
+        /* Size variants styling */
+        .variants-container {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .variant-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            padding: 4px 8px;
+            background-color: #2d3339;
+            border-radius: 4px;
+        }
+
+        .size-badge {
+            background-color: #0095ff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .quantity-text {
+            color: #8b949e;
+            font-size: 0.85rem;
+        }
+
+        .no-variants {
+            color: #8b949e;
+            font-style: italic;
+        }
+
+        /* Status badge styling */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-available {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-out-of-stock {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-discontinued {
+            background-color: #6c757d;
+            color: white;
+        }
     </style>
 </head>
 
@@ -207,10 +267,10 @@
                         <th>Sale Price</th>
                         <th>Offer Price</th>
                         <th>Offer</th>
-                        <th>Quantity</th>
+                        <th>Size Variants</th>
+                        <th>Stock Status</th>
                         <th>Action</th>
                         <th>Edit</th>
-                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -223,18 +283,13 @@
                             <td>
                                 <%=data[i].category.name%>
                             </td>
-                            <td>
-                                <%=data[i].salePrice%>
+                            <td>₹<%=data[i].salePrice%>
                             </td>
                             <td>
-
                                 <%if(locals.data[i].productOffer){%>
-
-                                    <%=data[i].productOffer%>
-
+                                    <%=data[i].productOffer%>%
                                         <%}else{%>
                                             0%
-
                                             <%}%>
                             </td>
                             <td>
@@ -249,8 +304,29 @@
 
                                         <%}%>
                             </td>
+
                             <td>
-                                <%=data[i].quantity%>
+                                <div class="variants-container">
+                                    <% if(data[i].sizeVariants && data[i].sizeVariants.length> 0) { %>
+                                        <% data[i].sizeVariants.forEach(variant=> { %>
+                                            <div class="variant-item">
+                                                <span class="size-badge">
+                                                    <%=variant.size%>
+                                                </span>
+                                                <span class="quantity-text">
+                                                    <%=variant.quantity%> pcs
+                                                </span>
+                                            </div>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <span class="no-variants">No variants</span>
+                                                    <% } %>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-<%=data[i].status.toLowerCase().replace(' ', '-')%>">
+                                    <%=data[i].status%>
+                                </span>
                             </td>
                             <td>
 
@@ -272,10 +348,6 @@
                                 <button class="button button-primary"> <a
                                         href="/admin/editProduct?id=<%=data[i]._id%>">Edit</a></button>
                             </td>
-                            <td>
-                                <button class="button button-danger"
-                                    onclick="deleteProduct('<%=data[i]._id%>')">Delete</button>
-                            </td>
                         </tr>
                         <%}%>
                 </tbody>
@@ -283,45 +355,45 @@
         </div>
     </div>
 
-   <div class="pagination-container">
-    <% if (currentPage > 1) { %>
-        <a href="/admin/products?page=<%= currentPage - 1 %><%= search ? `&search=${search}` : '' %>" class="pagination-link">&laquo; Previous</a>
-    <% } %>
-
-    <% 
-    // Calculate range of pages to show
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
+    <div class="pagination-container">
+        <% if (currentPage > 1) { %>
+            <a href="/admin/products?page=<%= currentPage - 1 %><%= search ? `&search=${search}` : '' %>" class="pagination-link">&laquo; Previous</a>
+        <% } %>
     
-    // Show first page and ellipsis if necessary
-    if (startPage > 1) { %>
-        <a href="/admin/products?page=1<%= search ? `&search=${search}` : '' %>" class="pagination-link">1</a>
-        <% if (startPage > 2) { %>
-            <span class="pagination-ellipsis">...</span>
+        <% 
+        // Calculate range of pages to show
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+        
+        // Show first page if not in range
+        if (startPage > 1) { %>
+            <a href="/admin/products?page=1<%= search ? `&search=${search}` : '' %>" class="pagination-link">1</a>
+            <% if (startPage > 2) { %>
+                <span class="pagination-ellipsis">...</span>
+            <% } %>
         <% } %>
-    <% } %>
-
-    <% // Show page numbers
-    for (let i = startPage; i <= endPage; i++) { %>
-        <% if (i === currentPage) { %>
-            <span class="current-page"><%= i %></span>
-        <% } else { %>
-            <a href="/admin/products?page=<%= i %><%= search ? `&search=${search}` : '' %>" class="pagination-link"><%= i %></a>
+    
+        <% // Show page numbers
+        for (let i = startPage; i <= endPage; i++) { %>
+            <% if (i === currentPage) { %>
+                <span class="current-page"><%= i %></span>
+            <% } else { %>
+                <a href="/admin/products?page=<%= i %><%= search ? `&search=${search}` : '' %>" class="pagination-link"><%= i %></a>
+            <% } %>
         <% } %>
-    <% } %>
-
-    <% // Show last page and ellipsis if necessary
-    if (endPage < totalPages) { %>
-        <% if (endPage < totalPages - 1) { %>
-            <span class="pagination-ellipsis">...</span>
+    
+        <% // Show last page if not in range
+        if (endPage < totalPages) { %>
+            <% if (endPage < totalPages - 1) { %>
+                <span class="pagination-ellipsis">...</span>
+            <% } %>
+            <a href="/admin/products?page=<%= totalPages %><%= search ? `&search=${search}` : '' %>" class="pagination-link"><%= totalPages %></a>
         <% } %>
-        <a href="/admin/products?page=<%= totalPages %><%= search ? `&search=${search}` : '' %>" class="pagination-link"><%= totalPages %></a>
-    <% } %>
-
-    <% if (currentPage < totalPages) { %>
-        <a href="/admin/products?page=<%= currentPage + 1 %><%= search ? `&search=${search}` : '' %>" class="pagination-link">Next &raquo;</a>
-    <% } %>
-</div>
+    
+        <% if (currentPage < totalPages) { %>
+            <a href="/admin/products?page=<%= currentPage + 1 %><%= search ? `&search=${search}` : '' %>" class="pagination-link">Next &raquo;</a>
+        <% } %>
+    </div>
 
 
     <!-- Scripts -->

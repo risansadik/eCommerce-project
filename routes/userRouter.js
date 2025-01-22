@@ -3,7 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/user/userController');
 const profileController = require('../controllers/user/profileController');
 const addressController = require('../controllers/user/addressController');
-const cartController = require('../controllers/user/cartController')
+const cartController = require('../controllers/user/cartController');
+const checkoutController = require('../controllers/user/checkoutController')
 const passport = require('passport');
 const { blockAuth,userAuth , adminAuth} = require('../middlewares/auth');
 
@@ -73,8 +74,15 @@ router.delete('/deleteAddress/:index', userAuth, addressController.deleteAddress
 
 //cart management
 
-router.get('/cart',userAuth,cartController.getCart);
+router.post('/addCart', userAuth, cartController.addToCart);
+router.get('/cart', userAuth, cartController.getCart);
+router.put('/updateCart', userAuth, cartController.updateCartItem);
+router.delete('/removeCart/:itemId', userAuth, cartController.removeCartItem);
 
+//checkout management
+
+router.get('/checkout', userAuth, checkoutController.getCheckout);
+router.post('/process-checkout', userAuth, checkoutController.processCheckout);
 
 
 
