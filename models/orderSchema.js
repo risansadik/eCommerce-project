@@ -8,11 +8,26 @@ const orderSchema = new Schema({
         default: () => uuidv4(),
         unique: true
     },
+
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    address: {
+        type: Schema.Types.ObjectId,
+        ref: 'Address',
+        required: true
+    },
     orderedItems: [{
 
         product: {
             type: Schema.Types.ObjectId,
             ref: 'Product',
+            required: true
+        },
+        size: {
+            type: String,
             required: true
         },
         quantity: {
@@ -34,11 +49,6 @@ const orderSchema = new Schema({
     },
     finalAmount: {
         type: Number,
-        required: true
-    },
-    address: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
         required: true
     },
     invoiceDate: {

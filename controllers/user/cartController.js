@@ -20,9 +20,10 @@ const Product = require('../../models/productSchema');
                     cartTotal
                 });
             }
-    
 
+            const user = req.user
             res.render('cart', {
+                user:user,
                 cart: cart || { items: [] },
                 cartTotal
             });

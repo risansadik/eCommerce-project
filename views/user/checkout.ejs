@@ -1,279 +1,338 @@
-<!-- /*
-* Bootstrap 5
-* Template Name: Furni
-* Template Author: Untree.co
-* Template URI: https://untree.co/
-* License: https://creativecommons.org/licenses/by/3.0/
-*/ -->
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <meta name="description" content="" />
-  <meta name="keywords" content="bootstrap, bootstrap4" />
 
-		<!-- Bootstrap CSS -->
-		<link href="css/bootstrap.min.css" rel="stylesheet">
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-		<link href="css/tiny-slider.css" rel="stylesheet">
-		<link href="css/style.css" rel="stylesheet">
-		<title>Furni Free Bootstrap 5 Template for Furniture and Interior Design Websites by Untree.co </title>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	</head>
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap4" />
 
-	<body>
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="css/tiny-slider.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <title>checkout</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 
-		<!-- Start Header/Navigation -->
-		<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+<body>
 
-			<div class="container">
-				<a class="navbar-brand" href="index.html">Furni<span>.</span></a>
+    <!-- Start Header/Navigation -->
+    <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
 
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Furni<span>.</span></a>
 
-				<div class="collapse navbar-collapse" id="navbarsFurni">
-					<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-						<li class="nav-item ">
-							<a class="nav-link" href="/">Home</a>
-						</li>
-						<li><a class="nav-link" href="/shop">Shop</a></li>
-						<li><a class="nav-link" href="about.html">About us</a></li>
-						<li><a class="nav-link" href="contact.html">Contact us</a></li>
-					</ul>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni"
+                aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-					<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
-						<li><a class="nav-link" href="#"><img src="images/user.svg"></a></li>
-						<li><a class="nav-link" href="/cart"><img src="images/cart.svg"></a></li>
-					</ul>
-				</div>
-			</div>
-				
-		</nav>
-		<!-- End Header/Navigation -->
+            <div class="collapse navbar-collapse" id="navbarsFurni">
+                <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li><a class="nav-link" href="/shop">Shop</a></li>
+                    <li><a class="nav-link" href="about.html">About us</a></li>
+                    <li><a class="nav-link" href="contact.html">Contact us</a></li>
+                </ul>
 
-		<!-- Start Hero Section -->
-        <div class="hero">
-            <div class="container">
-                <div class="row justify-content-between">
-                    <div class="col-lg-5">
-                        <div class="intro-excerpt">
-                            <h1>Checkout</h1>
-                        </div>
+                <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
+                    <li><a class="nav-link" href="#"><img src="images/user.svg"></a></li>
+                    <li><a class="nav-link" href="/cart"><img src="images/cart.svg"></a></li>
+                </ul>
+            </div>
+        </div>
+
+    </nav>
+    <!-- End Header/Navigation -->
+
+    <!-- Start Hero Section -->
+    <div class="hero">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div class="col-lg-5">
+                    <div class="intro-excerpt">
+                        <h1>Checkout</h1>
                     </div>
                 </div>
             </div>
         </div>
-		<!-- End Hero Section -->
+    </div>
+    <!-- End Hero Section -->
 
-		<div class="untree_co-section">
-            <div class="container">
-                <div class="row mb-5">
-                    <div class="col-md-12">
-                        <div class="border p-4 rounded" role="alert">
-                            <% if(addresses.length === 0) { %>
-                                No delivery address found. <a href="/address/add">Add a new address</a>
+    <div class="untree_co-section">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md-12">
+                    <div class="border p-4 rounded" role="alert">
+                        <% if(addresses.length===0) { %>
+                            No delivery address found. <a href="/addAddress">Add a new address</a>
                             <% } %>
-                        </div>
                     </div>
                 </div>
-    
-                <form id="checkoutForm">
-                    <div class="row">
-                        <div class="col-md-6 mb-5 mb-md-0">
-                            <h2 class="h3 mb-3 text-black">Delivery Address</h2>
-                            <div class="p-3 p-lg-5 border bg-white">
-                                <% if(addresses.length > 0) { %>
-                                    <% addresses.forEach(address => { %>
-                                        <div class="form-group mb-3">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" 
-                                                       id="address_<%= address._id %>" 
-                                                       name="addressId" 
-                                                       value="<%= address._id %>" 
-                                                       class="custom-control-input"
-                                                       required>
-                                                <label class="custom-control-label" for="address_<%= address._id %>">
-                                                    <strong><%= address.addressType %></strong><br>
-                                                    <%= address.name %><br>
+            </div>
+
+            <form id="checkoutForm">
+                <div class="row">
+                    <div class="col-md-6 mb-5 mb-md-0">
+                        <h2 class="h3 mb-3 text-black">Delivery Address</h2>
+                        <div class="p-3 p-lg-5 border bg-white">
+                            <% if(addresses.length> 0) { %>
+                                <% addresses.forEach(address=> { %>
+                                    <div class="form-group mb-3">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="address_<%= address._id %>" name="addressId"
+                                                value="<%= address._id %>" class="custom-control-input" required>
+                                            <label class="custom-control-label" for="address_<%= address._id %>">
+                                                <strong>
+                                                    <%= address.addressType %>
+                                                </strong><br>
+                                                <%= address.name %><br>
                                                     <%= address.landmark %>, <%= address.city %><br>
-                                                    <%= address.state %> - <%= address.pincode %><br>
-                                                    Phone: <%= address.phone %><br>
-                                                    Alt Phone: <%= address.altPhone %>
+                                                            <%= address.state %> - <%= address.pincode %><br>
+                                                                    Phone: <%= address.phone %><br>
+                                                                        Alt Phone: <%= address.altPhone %>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                                        <% } %>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="row mb-5">
+                            <div class="col-md-12">
+                                <h2 class="h3 mb-3 text-black">Your Order</h2>
+                                <div class="p-3 p-lg-5 border bg-white">
+                                    <table class="table site-block-order-table mb-5">
+                                        <thead>
+                                            <th>Product</th>
+                                            <th>Total</th>
+                                        </thead>
+                                        <tbody>
+                                            <% cart.items.forEach(item=> { %>
+                                                <tr>
+                                                    <td>
+                                                        <%= item.productId.productName %>
+                                                            (<%= item.size %>)
+                                                                <strong class="mx-2">x</strong>
+                                                                <%= item.quantity %>
+                                                    </td>
+                                                    <td>₹<%= item.totalPrice %>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                                    <tr>
+                                                        <td class="text-black font-weight-bold"><strong>Order
+                                                                Total</strong></td>
+                                                        <td class="text-black font-weight-bold"><strong>₹<%= cartTotal
+                                                                    %></strong></td>
+                                                    </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div class="border p-3 mb-3">
+                                        <h3 class="h6 mb-0">Have a coupon?</h3>
+                                        <div class="d-flex mt-2">
+                                            <input type="text" class="form-control me-2"
+                                                placeholder="Enter coupon code">
+                                            <button type="button" class="btn btn-secondary" disabled>Apply</button>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="border p-3 mb-3">
+                                        <h3 class="h6 mb-0">Payment Method</h3>
+
+                                        <!-- COD Option -->
+                                        <div class="form-group mb-2 mt-3">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="cod" name="paymentMethod" value="cod"
+                                                    class="custom-control-input" checked>
+                                                <label class="custom-control-label" for="cod">
+                                                    Cash on Delivery
+                                                    <small class="d-block text-muted">Payment will be collected at the
+                                                        time of delivery</small>
                                                 </label>
                                             </div>
                                         </div>
-                                    <% }); %>
-                                <% } %>
-                            </div>
-                        </div>
-    
-                        <div class="col-md-6">
-                            <div class="row mb-5">
-                                <div class="col-md-12">
-                                    <h2 class="h3 mb-3 text-black">Your Order</h2>
-                                    <div class="p-3 p-lg-5 border bg-white">
-                                        <table class="table site-block-order-table mb-5">
-                                            <thead>
-                                                <th>Product</th>
-                                                <th>Total</th>
-                                            </thead>
-                                            <tbody>
-                                                <% cart.items.forEach(item => { %>
-                                                    <tr>
-                                                        <td>
-                                                            <%= item.productId.productName %> 
-                                                            (<%= item.size %>) 
-                                                            <strong class="mx-2">x</strong> 
-                                                            <%= item.quantity %>
-                                                        </td>
-                                                        <td>₹<%= item.totalPrice %></td>
-                                                    </tr>
-                                                <% }); %>
-                                                <tr>
-                                                    <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-                                                    <td class="text-black font-weight-bold"><strong>₹<%= cartTotal %></strong></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-    
-                                        <div class="border p-3 mb-3">
-                                            <h3 class="h6 mb-0">Cash on Delivery</h3>
-                                            <p class="mb-0">Payment will be collected at the time of delivery</p>
+
+                                        <!-- UPI Option -->
+                                        <div class="form-group mb-2">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="upi" name="paymentMethod" value="upi"
+                                                    class="custom-control-input" disabled>
+                                                <label class="custom-control-label" for="upi">
+                                                    UPI Payment
+                                                    <small class="d-block text-muted">Pay using any UPI app (Coming
+                                                        Soon)</small>
+                                                </label>
+                                            </div>
                                         </div>
-    
-                                        <div class="form-group">
-                                            <button class="btn btn-black btn-lg py-3 btn-block" type="submit">Place Order</button>
+
+                                        <!-- Wallet Option -->
+                                        <div class="form-group mb-2">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="wallet" name="paymentMethod" value="wallet"
+                                                    class="custom-control-input" disabled>
+                                                <label class="custom-control-label" for="wallet">
+                                                    Wallet
+                                                    <small class="d-block text-muted">Pay using your wallet balance
+                                                        (Coming Soon)</small>
+                                                </label>
+                                            </div>
                                         </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <button class="btn btn-black btn-lg py-3 btn-block" type="submit">Place
+                                            Order</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </form>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Start Footer Section -->
+    <footer class="footer-section">
+        <div class="container relative">
+
+            <div class="sofa-img">
+                <img src="/images/black-hoodie-removebg-preview.png" alt="Image" class="img-fluid">
             </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="subscription-form">
+                        <h3 class="d-flex align-items-center"><span class="me-1"><img src="images/envelope-outline.svg"
+                                    alt="Image" class="img-fluid"></span><span>Subscribe to Newsletter</span></h3>
+
+                        <form action="#" class="row g-3">
+                            <div class="col-auto">
+                                <input type="text" class="form-control" placeholder="Enter your name">
+                            </div>
+                            <div class="col-auto">
+                                <input type="email" class="form-control" placeholder="Enter your email">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-primary">
+                                    <span class="fa fa-paper-plane"></span>
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-5 mb-5">
+                <div class="col-lg-4">
+                    <div class="mb-4 footer-logo-wrap"><a href="#" class="footer-logo">Brossoc<span>.</span></a></div>
+                    <p class="mb-4">Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus
+                        malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.
+                        Pellentesque habitant</p>
+
+                    <ul class="list-unstyled custom-social">
+                        <li><a href="#"><span class="fa fa-brands fa-facebook-f"></span></a></li>
+                        <li><a href="#"><span class="fa fa-brands fa-twitter"></span></a></li>
+                        <li><a href="#"><span class="fa fa-brands fa-instagram"></span></a></li>
+                        <li><a href="#"><span class="fa fa-brands fa-linkedin"></span></a></li>
+                    </ul>
+                </div>
+
+
+            </div>
+
         </div>
 
-		<!-- Start Footer Section -->
-		<footer class="footer-section">
-			<div class="container relative">
-
-				<div class="sofa-img">
-					<img src="/images/black-hoodie-removebg-preview.png" alt="Image" class="img-fluid">
-				</div>
-
-				<div class="row">
-					<div class="col-lg-8">
-						<div class="subscription-form">
-							<h3 class="d-flex align-items-center"><span class="me-1"><img src="images/envelope-outline.svg" alt="Image" class="img-fluid"></span><span>Subscribe to Newsletter</span></h3>
-
-							<form action="#" class="row g-3">
-								<div class="col-auto">
-									<input type="text" class="form-control" placeholder="Enter your name">
-								</div>
-								<div class="col-auto">
-									<input type="email" class="form-control" placeholder="Enter your email">
-								</div>
-								<div class="col-auto">
-									<button class="btn btn-primary">
-										<span class="fa fa-paper-plane"></span>
-									</button>
-								</div>
-							</form>
-
-						</div>
-					</div>
-				</div>
-
-				<div class="row g-5 mb-5">
-					<div class="col-lg-4">
-						<div class="mb-4 footer-logo-wrap"><a href="#" class="footer-logo">Brossoc<span>.</span></a></div>
-						<p class="mb-4">Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant</p>
-
-						<ul class="list-unstyled custom-social">
-							<li><a href="#"><span class="fa fa-brands fa-facebook-f"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-twitter"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-instagram"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-linkedin"></span></a></li>
-						</ul>
-					</div>
-
-					 
-					</div>
-
-				</div>
-
-				
-
-			</div>
-		</footer>
-		<!-- End Footer Section -->	
 
 
-		<script src="js/bootstrap.bundle.min.js"></script>
-		<script src="js/tiny-slider.js"></script>
-		<script src="js/custom.js"></script>
+        </div>
+    </footer>
+    <!-- End Footer Section -->
 
-        <script>
-            document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const selectedAddress = document.querySelector('input[name="addressId"]:checked');
-                
-                if (!selectedAddress) {
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/tiny-slider.js"></script>
+    <script src="js/custom.js"></script>
+
+    <script>
+        document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const selectedAddress = document.querySelector('input[name="addressId"]:checked');
+
+            if (!selectedAddress) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Address Required',
+                    text: 'Please select a delivery address',
+                    confirmButtonColor: '#4A665B'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/process-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        addressId: selectedAddress.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Address Required',
-                        text: 'Please select a delivery address',
-                        confirmButtonColor: '#4A665B'
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: 'Your order has been placed successfully',
+                        showCancelButton: true,
+                        confirmButtonText: 'Go to Orders',
+                        cancelButtonText: 'Continue Shopping',
+                        confirmButtonColor: '#4A665B',
+                        cancelButtonColor: '#808080',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // If user clicks "Go to Orders"
+                            window.location.href = '/orders';
+                        } else {
+                            // If user clicks "Continue Shopping"
+                            window.location.href = '/shop';
+                        }
                     });
-                    return;
-                }
-    
-                try {
-                    const response = await fetch('/process-checkout', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            addressId: selectedAddress.value
-                        })
-                    });
-    
-                    const data = await response.json();
-    
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Order Placed!',
-                            text: 'Your order has been placed successfully',
-                            confirmButtonColor: '#4A665B'
-                        }).then(() => {
-                            window.location.href = data.redirect;
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message,
-                            confirmButtonColor: '#4A665B'
-                        });
-                    }
-                } catch (error) {
+                } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'An error occurred while processing your order',
+                        text: data.message,
                         confirmButtonColor: '#4A665B'
                     });
                 }
-            });
-        </script>
-	</body>
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while processing your order',
+                    confirmButtonColor: '#4A665B'
+                });
+            }
+        });
+    </script>
+</body>
 
 </html>

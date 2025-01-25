@@ -135,11 +135,130 @@ const deleteAddress = async (req, res) => {
         });
     }
 };
+
+const editAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const addressIndex = parseInt(req.params.index);
+
+        // Input validation
+        if (!userId) {
+            return res.status(401).render('edit-address', { 
+                error: 'User not authenticated' 
+            });
+        }
+
+        // Find the user's address document
+        const userAddress = await Address.findOne({ userId: userId });
+
+        if (!userAddress) {
+            return res.status(404).render('edit-address', { 
+                error: 'No addresses found for this user' 
+            });
+        }
+
+        if (!userAddress.address || addressIndex >= userAddress.address.length) {
+            return res.status(404).render('edit-address', { 
+                error: 'Address not found' 
+            });
+        }
+
+        // Render edit address page with existing address data
+        res.render('edit-address', {
+            addressType: userAddress.address[addressIndex].addressType,
+            name: userAddress.address[addressIndex].name,
+            streetAddress: userAddress.address[addressIndex].landmark,
+            city: userAddress.address[addressIndex].city,
+            state: userAddress.address[addressIndex].state,
+            pinCode: userAddress.address[addressIndex].pincode,
+            phoneNumber: userAddress.address[addressIndex].phone,
+            alternativePhone: userAddress.address[addressIndex].altPhone,
+            addressIndex: addressIndex
+        });
+
+    } catch (error) {
+        console.error('Edit address error:', error);
+        res.status(500).render('edit-address', { 
+            error: 'Internal server error' 
+        });
+    }
+};
+
+const updateAddress = async (req, res) => {
+    try {
+        console.log('Incoming update request body:', req.body);
+        console.log('User ID from session:', req.session.user);
+        
+        const userId = req.session.user;
+        const addressIndex = parseInt(req.body.addressIndex);
+
+        // Input validation
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not authenticated'
+            });
+        }
+
+        // Find the user's address document
+        const userAddress = await Address.findOne({ userId: userId });
+
+        if (!userAddress) {
+            return res.status(404).json({
+                success: false,
+                message: 'No addresses found for this user'
+            });
+        }
+
+        if (!userAddress.address || addressIndex >= userAddress.address.length) {
+            return res.status(404).json({
+                success: false,
+                message: 'Address not found'
+            });
+        }
+
+        // Log current address before update
+        console.log('Current address before update:', userAddress.address[addressIndex]);
+
+        // Update the address
+        userAddress.address[addressIndex] = {
+            addressType: req.body.addressType,
+            name: req.body.name,
+            landmark: req.body.streetAddress,
+            city: req.body.city,
+            state: req.body.state,
+            pincode: req.body.pinCode,
+            phone: req.body.phoneNumber,
+            altPhone: req.body.alternativePhone
+        };
+
+        // Log address after update
+        console.log('Address after update:', userAddress.address[addressIndex]);
+
+        await userAddress.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Address updated successfully'
+        });
+
+    } catch (error) {
+        console.error('Update address error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
 module.exports = {
 
    
     getAddAddressPage,
     addAddress,
     loadAddresses,
-    deleteAddress
+    deleteAddress,
+    editAddress,
+    updateAddress
+
 }

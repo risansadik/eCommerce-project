@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Address - Brossoc</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.css"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .address-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .address-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .address-header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .address-section {
+            margin-bottom: 20px;
+        }
+
+        .field-label {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .field-value {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #2c5840;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .edit-button {
+            background-color: #2c5840;
+            color: white;
+        }
+
+        .edit-button:hover {
+            background-color: #2c5840;
+        }
+
+        .save-button {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .save-button:hover {
+            background-color: #27ae60;
+        }
+
+        .edit-input.error {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="address-card">
+        <div class="address-header">
+            <h1>Edit Address</h1>
+        </div>
+
+        <form id="edit-address-form" onsubmit="return false;">
+            <input type="hidden" id="addressIndex" name="addressIndex" value="<%= addressIndex %>">
+            <div class="address-section">
+                <span class="field-label">Address Type</span>
+                <input type="text" class="edit-input" id="addressType" placeholder="Enter address type"
+                    name="addressType" value="<%= typeof addressType !== 'undefined' ? addressType : '' %>">
+                <div class="error-message"></div>
+
+                <span class="field-label">Full Name</span>
+                <input type="text" class="edit-input" id="name" placeholder="Enter full name" name="name"
+                    value="<%= typeof name !== 'undefined' ? name : '' %>">
+                <div class="error-message"></div>
+
+                <span class="field-label">Street Address/Landmark</span>
+                <input type="text" class="edit-input" id="streetAddress" placeholder="Enter street address"
+                    name="streetAddress" value="<%= typeof streetAddress !== 'undefined' ? streetAddress : '' %>">
+                <div class="error-message"></div>
+
+                <span class="field-label">City</span>
+                <input type="text" class="edit-input" id="city" placeholder="Enter city" name="city"
+                    value="<%= typeof city !== 'undefined' ? city : '' %>">
+                <div class="error-message"></div>
+
+                <span class="field-label">State</span>
+                <input type="text" class="edit-input" id="state" placeholder="Enter state" name="state"
+                    value="<%= typeof state !== 'undefined' ? state : '' %>">
+                <div class="error-message"></div>
+
+                <span class="field-label">PIN Code</span>
+                <input type="text" class="edit-input" id="pinCode" placeholder="Enter PIN code" name="pinCode"
+                    value="<%= typeof pinCode !== 'undefined' ? pinCode : '' %>">
+                <div class="error-message"></div>
+
+                <span class="field-label">Phone Number</span>
+                <input type="tel" class="edit-input" id="phoneNumber" placeholder="Enter phone number"
+                    name="phoneNumber" value="<%= typeof phoneNumber !== 'undefined' ? phoneNumber : '' %>">
+                <div class="error-message"></div>
+
+                <span class="field-label">Alternative Phone</span>
+                <input type="tel" class="edit-input" id="alternativePhone" placeholder="Enter alternative phone"
+                    name="alternativePhone"
+                    value="<%= typeof alternativePhone !== 'undefined' ? alternativePhone : '' %>">
+                <div class="error-message"></div>
+            </div>
+            <button type="submit" class="button edit-button" onclick="validateForm(event)">Update Address</button>
+        </form>
+    </div>
+
+    <script>
+        function validateForm(event) {
+            event.preventDefault();
+            let isValid = true;
+            const form = document.getElementById('edit-address-form');
+            const inputs = form.querySelectorAll('input[type="text"], input[type="tel"]');
+
+            inputs.forEach(input => {
+                // Create error message element if it doesn't exist
+                if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('error-message')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.classList.add('error-message');
+                    errorDiv.style.color = '#dc3545';
+                    errorDiv.style.fontSize = '12px';
+                    errorDiv.style.marginTop = '4px';
+                    errorDiv.style.display = 'none';
+                    input.insertAdjacentElement('afterend', errorDiv);
+                }
+
+                // Reset previous error states
+                input.classList.remove('error');
+                input.nextElementSibling.style.display = 'none';
+
+                // Check for empty or space-only values
+                if (input.value.trim() === '') {
+                    input.classList.add('error');
+                    input.nextElementSibling.textContent = 'This field cannot be empty or contain only spaces';
+                    input.nextElementSibling.style.display = 'block';
+                    isValid = false;
+                }
+
+
+                if (input.id === 'pinCode') {
+                    if (!/^\d{6}$/.test(input.value)) {
+                        input.classList.add('error');
+                        input.nextElementSibling.textContent = 'Please enter a valid 6-digit PIN code';
+                        input.nextElementSibling.style.display = 'block';
+                        isValid = false;
+                    }
+                }
+
+
+                if (input.id === 'phoneNumber' || input.id === 'alternativePhone') {
+                    if (!/^\d{10}$/.test(input.value)) {
+                        input.classList.add('error');
+                        input.nextElementSibling.textContent = 'Please enter a valid 10-digit phone number';
+                        input.nextElementSibling.style.display = 'block';
+                        isValid = false;
+                    }
+                }
+            });
+
+            if (isValid) {
+
+                const formData = {
+                    name: document.getElementById('name').value,
+                    addressType: document.getElementById('addressType').value,
+                    streetAddress: document.getElementById('streetAddress').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    pinCode: document.getElementById('pinCode').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    alternativePhone: document.getElementById('alternativePhone').value,
+                    addressIndex: document.getElementById('addressIndex').value
+                };
+
+                fetch('/updateAddress', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                    .then(async response => {
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Address updated successfully',
+                                icon: 'success'
+                            }).then(() => {
+                                window.location.href = '/addresses';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: result.message || 'Failed to update address',
+                                icon: 'error'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong',
+                            icon: 'error'
+                        });
+                    });
+            }
+        }
+
+
+        document.getElementById('edit-address-form').addEventListener('submit', validateForm);
+
+
+        document.querySelectorAll('.edit-input').forEach(input => {
+            input.addEventListener('input', function () {
+                if (this.value.trim() !== '') {
+                    this.classList.remove('error');
+                    if (this.nextElementSibling && this.nextElementSibling.classList.contains('error-message')) {
+                        this.nextElementSibling.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+
+        document.querySelectorAll('.field-label').forEach(label => {
+            const requiredSpan = document.createElement('span');
+            requiredSpan.textContent = '*';
+            requiredSpan.style.color = 'red';
+            requiredSpan.style.marginLeft = '2px';
+            label.appendChild(requiredSpan);
+        });
+    </script>
+</body>
+
+</html>

@@ -425,7 +425,7 @@
                         <input type="number" min="1" value="1" class="form-input" id="quantityInput" disabled>
                         <div id="quantity-message" class="text-sm mt-1 text-red-600"></div>
                     </div>
-                    <button class="add-to-cart-btn" id="addToCartBtn" disabled>ADD TO CART</button>
+                    <button class="add-to-cart-btn" id="addToCartBtn">ADD TO CART</button>
                 </div>
 
 
@@ -784,14 +784,10 @@
             const addToCartBtn = document.getElementById('addToCartBtn');
             const sizeSelect = document.getElementById('sizeSelect');
             const quantityInput = document.getElementById('quantityInput');
-            const sizeMessage = document.getElementById('size-message');
-            const quantityMessage = document.getElementById('quantity-message');
 
-            // Handle add to cart
-            addToCartBtn.addEventListener('click', async function (e) {
+            addToCartBtn.onclick = function (e) {
                 e.preventDefault();
 
-                // Validate size selection
                 if (!sizeSelect.value) {
                     Swal.fire({
                         icon: 'warning',
@@ -802,7 +798,6 @@
                     return;
                 }
 
-                // Validate quantity
                 const quantity = parseInt(quantityInput.value);
                 if (!quantity || quantity < 1) {
                     Swal.fire({
@@ -824,80 +819,41 @@
                     return;
                 }
 
-                try {
-                    const response = await fetch('/addCart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            productId: '<%= product._id %>',
-                            size: sizeSelect.value,
-                            quantity: quantity
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(data.message || 'Failed to add to cart');
-                    }
-
-                    if (data.success) {
+                fetch('/addCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        productId: '<%= product._id %>',
+                        size: sizeSelect.value,
+                        quantity: quantity
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Product added to cart successfully',
+                                confirmButtonColor: '#4A665B'
+                            }).then((result) => {
+                                if (result.isConfirmed && data.redirect) {
+                                    window.location.href = data.redirect;
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Product added to cart successfully',
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: error.message || 'Something went wrong! Please try again.',
                             confirmButtonColor: '#4A665B'
-                        }).then((result) => {
-                            if (result.isConfirmed && data.redirect) {
-                                window.location.href = data.redirect;
-                            }
                         });
-                    }
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: error.message || 'Something went wrong! Please try again.',
-                        confirmButtonColor: '#4A665B'
                     });
-                }
-            });
-
-            // Handle quantity input validation
-            quantityInput.addEventListener('input', function () {
-                const value = parseInt(this.value);
-                if (value > 5) {
-                    this.value = 5;
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Maximum Limit',
-                        text: 'Maximum 5 items allowed per order',
-                        confirmButtonColor: '#4A665B'
-                    });
-                } else if (value < 1) {
-                    this.value = 1;
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Minimum Quantity',
-                        text: 'Minimum 1 item required',
-                        confirmButtonColor: '#4A665B'
-                    });
-                }
-            });
-
-            // Handle size selection validation
-            sizeSelect.addEventListener('change', function () {
-                if (!this.value) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Size Required',
-                        text: 'Please select a size',
-                        confirmButtonColor: '#4A665B'
-                    });
-                }
-            });
+            };
         });
     </script>
 </body>

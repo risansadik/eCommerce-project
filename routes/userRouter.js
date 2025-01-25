@@ -4,7 +4,8 @@ const userController = require('../controllers/user/userController');
 const profileController = require('../controllers/user/profileController');
 const addressController = require('../controllers/user/addressController');
 const cartController = require('../controllers/user/cartController');
-const checkoutController = require('../controllers/user/checkoutController')
+const checkoutController = require('../controllers/user/checkoutController');
+const orderController = require('../controllers/user/orderController')
 const passport = require('passport');
 const { blockAuth,userAuth , adminAuth} = require('../middlewares/auth');
 
@@ -71,6 +72,8 @@ router.get('/addAddress',userAuth, addressController.getAddAddressPage);
 router.post('/address/add',userAuth, addressController.addAddress);
 router.get('/addresses',userAuth, addressController.loadAddresses);
 router.delete('/deleteAddress/:index', userAuth, addressController.deleteAddress);
+router.get('/editAddress/:index', userAuth, addressController.editAddress);
+router.put('/updateAddress', userAuth, addressController.updateAddress);
 
 //cart management
 
@@ -83,6 +86,13 @@ router.delete('/removeCart/:itemId', userAuth, cartController.removeCartItem);
 
 router.get('/checkout', userAuth, checkoutController.getCheckout);
 router.post('/process-checkout', userAuth, checkoutController.processCheckout);
+
+//order management
+
+router.get('/orders', userAuth, orderController.getUserOrders);
+router.get('/orders/:orderId', userAuth, orderController.getOrderDetails);
+router.post('/orders/create', userAuth, orderController.createOrder);
+router.post('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
 
 
 

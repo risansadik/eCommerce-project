@@ -158,7 +158,7 @@
 
                     <span class="field-label">Username</span>
                     <input type="text" class="edit-input" id="name" placeholder="Enter username" name="name"
-                        value="<%=name%>">
+                        value="<%=name || ''%>" required>
 
                     <%if(!isGoogle){%>
 
@@ -184,102 +184,153 @@
         </div>
 
         <script>
-
-            window.onpageshow = function (event) {
-                if (event.persisted) {
-                    window.location.reload();
-                }
-            };
-
-
-            if (window.performance && window.performance.navigation.type === 2) {
-                window.location.href = '/userProfile';
-            }
-            document.getElementById('update-user').addEventListener('submit', async function (e) {
-                e.preventDefault();
-
-                const userId = "<%=id%>";
-                const formData = {
-                    name: document.getElementById('name').value,
-                    phone: document.getElementById('phone')?.value || '',
-                    password: document.getElementById('pass')?.value || '',
-                    cPassword: document.getElementById('cPass')?.value || ''
+            document.addEventListener('DOMContentLoaded', function () {
+                // Handle page reload and navigation
+                window.onpageshow = function (event) {
+                    if (event.persisted) {
+                        window.location.reload();
+                    }
                 };
 
-
-                if (formData.password || formData.cPassword) {
-                    if (formData.password !== formData.cPassword) {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Password Mismatch',
-                            text: 'Passwords do not match!',
-                            confirmButtonColor: '#2c5840'
-                        });
-                        return;
-                    }
-                    if (formData.password.length < 6) {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid Password',
-                            text: 'Password must be at least 6 characters long',
-                            confirmButtonColor: '#2c5840'
-                        });
-                        return;
-                    }
+                if (window.performance && window.performance.navigation.type === 2) {
+                    window.location.href = '/userProfile';
                 }
 
-                // Show loading state
-                Swal.fire({
-                    title: 'Updating Profile',
-                    text: 'Please wait...',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
+                const form = document.getElementById('update-user');
+                if (!form) return;
+
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const userId = "<%=id%>";
+                    const nameInput = document.getElementById('name');
+
+                    
+                    const phoneInput = document.getElementById('phone');
+                    const passwordInput = document.getElementById('pass');
+                    const confirmPasswordInput = document.getElementById('cPass');
+
+                 
+                    if (!nameInput || !nameInput.value.trim()) {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Input',
+                            text: 'Username cannot be blank',
+                            confirmButtonColor: '#2c5840'
+                        });
+                        if (nameInput) nameInput.focus();
+                        return;
+                    }
+
+                    
+                    if (phoneInput) {
+                        if (!phoneInput.value.trim()) {
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid Input',
+                                text: 'Mobile number cannot be blank',
+                                confirmButtonColor: '#2c5840'
+                            });
+                            phoneInput.focus();
+                            return;
+                        }
+
+                        if (phoneInput.value.trim().length < 10) {
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid Phone Number',
+                                text: 'Mobile number must be at least 10 digits',
+                                confirmButtonColor: '#2c5840'
+                            });
+                            phoneInput.focus();
+                            return;
+                        }
+                    }
+
+                    
+                    if (passwordInput && confirmPasswordInput) {
+                        if (passwordInput.value || confirmPasswordInput.value) {
+                            if (passwordInput.value !== confirmPasswordInput.value) {
+                                await Swal.fire({
+                                    icon: 'error',
+                                    title: 'Password Mismatch',
+                                    text: 'Passwords do not match!',
+                                    confirmButtonColor: '#2c5840'
+                                });
+                                passwordInput.focus();
+                                return;
+                            }
+
+                            if (passwordInput.value.length < 6) {
+                                await Swal.fire({
+                                    icon: 'error',
+                                    title: 'Invalid Password',
+                                    text: 'Password must be at least 6 characters long',
+                                    confirmButtonColor: '#2c5840'
+                                });
+                                passwordInput.focus();
+                                return;
+                            }
+                        }
+                    }
+
+                    
+                    const formData = {
+                        name: nameInput.value.trim(),
+                        phone: phoneInput ? phoneInput.value.trim() : '',
+                        password: passwordInput && passwordInput.value ? passwordInput.value.trim() : '',
+                        cPassword: confirmPasswordInput && confirmPasswordInput.value ? confirmPasswordInput.value.trim() : ''
+                    };
+
+                 
+                    Swal.fire({
+                        title: 'Updating Profile',
+                        text: 'Please wait...',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    try {
+                        const response = await fetch(`/edit-userProfile/${userId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Profile updated successfully',
+                                confirmButtonColor: '#2c5840'
+                            });
+                            window.history.replaceState(null, '', '/userProfile');
+                            window.location.replace('/userProfile');
+                        } else {
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Update Failed',
+                                text: data.message || 'Error updating profile',
+                                confirmButtonColor: '#2c5840'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error updating profile:', error);
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating your profile',
+                            confirmButtonColor: '#2c5840'
+                        });
                     }
                 });
-
-                try {
-                    const response = await fetch(`/edit-userProfile/${userId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Profile updated successfully',
-                            confirmButtonColor: '#2c5840'
-                        });
-                        window.history.replaceState(null, '', '/userProfile');
-                        window.location.replace('/userProfile');
-                    } else {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Update Failed',
-                            text: data.message || 'Error updating profile',
-                            confirmButtonColor: '#2c5840'
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error updating profile:', error);
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred while updating your profile',
-                        confirmButtonColor: '#2c5840'
-                    });
-                }
-            });
-
-            window.addEventListener('unload', function () {
-                window.history.replaceState(null, '', '/userProfile');
             });
         </script>
 

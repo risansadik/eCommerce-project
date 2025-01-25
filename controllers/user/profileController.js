@@ -193,13 +193,15 @@ const loadDashboard = async (req, res) => {
 
        if(user){
 
+        const isGoogle = !!req.user.googleId
+
         res.render('dashboard',{
 
             id:user._id,
             name:user.name,
             email:user.email,
             phone:user.phone,
-            isGoogle:req.user
+            isGoogle:isGoogle
             
         })
 
@@ -237,7 +239,7 @@ const getUserEditPage = async (req,res) => {
                 user:user,
                 name:user.name,
                 phone:user.phone,
-                isGoogle:req.user
+                isGoogle:req.user.googleId
             });
         }
        
