@@ -6,7 +6,7 @@ const customerInfo = async (req, res) => {
         const limit = 4;
         const search = req.query.search ? req.query.search.trim() : "";
 
-        // Case-insensitive search query
+   
         const searchQuery = {
             isAdmin: false,
             $or: [
@@ -16,16 +16,15 @@ const customerInfo = async (req, res) => {
             ]
         };
 
-        // Get users with search and pagination
+     
         const data = await User.find(searchQuery)
             .limit(limit)
             .skip((page - 1) * limit);
 
-        // Get total count for pagination
         const count = await User.countDocuments(searchQuery);
         const totalPages = Math.ceil(count / limit);
 
-        // If page exceeds total pages, redirect to last page
+
         if (page > totalPages && totalPages > 0) {
             return res.redirect(`/admin/users?page=${totalPages}&search=${search}`);
         }
@@ -43,33 +42,25 @@ const customerInfo = async (req, res) => {
     }
 };
 
-const customerBlocked = async (req,res) => {
-
+const customerBlocked = async (req, res) => {
     try {
-        
         let id = req.query.id;
-        await User.updateOne({_id : id},{$set : {isBlocked : true}});
-        res.redirect('/admin/users')
+        await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        res.redirect('/admin/users?blockSuccess=true');
     } catch (error) {
-
         res.redirect('/admin/pageError');
-        
     }
-}
-
-const customerUnblocked = async (req,res) => {
-
+};
+const customerUnblocked = async (req, res) => {
     try {
         let id = req.query.id;
-        await User.updateOne({_id : id},{$set : {isBlocked:false}});
-        res.redirect('/admin/users')
-
+        await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
+       
+        res.redirect('/admin/users?unblockSuccess=true');
     } catch (error) {
-
-        res.redirect('/admin/pageError')
-        
+        res.redirect('/admin/pageError');
     }
-}
+};
 
 module.exports = { 
     customerInfo,

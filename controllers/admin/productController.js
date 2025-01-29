@@ -28,22 +28,20 @@ const getProductAddPage = async (req, res) => {
 }
 const addProducts = async (req, res) => {
     try {
-        // Log the entire request body for debugging
-        console.log('Full request body:', req.body);
-        console.log('Uploaded files:', req.files);
-
-        // Extract sizes and quantities, checking both array notation and regular names
+      
+     
+       
         const sizes = req.body.sizes || req.body['sizes[]'];
         const quantities = req.body.quantities || req.body['quantities[]'];
 
         console.log('Received sizes:', sizes);
         console.log('Received quantities:', quantities);
 
-        // Ensure sizes and quantities are always arrays
+        
         const sizeArray = Array.isArray(sizes) ? sizes : [sizes];
         const quantityArray = Array.isArray(quantities) ? quantities : [quantities];
 
-        // Create size variants array with better validation
+      
         const sizeVariants = sizeArray
             .map((size, index) => {
                 const sizeValue = size ? size.toString().trim() : '';
@@ -58,7 +56,7 @@ const addProducts = async (req, res) => {
 
         console.log('Processed size variants:', sizeVariants);
 
-        // Validate size variants
+    
         if (!sizeVariants || sizeVariants.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -66,7 +64,7 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // Calculate total quantity
+        
         const totalQuantity = sizeVariants.reduce((sum, variant) => sum + variant.quantity, 0);
 
         if (!req.files || req.files.length === 0) {
@@ -76,10 +74,9 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // Create array of image paths
+      
         const imagePaths = req.files.map(file => file.filename);
 
-        // Create new product
         const newProduct = new Product({
             productName: req.body.productName,
             description: req.body.description,
@@ -87,7 +84,7 @@ const addProducts = async (req, res) => {
             regularPrice: parseFloat(req.body.regularPrice),
             salePrice: parseFloat(req.body.salePrice),
             sizeVariants: sizeVariants,
-            productImage: imagePaths, // Using productImage consistently
+            productImage: imagePaths,
             status: totalQuantity > 0 ? 'Available' : 'out of stock',
             displayLocation: req.body.displayLocation || 'shop',
         });
@@ -166,7 +163,7 @@ const addProductOffer = async (req, res) => {
     try {
         const { productId, percentage } = req.body;
 
-        // Input validation
+        
         if (!productId || !percentage || percentage < 0 || percentage > 100) {
             return res.status(400).json({
                 status: false,
@@ -190,7 +187,7 @@ const addProductOffer = async (req, res) => {
             });
         }
 
-        // Check if category offer is better
+        
         if (findCategory.categoryOffer > percentage) {
             return res.status(400).json({
                 status: false,
@@ -198,11 +195,11 @@ const addProductOffer = async (req, res) => {
             });
         }
 
-        // Calculate new sale price
+       
         const discountAmount = Math.floor(findProduct.regularPrice * (percentage / 100));
         const newSalePrice = findProduct.regularPrice - discountAmount;
 
-        // Update product
+        
         findProduct.salePrice = newSalePrice;
         findProduct.productOffer = parseInt(percentage);
         await findProduct.save();
@@ -241,7 +238,7 @@ const removeProductOffer = async (req, res) => {
             });
         }
 
-        // Reset price to regular price if offer exists
+        
         if (findProduct.productOffer > 0) {
             findProduct.salePrice = findProduct.regularPrice;
             findProduct.productOffer = 0;
@@ -319,7 +316,7 @@ const editProduct = async (req, res) => {
             quantities: data['quantities[]']
         });
 
-        // Find the product first to ensure it exists
+        
         const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({
@@ -328,7 +325,7 @@ const editProduct = async (req, res) => {
             });
         }
 
-        // Check for duplicate product name
+       
         const existingProduct = await Product.findOne({
             productName: data.productName,
             _id: { $ne: id }
@@ -341,7 +338,7 @@ const editProduct = async (req, res) => {
             });
         }
 
-        // Find category by name and get its ID
+        
         const category = await Category.findOne({ name: data.category });
         if (!category) {
             return res.json({
@@ -350,7 +347,6 @@ const editProduct = async (req, res) => {
             });
         }
 
-        // Validate numeric fields
         const regularPrice = parseFloat(data.regularPrice);
         const salePrice = parseFloat(data.salePrice);
 
@@ -368,15 +364,14 @@ const editProduct = async (req, res) => {
             });
         }
 
-        // Process size variants
         let sizes = data.sizes;        
         let quantities = data.quantities;
 
-        // Ensure arrays even if single value
+     
         console.log("Received sizes:", sizes);
         console.log("Received quantities:", quantities);
         
-        // Ensure arrays even if single value
+       
         if (!Array.isArray(sizes)) {
             sizes = sizes ? [sizes] : [];
         }
@@ -384,7 +379,7 @@ const editProduct = async (req, res) => {
             quantities = quantities ? [quantities] : [];
         }
         
-        // Create size variants array
+        
         const sizeVariants = sizes.map((size, index) => {
             if (!size || size.trim() === '') {
                 throw new Error('Size cannot be empty');
@@ -399,7 +394,7 @@ const editProduct = async (req, res) => {
             };
         });
 
-        // Calculate total quantity
+      
         const totalQuantity = sizeVariants.reduce((sum, variant) => sum + variant.quantity, 0);
 
         const updateFields = {
@@ -413,7 +408,7 @@ const editProduct = async (req, res) => {
             displayLocation: data.displayLocation || product.displayLocation,
         };
 
-        // Handle image updates
+   
         if (req.files && req.files.length > 0) {
             const images = [];
             for (const file of req.files) {
@@ -426,7 +421,7 @@ const editProduct = async (req, res) => {
             updateFields.productImage = [...product.productImage, ...images];
         }
 
-        // Update the product with validation
+        
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
             updateFields,
@@ -457,13 +452,13 @@ const deleteSingleImage = async (req, res) => {
     try {
         const { imageNameToServer, productIdToServer } = req.body;
 
-        // Remove image from product document
+        
         await Product.findByIdAndUpdate(
             productIdToServer,
             { $pull: { productImage: imageNameToServer } }
         );
 
-        // Delete physical file
+      
         const imagePath = path.join("public", "uploads", "product-images", imageNameToServer);
         if (fs.existsSync(imagePath)) {
             fs.unlinkSync(imagePath);

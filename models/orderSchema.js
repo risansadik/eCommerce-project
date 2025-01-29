@@ -36,7 +36,12 @@ const orderSchema = new Schema({
         },
         price: {
             type: Number,
-            default: 0
+            required:true
+        },
+        status: {
+            type: String,
+            enum: ['Active', 'Cancelled'],
+            default: 'Active'
         }
     }],
     totalPrice: {
@@ -56,19 +61,102 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        required: true,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
+        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+        default: 'Pending'
     },
     createdOn: {
         type: Date,
         default: Date.now,
-        required: true
     },
     couponApplied: {
         type: Boolean,
         default: false
-    }
+    },
 })
+
+orderSchema.pre('find', function(next) {
+    console.log('Finding order with query:', this.getQuery());
+    next();
+});
+
+orderSchema.pre('findOne', function(next) {
+    console.log('Finding one order with query:', this.getQuery());
+    next();
+});
+
+orderSchema.methods.recalculateTotals = function() {
+    console.log('Starting recalculation...');
+    
+    // Validate and normalize all items first
+    const normalizedItems = this.orderedItems.map((item, index) => {
+        // Ensure numeric values
+        const basePrice = Number(item.price/item.quantity); // This should be the price per unit
+        const quantity = Number(item.quantity);
+        
+        if (isNaN(basePrice) || isNaN(quantity)) {
+            throw new Error(`Invalid numeric values at index ${index}`);
+        }
+
+      
+        const subtotal = Number((basePrice * quantity).toFixed(2));
+        
+        return {
+            ...item.toObject(),
+            price: basePrice,   
+            quantity,
+            subtotal
+        };
+    });
+
+   
+    console.log('Normalized items:', normalizedItems.map(item => ({
+        pricePerUnit: item.price,
+        quantity: item.quantity,
+        status: item.status,
+        subtotal: item.subtotal
+    })));
+
+  
+    const activeItems = normalizedItems.filter(item => item.status !== 'Cancelled');
+
+   
+    this.totalPrice = Number(
+        activeItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2)
+    );
+
+  
+    const discount = Number(this.discount || 0);
+    this.finalAmount = Number((this.totalPrice - discount).toFixed(2));
+
+    // Handle fully cancelled orders
+    if (activeItems.length === 0) {
+        console.log('Order fully cancelled - resetting totals');
+        this.status = 'Cancelled';
+        this.totalPrice = 0;
+        this.finalAmount = 0;
+        this.discount = 0;
+    }
+
+    console.log('Final calculation:', {
+        activeItemCount: activeItems.length,
+        totalPrice: this.totalPrice,
+        discount,
+        finalAmount: this.finalAmount,
+        status: this.status
+    });
+
+    return this;
+};
+
+// Pre-save middleware
+orderSchema.pre('save', function(next) {
+    try {
+        this.recalculateTotals();
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 const Order = mongoose.model("Order", orderSchema);
 

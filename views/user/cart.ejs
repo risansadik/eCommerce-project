@@ -16,6 +16,21 @@
 	<link href="css/style.css" rel="stylesheet">
 	<title>Cart </title>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script>
+		// Show message if it exists in the server response
+		<% if (locals.message) { %>
+			document.addEventListener('DOMContentLoaded', () => {
+				Swal.fire({
+					icon: 'warning',
+					title: 'Cart Updated',
+					text: '<%= message %>',
+					confirmButtonColor: '#4A665B'
+				});
+			});
+		<% } %>
+
+
+	</script>
 
 	<style>
 		.dropdown {
@@ -303,7 +318,7 @@
 					</ul>
 				</div>
 
-				
+
 
 			</div>
 
@@ -314,65 +329,77 @@
 	<!-- End Footer Section -->
 
 	<script>
-		async function updateQuantity(itemId, newQuantity) {
 
-			if (newQuantity < 1) {
-				Swal.fire({
-					icon: 'warning',
-					title: 'Invalid Quantity',
-					text: 'Quantity cannot be less than 1',
-					confirmButtonColor: '#4A665B'
-				}).then((result) => {
-					if (result.isConfirmed) {
-						location.reload();
-					}
-				});
-				return;
-			}
 
-			if (newQuantity > 5) {
-				Swal.fire({
-					icon: 'warning',
-					title: 'Quantity Limit',
-					text: 'Maximum 5 items allowed per product',
-					confirmButtonColor: '#4A665B'
-				}).then((result) => {
-					if (result.isConfirmed) {
-						location.reload();
-					}
-				});
-				return;
-			}
+			async function updateQuantity(itemId, newQuantity) {
 
-			try {
-				const response = await fetch('/updateCart', {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ itemId, quantity: newQuantity })
-				});
-
-				const data = await response.json();
-
-				if (!response.ok) {
-					throw new Error(data.message || 'Error updating quantity');
+				if (newQuantity < 1) {
+					Swal.fire({
+						icon: 'warning',
+						title: 'Invalid Quantity',
+						text: 'Quantity cannot be less than 1',
+						confirmButtonColor: '#4A665B'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							location.reload();
+						}
+					});
+					return;
 				}
 
-				if (data.success) {
-					location.reload();
-				} else {
-					throw new Error(data.message || 'Error updating quantity');
+				if (newQuantity > 5) {
+					Swal.fire({
+						icon: 'warning',
+						title: 'Quantity Limit',
+						text: 'Maximum 5 items allowed per product',
+						confirmButtonColor: '#4A665B'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							location.reload();
+						}
+					});
+					return;
 				}
-			} catch (error) {
-				Swal.fire({
-					icon: 'error',
-					title: 'Error',
-					text: error.message || 'Error updating quantity',
-					confirmButtonColor: '#4A665B'
-				});
+
+				try {
+					const response = await fetch('/updateCart', {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ itemId, quantity: newQuantity })
+					});
+
+					const data = await response.json();
+
+					if (response.status === 400) {
+						await Swal.fire({
+							icon: 'warning',
+							title: 'Stock Update',
+							text: data.message,
+							confirmButtonColor: '#4A665B',
+							timer: 1000,
+							timerProgressBar: true
+						});
+
+						location.reload();
+					}
+
+					if (data.success) {
+						location.reload();
+					} else {
+						throw new Error(data.message || 'Error updating quantity');
+					}
+				} catch (error) {
+					Swal.fire({
+						icon: 'error',
+						title: 'Error',
+						text: error.message || 'Error updating quantity',
+						confirmButtonColor: '#4A665B'
+					});
+				}
 			}
-		}
+
 		async function removeCartItem(itemId) {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
@@ -419,6 +446,40 @@
 			}
 		}
 	</script>
+	<script>
+		// Function to check cart status on page load
+		async function checkCartStatus() {
+			try {
+				const response = await fetch('/cart', {
+					headers: {
+						'Accept': 'application/json'
+					}
+				});
+				const data = await response.json();
+
+				if (data.message) {
+					Swal.fire({
+						icon: 'warning',
+						title: 'Cart Updated',
+						text: data.message,
+						confirmButtonColor: '#4A665B'
+					}).then(() => {
+						if (data.redirect) {
+							window.location.href = data.redirect;
+						} else {
+							location.reload();
+						}
+					});
+				}
+			} catch (error) {
+				console.error('Error checking cart status:', error);
+			}
+		}
+
+		// Run the check when page loads
+		document.addEventListener('DOMContentLoaded', checkCartStatus);
+	</script>
+
 	<script src="js/bootstrap.bundle.min.js"></script>
 	<script src="js/tiny-slider.js"></script>
 	<script src="js/custom.js"></script>

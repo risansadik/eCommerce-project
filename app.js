@@ -16,6 +16,18 @@ db();
 app.use(nocache());
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+    // For AJAX requests, ensure we never try to render views
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+        res.renderJSON = res.json;  // Store original json method
+        res.json = function(data) {
+            res.set('Content-Type', 'application/json');
+            return res.renderJSON(data);
+        };
+    }
+    next();
+});
 app.use(express.urlencoded({extended:true}));
 app.use(session({
     secret:process.env.SESSION_SECRET,
@@ -52,6 +64,11 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
 });
 
 app.set('view engine','ejs');

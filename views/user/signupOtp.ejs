@@ -212,27 +212,26 @@
         otp += input.value;
     });
 
-    // Send OTP to backend for verification via Fetch
+    // Send OTP to backend for verification
     fetch('/verify-otp', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ otp: otp })  // OTP entered by the user
+        body: JSON.stringify({ otp: otp })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Show success message using SweetAlert
+            // Show success message and redirect to home
             Swal.fire({
                 icon: "success",
-                title: "OTP Verified",
-                text: "OTP verification successful! Redirecting to login page...",
+                title: "Success",
+                text: data.message,
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                // Redirect to login page after the success message
-                window.location.href = '/signin';  // Adjust to your login page URL
+                window.location.href = '/'; // Redirect to home page
             });
         } else {
             // Show error message
@@ -251,7 +250,7 @@
         });
     });
 
-    return false; // Prevent the form from submitting traditionally
+    return false; // Prevent form submission
 }
 
     </script>

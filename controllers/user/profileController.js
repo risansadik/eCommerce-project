@@ -8,7 +8,7 @@ function generateOtp() {
     const digits = "1234567890";
     let otp = "";
     for (let i = 0; i < 4; i++) {
-        otp += digits[Math.floor(Math.random() * digits.length)];  // Fixed: Access string by index
+        otp += digits[Math.floor(Math.random() * digits.length)];  
     }
     return otp;
 }
@@ -88,7 +88,7 @@ const forgotEmailValid = async (req, res) => {
                 req.session.userOtp = otp;
                 req.session.email = email;
                 console.log(`OTP is ${otp}`)
-                return res.render('forgotPass-otp');  // Added return statement
+                return res.render('forgotPass-otp');  
             } else {
                 return res.status(500).json({
                     success: false,

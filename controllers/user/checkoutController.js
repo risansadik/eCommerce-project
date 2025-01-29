@@ -2,28 +2,39 @@ const Cart = require('../../models/cartSchema');
 const Address = require('../../models/addressSchema');
 const Product = require('../../models/productSchema');
 const Order = require('../../models/orderSchema');
-const User = require('../../models/userSchema')
+const User = require('../../models/userSchema');
+const Category = require('../../models/categorySchema')
 
 const checkoutController = {
     getCheckout: async (req, res) => {
         try {
             const userId = req.user._id;
 
-            // Get cart with populated product details
+           
             const cart = await Cart.findOne({ userId })
-                .populate('items.productId', 'productName productImage salePrice status isBlocked');
+                .populate({
+                    path: 'items.productId',
+                    select: 'productName productImage salePrice status isBlocked category',
+                    populate: {
+                        path: 'category',
+                        select: 'isListed'
+                    }
+                });
 
             // Validate cart
             if (!cart || cart.items.length === 0) {
                 return res.redirect('/cart');
             }
 
-            // Check product availability and stock
             let hasStockIssue = false;
             let stockMessage = '';
 
             for (const item of cart.items) {
-                if (!item.productId || item.productId.isBlocked || item.productId.status !== 'Available') {
+              
+                if (!item.productId || 
+                    item.productId.isBlocked || 
+                    item.productId.status !== 'Available' || 
+                    !item.productId.category?.isListed) {
                     hasStockIssue = true;
                     stockMessage = 'Some items in your cart are no longer available';
                     break;
@@ -42,10 +53,8 @@ const checkoutController = {
                 return res.redirect('/cart');
             }
 
-            // Get user's addresses
             const userAddresses = await Address.findOne({ userId });
 
-            // Calculate totals
             const cartTotal = cart.items.reduce((total, item) => total + item.totalPrice, 0);
 
             res.render('checkout', {
@@ -67,7 +76,7 @@ const checkoutController = {
             const userId = req.user._id;
             const { addressId } = req.body;
 
-            // Validate address
+           
             const userAddress = await Address.findOne({
                 userId,
                 'address._id': addressId
@@ -80,7 +89,7 @@ const checkoutController = {
                 });
             }
 
-            // Get and validate cart
+            
             const cart = await Cart.findOne({ userId })
                 .populate('items.productId');
 
@@ -91,7 +100,7 @@ const checkoutController = {
                 });
             }
 
-            // Validate products and stock
+            
             for (const item of cart.items) {
                 const product = await Product.findById(item.productId);
 
@@ -111,7 +120,7 @@ const checkoutController = {
                 }
             }
 
-            // Create order using createOrder function
+          
             const orderData = {
                 orderedItems: cart.items.map(item => ({
                     product: item.productId._id,
@@ -130,7 +139,7 @@ const checkoutController = {
             const order = new Order(orderData);
             await order.save();
 
-            // Update product quantities
+            
             for (const item of cart.items) {
                 await Product.updateOne(
                     {
@@ -143,12 +152,12 @@ const checkoutController = {
                 );
             }
 
-            // Add order to user's order history
+           
             await User.findByIdAndUpdate(userId, {
                 $push: { orderHistory: order._id }
             });
 
-            // Clear the cart
+            
             await Cart.findByIdAndDelete(cart._id);
 
             res.status(200).json({

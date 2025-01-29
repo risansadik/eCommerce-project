@@ -357,6 +357,108 @@
             font-size: 0.875rem;
             margin-top: 0.25rem;
         }
+
+        .related-products {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .related-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4A665B;
+            margin-bottom: 1.5rem;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .related-product-card {
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .related-product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .related-image-container {
+            aspect-ratio: 1;
+            overflow: hidden;
+        }
+
+        .related-product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .related-product-card:hover .related-product-image {
+            transform: scale(1.05);
+        }
+
+        .related-product-info {
+            padding: 1rem;
+        }
+
+        .related-product-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .related-product-price {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .related-original-price {
+            color: #6b7280;
+            text-decoration: line-through;
+            font-size: 0.875rem;
+        }
+
+        .related-sale-price {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        @media (max-width: 768px) {
+            .related-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .related-product-info {
+                padding: 0.75rem;
+            }
+
+            .related-product-title {
+                font-size: 0.875rem;
+            }
+
+            .related-sale-price {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 
@@ -492,8 +594,38 @@
                         </div>
                     </div>
                 </div>
+
+
             </div>
         </div>
+
+        <div class="related-products">
+            <h2 class="related-title">Related Products</h2>
+            <div class="related-grid">
+                <% relatedProducts.forEach(product=> { %>
+                    <div class="related-product-card">
+                        <a href="/productDetails?id=<%= product._id %>" class="product-link">
+                            <div class="related-image-container">
+                                <% if (product.productImage && product.productImage.length> 0) { %>
+                                    <img src="/uploads/product-images/<%= product.productImage[0] %>"
+                                        alt="<%= product.productName %>" class="related-product-image">
+                                    <% } %>
+                            </div>
+                            <div class="related-product-info">
+                                <h3 class="related-product-title">
+                                    <%= product.productName %>
+                                </h3>
+                                <div class="related-product-price">
+                                    <span class="related-original-price">₹<%= product.regularPrice %></span>
+                                    <span class="related-sale-price">₹<%= product.salePrice %></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <% }); %>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -577,9 +709,9 @@
 
             if (!container || !mainImage || !zoomedImage) return;
 
-            const ZOOM_LEVEL = 2; // Reduced zoom level for smoother effect
+            const ZOOM_LEVEL = 2; // 
 
-            // Add transition for smoother zoom effect
+
             zoomedImage.style.transition = 'transform 0.1s ease-out';
 
             let isZoomed = false;
@@ -592,11 +724,11 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Calculate zoom position as percentages
+
                 const xPercent = (x / rect.width) * 100;
                 const yPercent = (y / rect.height) * 100;
 
-                // Apply transform with easing
+
                 zoomedImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
                 zoomedImage.style.transform = `scale(${ZOOM_LEVEL})`;
             }
@@ -610,7 +742,7 @@
                 zoomedImage.classList.add('active');
                 updateZoom(touch);
 
-                // Auto-disable zoom after 5 seconds of touch
+
                 clearTimeout(touchTimeout);
                 touchTimeout = setTimeout(() => {
                     isZoomed = false;
@@ -855,6 +987,9 @@
                     });
             };
         });
+    
+
+        document.addEventListener('DOMContentLoaded', fetchProductDetails);
     </script>
 </body>
 

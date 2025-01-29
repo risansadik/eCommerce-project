@@ -265,14 +265,14 @@
             onsubmit="return false">
             <div class="card">
                 <div class="mb-4">
-                    <label for="product_name" class="form-label">Product Name</label>
+                    <label for="product_name" class="form-label text-white">Product Name</label>
                     <input type="text" name="productName" value="<%=product.productName%>" class="form-control"
                         id="product_name">
                     <div id="productName-error" class="error-message"></div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Full description</label>
+                    <label class="form-label text-white">Full description</label>
                     <input name="descriptionData" value="<%=product.description%>" class="form-control" rows="4">
                     <div id="description-error" class="error-message"></div>
                 </div>
@@ -280,7 +280,7 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="mb-4">
-                            <label class="form-label">Regular price</label>
+                            <label class="form-label text-white">Regular price</label>
                             <input placeholder="$" name="regularPrice" type="text" value="<%=product.regularPrice%>"
                                 class="form-control">
                             <div id="regularPrice-error" class="error-message"></div>
@@ -288,7 +288,7 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="mb-4">
-                            <label class="form-label">Sale price</label>
+                            <label class="form-label text-white">Sale price</label>
                             <input name="salePrice" type="text" value="<%=product.salePrice%>" class="form-control">
                             <div id="salePrice-error" class="error-message"></div>
                         </div>
@@ -297,7 +297,7 @@
 
                 <!-- New Size Variants Section -->
                 <div class="size-variants-container">
-                    <label class="form-label">Size Variants</label>
+                    <label class="form-label text-white">Size Variants</label>
                     <div id="sizeVariants">
                         <% if (product.sizeVariants && product.sizeVariants.length> 0) { %>
                             <% product.sizeVariants.forEach((variant, index)=> { %>
@@ -326,7 +326,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Category</label>
+                    <label class="form-label text-white">Category</label>
                     <select class="form-control" name="category">
 
                         <%for(let i=0; i < cat.length; i++) {%>
@@ -340,7 +340,7 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header text-white">
                         <h4>Product Images</h4>
                     </div>
 
@@ -412,7 +412,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="displayLocation">Display Location</label>
+                    <label for="displayLocation" class="text-white">Display Location</label>
                     <select name="displayLocation" id="displayLocation" class="form-control" required>
                         <option value="shop">Shop Only</option>
                         <option value="home">Home Only</option>

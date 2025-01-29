@@ -85,7 +85,7 @@ const deleteAddress = async (req, res) => {
         const userId = req.session.user;
         const addressIndex = parseInt(req.params.index);
 
-        // Input validation
+       
         if (!userId) {
             return res.status(401).json({
                 success: false,
@@ -100,7 +100,6 @@ const deleteAddress = async (req, res) => {
             });
         }
 
-        // Find the user's address document
         const userAddress = await Address.findOne({ userId: userId });
 
         if (!userAddress) {
@@ -117,7 +116,7 @@ const deleteAddress = async (req, res) => {
             });
         }
 
-        // Remove the address and save
+       
         userAddress.address.splice(addressIndex, 1);
         await userAddress.save();
 
@@ -141,14 +140,14 @@ const editAddress = async (req, res) => {
         const userId = req.session.user;
         const addressIndex = parseInt(req.params.index);
 
-        // Input validation
+       
         if (!userId) {
             return res.status(401).render('edit-address', { 
                 error: 'User not authenticated' 
             });
         }
 
-        // Find the user's address document
+       
         const userAddress = await Address.findOne({ userId: userId });
 
         if (!userAddress) {
@@ -163,7 +162,7 @@ const editAddress = async (req, res) => {
             });
         }
 
-        // Render edit address page with existing address data
+        
         res.render('edit-address', {
             addressType: userAddress.address[addressIndex].addressType,
             name: userAddress.address[addressIndex].name,
@@ -192,7 +191,7 @@ const updateAddress = async (req, res) => {
         const userId = req.session.user;
         const addressIndex = parseInt(req.body.addressIndex);
 
-        // Input validation
+        
         if (!userId) {
             return res.status(401).json({
                 success: false,
@@ -200,7 +199,7 @@ const updateAddress = async (req, res) => {
             });
         }
 
-        // Find the user's address document
+        
         const userAddress = await Address.findOne({ userId: userId });
 
         if (!userAddress) {
@@ -217,10 +216,10 @@ const updateAddress = async (req, res) => {
             });
         }
 
-        // Log current address before update
+      
         console.log('Current address before update:', userAddress.address[addressIndex]);
 
-        // Update the address
+       
         userAddress.address[addressIndex] = {
             addressType: req.body.addressType,
             name: req.body.name,
@@ -232,7 +231,7 @@ const updateAddress = async (req, res) => {
             altPhone: req.body.alternativePhone
         };
 
-        // Log address after update
+       
         console.log('Address after update:', userAddress.address[addressIndex]);
 
         await userAddress.save();

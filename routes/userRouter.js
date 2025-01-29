@@ -7,17 +7,17 @@ const cartController = require('../controllers/user/cartController');
 const checkoutController = require('../controllers/user/checkoutController');
 const orderController = require('../controllers/user/orderController')
 const passport = require('passport');
-const { blockAuth,userAuth , adminAuth} = require('../middlewares/auth');
+const { blockAuth,userAuth , adminAuth , redirectIfAuthenticated} = require('../middlewares/auth');
 
 
 router.get('/', blockAuth, userController.loadHomePage);
 router.get('/pageNotFound', userController.pageNotFound);
-router.get('/signin', userController.loadSignIn);
-router.post('/signin', userController.signin);
-router.get('/signup', userController.loadSignUp)
-router.post('/signup', userController.signup);
-router.post('/verify-otp', userController.verifyOtp);
-router.post('/resend-otp', userController.resendOtp);
+router.get('/signin',redirectIfAuthenticated, userController.loadSignIn);
+router.post('/signin',redirectIfAuthenticated, userController.signin);
+router.get('/signup',redirectIfAuthenticated, userController.loadSignUp)
+router.post('/signup',redirectIfAuthenticated, userController.signup);
+router.post('/verify-otp',redirectIfAuthenticated, userController.verifyOtp);
+router.post('/resend-otp',redirectIfAuthenticated, userController.resendOtp);
 router.get('/logout', userController.logout)
 router.get('/shop', blockAuth,userController.getShopPage);
 router.get('/productDetails',blockAuth, userController.getProductDetails);
@@ -90,9 +90,10 @@ router.post('/process-checkout', userAuth, checkoutController.processCheckout);
 //order management
 
 router.get('/orders', userAuth, orderController.getUserOrders);
-router.get('/orders/:orderId', userAuth, orderController.getOrderDetails);
 router.post('/orders/create', userAuth, orderController.createOrder);
 router.post('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
+router.post('/orders/:orderId/items/:itemId/cancel',userAuth, orderController.cancelOrderItem);
+router.get('/orders/:orderId', userAuth, orderController.getOrderDetails);
 
 
 

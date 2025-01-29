@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --bg-primary: #1a1a1a;
@@ -206,15 +207,33 @@
     <div class="layout">
         <nav class="sidebar">
             <ul class="sidebar-menu">
-                <a style="text-decoration: none;" href="/admin"><li>Dashboard</li></a>
-                <a style="text-decoration: none;" href=""><li>Customers</li></a>
-                <a style="text-decoration: none;" href=""><li>Category</li></a>
-                <a style="text-decoration: none;" href=""><li>Add product</li></a>
-                <a style="text-decoration: none;" href=""><li>Products</li></a>
-                <a style="text-decoration: none;" href=""><li>Coupon</li></a>
-                <a style="text-decoration: none;" href=""><li>Banner</li></a>
-                <a style="text-decoration: none;" href=""><li>Add product</li></a>
-                <a style="text-decoration: none;" href=""><li class="active">Orders</li></a>
+                <a style="text-decoration: none;" href="/admin">
+                    <li>Dashboard</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li>Customers</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li>Category</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li>Add product</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li>Products</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li>Coupon</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li>Banner</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li>Add product</li>
+                </a>
+                <a style="text-decoration: none;" href="">
+                    <li class="active">Orders</li>
+                </a>
             </ul>
         </nav>
 
@@ -229,7 +248,7 @@
                         <div>
                             <select class="status-select"
                                 onchange="updateOrderStatus('<%= order.orderId %>', this.value)"
-                                <%=order.status==='Cancelled' ? 'disabled' : '' %>>
+                                <%=(order.status==='Cancelled' || order.status === 'Delivered') ? 'disabled' : '' %>>
                                 <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending
                                 </option>
                                 <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>
@@ -241,33 +260,38 @@
                                 <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>>Cancelled
                                 </option>
                             </select>
-                          
+
                         </div>
                     </div>
 
                     <table class="orders-table">
                         <tr>
                             <td class="customer-info">
-                                <strong>Customer:</strong> <%= order.address.name %><br>
-                                <strong>Address:</strong> 
-                                <%= `${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.pincode}` %><br>
-                                <strong>Contact:</strong> <%= order.address.phone %>
+                                <strong>Customer:</strong>
+                                <%= order.address.name %><br>
+                                    <strong>Address:</strong>
+                                    <%= `${order.address.street}, ${order.address.city}, ${order.address.state},
+                                        ${order.address.pincode}` %><br>
+                                        <strong>Contact:</strong>
+                                        <%= order.address.phone %>
                             </td>
                         </tr>
-                        <% order.orderedItems.forEach(item => { %>
+                        <% order.orderedItems.forEach(item=> { %>
                             <tr class="product-info">
                                 <td>
-                                    <strong>Product:</strong> <%= item.product.productName %><br>
-                                    <strong>Quantity:</strong> <%= item.quantity %> x ₹<%= item.price %>
+                                    <strong>Product:</strong>
+                                    <%= item.product.productName %><br>
+                                        <strong>Quantity:</strong>
+                                        <%= item.quantity %> x ₹<%= item.price %>
                                 </td>
                             </tr>
-                        <% }); %>
-                        <tr class="total-info">
-                            <td>
-                                <strong>Total Price:</strong> ₹<%= order.totalPrice %><br>
-                                <strong>Final Amount:</strong> ₹<%= order.finalAmount %>
-                            </td>
-                        </tr>
+                            <% }); %>
+                                <tr class="total-info">
+                                    <td>
+                                        <strong>Total Price:</strong> ₹<%= order.totalPrice %><br>
+                                            <strong>Final Amount:</strong> ₹<%= order.finalAmount %>
+                                    </td>
+                                </tr>
                     </table>
 
                     <div class="action-buttons" style="margin-top: 20px">
@@ -294,18 +318,43 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    alert('Order status updated successfully');
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'Order status updated successfully',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
                     location.reload();
                 } else {
-                    alert(data.message || 'Failed to update status');
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to update status',
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             } catch (error) {
-                alert('An error occurred while updating the status');
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred while updating the status',
+                    icon: 'error',
+                    confirmButtonColor: '#d33'
+                });
             }
         }
 
         async function cancelOrder(orderId) {
-            if (confirm('Are you sure you want to cancel this order?')) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, cancel it!'
+            });
+
+            if (result.isConfirmed) {
                 try {
                     const response = await fetch(`/admin/orders/${orderId}/cancel`, {
                         method: 'POST',
@@ -316,18 +365,33 @@
 
                     const data = await response.json();
                     if (data.success) {
-                        alert('Order cancelled successfully');
+                        await Swal.fire({
+                            title: 'Cancelled!',
+                            text: 'Order has been cancelled successfully',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6'
+                        });
                         location.reload();
                     } else {
-                        alert(data.message || 'Failed to cancel order');
+                        await Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Failed to cancel order',
+                            icon: 'error',
+                            confirmButtonColor: '#d33'
+                        });
                     }
                 } catch (error) {
-                    alert('An error occurred while cancelling the order');
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while cancelling the order',
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             }
         }
 
-        // Search functionality
+        // Search functionality remains the same
         document.querySelector('.search-bar').addEventListener('input', function (e) {
             const searchTerm = e.target.value.toLowerCase();
             const orderCards = document.querySelectorAll('.order-card');

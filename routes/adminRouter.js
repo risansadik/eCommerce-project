@@ -49,7 +49,6 @@ router.post('/editProduct/:id', adminAuth, uploads.array('images', 4), productCo
 router.post('/deleteImage', adminAuth, productController.deleteSingleImage);
 
 router.get('/orders',adminAuth,adminOrderController.getAllOrders);
-router.get('/orders/:orderId', adminAuth,adminOrderController.getOrderDetails);
 router.post('/orders/:orderId/status',adminAuth,adminOrderController. updateOrderStatus);
 router.post('/orders/:orderId/cancel', adminAuth,adminOrderController.cancelOrder);
 
