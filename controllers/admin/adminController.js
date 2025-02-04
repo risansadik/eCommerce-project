@@ -43,7 +43,7 @@ const login = async (req, res) => {
                 console.log('Session save error:', err);
                 return res.redirect('/admin/login');
             }
-            return res.redirect('/admin/');
+            return res.redirect('/admin/sales-report');
         });
 
     } catch (error) {
@@ -51,20 +51,7 @@ const login = async (req, res) => {
         return res.redirect('/admin/pageError');
     }
 };
-const loadDashboard = async (req,res) => {
 
-    if(req.session.admin){
-
-        try {
-            
-            res.render('admin-dashboard');
-        } catch (error) {
-
-            res.redirect('/pageError')
-            
-        }
-    }
-}
 
 const pageError = async (req,res) => {
 
@@ -91,7 +78,6 @@ module.exports = {
 
     loadLogin,
     login,
-    loadDashboard,
     pageError,
     logout
 }

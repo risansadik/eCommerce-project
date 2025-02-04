@@ -200,6 +200,35 @@
             padding: 12px;
             line-height: 1.6;
         }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--bg-secondary);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            background: none;
+            border: none;
+            font-size: 16px;
+        }
+
+        .tab.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 
@@ -207,101 +236,140 @@
     <div class="layout">
         <nav class="sidebar">
             <ul class="sidebar-menu">
-                <a style="text-decoration: none;" href="/admin">
+                <a style="text-decoration: none;" href="/admin/sales-report">
                     <li>Dashboard</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="/admin/users">
                     <li>Customers</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="/admin/category">
                     <li>Category</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="/admin/addProducts">
                     <li>Add product</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="/admin/products">
                     <li>Products</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="/admin/coupons">
                     <li>Coupon</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="#">
                     <li>Banner</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="/admin/addProducts">
                     <li>Add product</li>
                 </a>
-                <a style="text-decoration: none;" href="">
+                <a style="text-decoration: none;" href="/admin/orders">
                     <li class="active">Orders</li>
+                </a>
+                <a style="text-decoration: none;" href="/admin/logout">
+                    <li>Logout</li>
                 </a>
             </ul>
         </nav>
 
         <main class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('orders')">Orders</button>
+                <button class="tab" onclick="switchTab('returns')">Return Requests</button>
+            </div>
+        
             <input type="search" class="search-bar" placeholder="Search orders by ID or customer name">
-
-            <% orders.forEach(order=> { %>
-                <div class="order-card">
-                    <div class="order-header">
-                        <h3>Order #<%= order.orderId %>
-                        </h3>
-                        <div>
-                            <select class="status-select"
-                                onchange="updateOrderStatus('<%= order.orderId %>', this.value)"
-                                <%=(order.status==='Cancelled' || order.status === 'Delivered') ? 'disabled' : '' %>>
-                                <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending
-                                </option>
-                                <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>
-                                    >Processing</option>
-                                <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped
-                                </option>
-                                <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>>Delivered
-                                </option>
-                                <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>>Cancelled
-                                </option>
-                            </select>
-
+            
+            <!-- Orders Tab -->
+            <div id="orders-tab" class="tab-content active">
+                <% orders.forEach(order => { %>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Order #<%= order.orderId %></h3>
+                            <div>
+                                <select class="status-select"
+                                    onchange="updateOrderStatus('<%= order.orderId %>', this.value)"
+                                    <%= (order.status === 'Cancelled' || order.status === 'Delivered' || order.status === 'Return Request' || order.status === 'Returned') ? 'disabled' : '' %>>
+                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    <% if (order.status === 'Return Request') { %>
+                                        <option value="Return Request" selected>Return Request</option>
+                                    <% } %>
+                                    <% if (order.status === 'Returned') { %>
+                                        <option value="Returned" selected>Returned</option>
+                                    <% } %>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-
-                    <table class="orders-table">
-                        <tr>
-                            <td class="customer-info">
-                                <strong>Customer:</strong>
-                                <%= order.address.name %><br>
-                                    <strong>Address:</strong>
-                                    <%= `${order.address.street}, ${order.address.city}, ${order.address.state},
-                                        ${order.address.pincode}` %><br>
-                                        <strong>Contact:</strong>
-                                        <%= order.address.phone %>
-                            </td>
-                        </tr>
-                        <% order.orderedItems.forEach(item=> { %>
-                            <tr class="product-info">
-                                <td>
-                                    <strong>Product:</strong>
-                                    <%= item.product.productName %><br>
-                                        <strong>Quantity:</strong>
-                                        <%= item.quantity %> x ₹<%= item.price %>
+        
+                        <table class="orders-table">
+                            <tr>
+                                <td class="customer-info">
+                                    <strong>Customer:</strong> <%= order.address.name %><br>
+                                    <strong>Address:</strong> <%= `${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.pincode}` %><br>
+                                    <strong>Contact:</strong> <%= order.address.phone %>
                                 </td>
                             </tr>
-                            <% }); %>
-                                <tr class="total-info">
+                            <% order.orderedItems.forEach(item => { %>
+                                <tr class="product-info">
                                     <td>
-                                        <strong>Total Price:</strong> ₹<%= order.totalPrice %><br>
-                                            <strong>Final Amount:</strong> ₹<%= order.finalAmount %>
+                                        <strong>Product:</strong> <%= item.product.productName %><br>
+                                        <strong>Quantity:</strong> <%= item.quantity %> x ₹<%= item.price %>
                                     </td>
                                 </tr>
-                    </table>
-
-                    <div class="action-buttons" style="margin-top: 20px">
-                        <% if (!['Delivered', 'Cancelled' ].includes(order.status)) { %>
-                            <button class="btn btn-danger" onclick="cancelOrder('<%= order.orderId %>')">Cancel
-                                Order</button>
-                            <% } %>
+                            <% }); %>
+                            <tr class="total-info">
+                                <td>
+                                    <strong>Total Price:</strong> ₹<%= order.totalPrice %><br>
+                                    <strong>Final Amount:</strong> ₹<%= order.finalAmount %>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                </div>
                 <% }); %>
+            </div>
+        
+            <!-- Returns Tab -->
+            <div id="returns-tab" class="tab-content">
+                <% if (typeof returnRequests !== 'undefined' && returnRequests && returnRequests.length > 0) { %>
+                    <% returnRequests.forEach(function(request) { %>
+                        <div class="order-card">
+                            <div class="order-header">
+                                <h3>Return Request #<%= request._id %></h3>
+                                <div>
+                                    <span class="status-badge status-<%= request.returnStatus ? request.returnStatus.toLowerCase() : 'pending' %>">
+                                        <%= request.returnStatus || 'Pending' %>
+                                    </span>
+                                </div>
+                            </div>
+        
+                            <table class="orders-table">
+                                <tr>
+                                    <td class="customer-info">
+                                        <strong>Order ID:</strong> #<%= request.orderId ? request.orderId.orderId : 'N/A' %><br>
+                                        <strong>Customer:</strong> <%= request.userId ? request.userId.name : 'N/A' %><br>
+                                        <strong>Reason:</strong> <%= request.returnReason || 'N/A' %>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>Refund Amount:</strong> ₹<%= request.refundAmount || '0' %>
+                                    </td>
+                                </tr>
+                            </table>
+        
+                            <div class="action-buttons">
+                                <% if (request.returnStatus === 'Pending') { %>
+                                    <button onclick="approveReturnRequest('<%= request._id %>')" class="btn btn-primary">Approve</button>
+                                    <button onclick="rejectReturnRequest('<%= request._id %>')" class="btn btn-danger">Reject</button>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p>No return requests found.</p>
+                <% } %>
+            </div>
         </main>
     </div>
 
@@ -399,6 +467,114 @@
             orderCards.forEach(card => {
                 const orderText = card.textContent.toLowerCase();
                 card.style.display = orderText.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+
+        async function approveReturnRequest(returnId) {
+            try {
+                const response = await fetch(`/admin/returns/${returnId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'Return request approved successfully',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    location.reload();
+                } else {
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to approve return request',
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            } catch (error) {
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred while approving the return request',
+                    icon: 'error',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        }
+        async function rejectReturnRequest(returnId) {
+            try {
+                const response = await fetch(`/admin/returns/${returnId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'Return request rejected successfully',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    location.reload();
+                } else {
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to reject return request',
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            } catch (error) {
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred while rejecting the return request',
+                    icon: 'error',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        }
+
+        // Add tab switching function
+        function switchTab(tabName) {
+            // Update search bar placeholder
+            const searchBar = document.querySelector('.search-bar');
+            searchBar.placeholder = tabName === 'orders'
+                ? 'Search orders by ID or customer name'
+                : 'Search return requests by ID or customer name';
+
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Activate selected tab button
+            event.target.classList.add('active');
+        }
+
+        // Update search functionality to work with active tab
+        document.querySelector('.search-bar').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const activeTab = document.querySelector('.tab-content.active');
+            const cards = activeTab.querySelectorAll('.order-card');
+
+            cards.forEach(card => {
+                const cardText = card.textContent.toLowerCase();
+                card.style.display = cardText.includes(searchTerm) ? 'block' : 'none';
             });
         });
     </script>

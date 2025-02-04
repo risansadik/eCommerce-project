@@ -1,6 +1,7 @@
 const User = require('../../models/userSchema');
 const Category = require('../../models/categorySchema');
 const Product = require('../../models/productSchema');
+const Wishlist = require('../../models/wishlistSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
@@ -482,13 +483,22 @@ const getProductDetails = async (req, res) => {
         const renderData = {
             product: productData,
             relatedProducts: relatedProducts,
-            user: null
+            user: null,
+            isInWishlist: false  // Default value
         };
 
         if (user) {
             const userData = await User.findById(user);
             if (userData) {
                 renderData.user = userData;
+                
+                
+                const wishlist = await Wishlist.findOne({
+                    userId: user,
+                    'products.productId': productId
+                });
+                
+                renderData.isInWishlist = !!wishlist;
             }
         }
 
@@ -498,7 +508,6 @@ const getProductDetails = async (req, res) => {
         res.redirect('/shop');
     }
 };
-
 
 module.exports = {
     loadHomePage,

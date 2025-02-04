@@ -1,91 +1,106 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brossoc - Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Original styles for body, header, and sidebar */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        :root {
+            --primary-color: #3b7254;
+            --secondary-color: #f5f5f5;
+            --text-color: #333;
+        }
+
+        body {
+            background-color: #f0f0f0;
         }
 
         .header {
-            background-color: #437A59;
-            color: white;
-            padding: 15px 20px;
+            background-color: var(--primary-color);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: white;
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 1.5rem;
             font-weight: bold;
         }
 
-        .nav-items {
+        .nav-menu {
             display: flex;
-            gap: 20px;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
         }
 
         .nav-icons {
             display: flex;
-            gap: 20px;
+            gap: 1rem;
+            align-items: center;
         }
 
-        .container {
+        .main-container {
             display: flex;
-            min-height: calc(100vh - 60px);
+            min-height: calc(100vh - 64px);
         }
 
         .sidebar {
             width: 250px;
             background-color: white;
-            padding: 20px 0;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
 
-        .sidebar-item {
-            padding: 12px 20px;
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 1rem 0;
+        }
+
+        .sidebar-menu a {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #333;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            color: var(--text-color);
             text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
         }
 
-        .sidebar-item.active {
-            background-color: #f0f0f0;
+        .sidebar-menu a:hover {
+            background-color: var(--secondary-color);
         }
 
-        .main-content {
+        .content {
             flex: 1;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 2rem;
         }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 24px;
-            margin: 0;
-            color: #333;
-        }
-
-        /* New table layout styles */
+        /* Additional styles for the orders table */
         .orders-table-container {
             background: white;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 2rem;
             overflow-x: auto;
         }
 
@@ -107,18 +122,12 @@
         .orders-table td {
             padding: 15px;
             border-bottom: 1px solid #dee2e6;
-            vertical-align: top;
         }
 
         .product-cell {
             display: flex;
-            align-items: start;
+            align-items: center;
             gap: 15px;
-            margin-bottom: 10px;
-        }
-
-        .product-details {
-            flex: 1;
         }
 
         .product-image {
@@ -134,94 +143,67 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
-            text-align: center;
-            min-width: 100px;
             color: white;
         }
 
-        .status-pending {
-            background-color: #f0ad4e;
-        }
-
-        .status-processing {
-            background-color: #5bc0de;
-        }
-
-        .status-shipped {
-            background-color: #437A59;
-        }
-
-        .status-delivered {
-            background-color: #5cb85c;
-        }
-
-        .status-cancelled {
-            background-color: #d9534f;
-        }
+        .status-pending { background-color: #f0ad4e; }
+        .status-processing { background-color: #5bc0de; }
+        .status-shipped { background-color: #3b7254; }
+        .status-delivered { background-color: #5cb85c; }
+        .status-cancelled { background-color: #d9534f; }
+        .status-return-request { background-color: #ff9800; }
+        .status-returned { background-color: #9c27b0; }
 
         .view-details-btn {
-            padding: 6px 12px;
-            background-color: #437A59;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
             color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 13px;
-            display: inline-block;
-            text-align: center;
             border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
-
-        .price-details {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .page-header {
+            margin-bottom: 1.5rem;
         }
 
-        .final-price {
-            font-weight: bold;
-            color: #437A59;
-        }
-
-        .order-date {
-            color: #666;
-            font-size: 13px;
+        .page-header h1 {
+            font-size: 1.5rem;
+            color: var(--text-color);
         }
     </style>
 </head>
-
 <body>
-    <!-- Original Header -->
-    <div class="header">
+    <header class="header">
         <div class="logo">Brossoc</div>
-        <div class="nav-items">
-            <div>Home</div>
-            <div>Shop</div>
-            <div>About us</div>
-            <div>Contact us</div>
-        </div>
+        <nav class="nav-menu">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="#">About us</a>
+            <a href="#">Contact us</a>
+        </nav>
         <div class="nav-icons">
             <span><i class="fa-solid fa-heart"></i></span>
             <span><i class="fa-solid fa-user"></i></span>
             <span><i class="fa-solid fa-cart-shopping"></i></span>
         </div>
-    </div>
+    </header>
 
-    <div class="container">
-        <!-- Original Sidebar -->
-        <div class="sidebar">
-            <a href="/userProfile" class="sidebar-item"><span><i class="fa-solid fa-gauge"></i></span>Dashboard</a>
-            <a href="#" class="sidebar-item active"><span><i class="fa-solid fa-box"></i></span> Orders</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-location-dot"></i></span> My Address</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-wallet"></i></span> Wallet</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-sharp fa-solid fa-users"></i></span> Referral</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
-        </div>
+    <div class="main-container">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="/userProfile"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                <li><a href="/orders"><i class="fa-solid fa-box"></i> Orders</a></li>
+                <li><a href="/addresses"><i class="fa-solid fa-location-dot"></i> My Address</a></li>
+                <li><a href="/wallet"><i class="fa-solid fa-wallet"></i> Wallet</a></li>
+                <li><a href="/referral"><i class="fa-sharp fa-solid fa-users"></i> Referral</a></li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </aside>
 
-        <!-- Main Content with New Table Layout -->
-        <div class="main-content">
+        <main class="content">
             <div class="page-header">
-                <h2 class="section-title">My Orders</h2>
+                <h1>My Orders</h1>
             </div>
 
             <div class="orders-table-container">
@@ -236,119 +218,96 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% orders.forEach(order=> { %>
+                        <% orders.forEach(order => { %>
                             <tr>
                                 <td>
                                     <div class="order-date">
                                         Order Date: <%= new Date(order.createdOn).toLocaleDateString() %>
                                     </div>
-                                    <div>Order ID: #<%= order.orderId %>
-                                    </div>
+                                    <div>Order ID: #<%= order.orderId %></div>
                                 </td>
                                 <td>
-                                    <% order.orderedItems.forEach(item=> { %>
+                                    <% order.orderedItems.forEach(item => { %>
                                         <div class="product-cell">
-                                            <% if (item.product && item.product.productImage &&
-                                                item.product.productImage.length> 0) { %>
-                                                <img src="/uploads/product-images/<%= item.product.productImage[0] %>"
-                                                    alt="<%= item.product.productName %>" class="product-image"
-                                                    onerror="this.src='/path/to/default/image.jpg'">
-                                                <% } else { %>
-                                                    <img src="/path/to/default/image.jpg" alt="No Image"
-                                                        class="product-image">
-                                                    <% } %>
-                                                        <div class="product-details">
-                                                            <% if(item.product) { %>
-                                                                <div>
-                                                                    <%= item.product.productName %>
-                                                                </div>
-                                                                <% } else { %>
-                                                                    <div>Product Unavailable</div>
-                                                                    <% } %>
-                                                                        <div class="order-date">Qty: <%= item.quantity %> (Total: ₹<%= item.price/item.quantity * item.quantity %>)</div>
-                                                                        <% if (item.status==='Cancelled' ) { %>
-                                                                            <span
-                                                                                class="status-badge status-cancelled">Cancelled</span>
-                                                                            <% } %>
-                                                        </div>
+                                            <img src="/uploads/product-images/<%= item.product?.productImage?.[0] || 'default.jpg' %>"
+                                                alt="<%= item.product?.productName || 'Product' %>"
+                                                class="product-image"
+                                                onerror="this.src='/path/to/default/image.jpg'">
+                                            <div class="product-details">
+                                                <div><%= item.product?.productName || 'Product Unavailable' %></div>
+                                                <div class="order-date">
+                                                    Qty: <%= item.quantity %> 
+                                                    (Total: ₹<%= item.price %>)
+                                                </div>
+                                            </div>
                                         </div>
-                                        <% }); %>
+                                    <% }); %>
                                 </td>
                                 <td>
                                     <div class="price-details">
-                                        <div>Total: ₹<%= order.totalPrice %>
-                                        </div>
-                                        <% if (order.discount> 0) { %>
-                                            <div>Discount: ₹<%= order.discount %>
-                                            </div>
-                                            <% } %>
-                                                <div class="final-price">Final Amount: ₹<%= order.finalAmount %>
-                                                </div>
+                                        <div>Total: ₹<%= order.totalPrice %></div>
+                                        <% if (order.discount > 0) { %>
+                                            <div>Discount: ₹<%= order.discount %></div>
+                                        <% } %>
+                                        <div class="final-price">Final Amount: ₹<%= order.finalAmount %></div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="status-badge status-<%= order.status.toLowerCase() %>">
+                                    <span class="status-badge status-<%= order.status.toLowerCase().replace(/\s+/g, '-') %>">
                                         <%= order.status %>
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="order-actions">
-
-                                        <button onclick="viewOrderDetails('<%= order.orderId %>')"
-                                            class="view-details-btn" data-order-id="<%= order.orderId %>">
-                                            View Details
-                                        </button>
-                                    </div>
+                                    <button onclick="viewOrderDetails('<%= order.orderId %>')" 
+                                            class="view-details-btn">
+                                        View Details
+                                    </button>
                                 </td>
                             </tr>
-                            <% }); %>
+                        <% }); %>
                     </tbody>
                 </table>
             </div>
+        </main>
+    </div>
 
-            <script>
+    <script>
+        function viewOrderDetails(orderId) {
+            if (!orderId) {
+                console.error('Order ID is required');
+                return;
+            }
 
-                // Improved viewOrderDetails function with proper URL handling and error feedback
-                function viewOrderDetails(orderId) {
-                    if (!orderId) {
-                        console.error('Order ID is required');
-                        return;
-                    }
-
-                    fetch(`/orders/${orderId}`, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'text/html, application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        credentials: 'same-origin'
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-
-                            // Check if the response is JSON or HTML
-                            const contentType = response.headers.get('content-type');
-                            if (contentType && contentType.includes('application/json')) {
-                                return response.json().then(data => {
-                                    if (data.success) {
-                                        window.location.href = `/orders/${orderId}`;
-                                    } else {
-                                        throw new Error(data.message || 'Failed to fetch order details');
-                                    }
-                                });
-                            } else {
-                                // If it's HTML, just redirect to the order details page
-                                window.location.href = `/orders/${orderId}`;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to load order details: ' + error.message);
-                        });
+            fetch(`/orders/${orderId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html, application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            </script>
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json().then(data => {
+                        if (data.success) {
+                            window.location.href = `/orders/${orderId}`;
+                        } else {
+                            throw new Error(data.message || 'Failed to fetch order details');
+                        }
+                    });
+                } else {
+                    window.location.href = `/orders/${orderId}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load order details: ' + error.message);
+            });
+        }
+    </script>
 </body>
-
 </html>

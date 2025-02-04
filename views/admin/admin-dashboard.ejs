@@ -2,7 +2,9 @@
 <html>
 
 <head>
-    <style>
+
+
+    <style id="mainStyles">
         * {
             margin: 0;
             padding: 0;
@@ -18,7 +20,6 @@
         }
 
         ::-webkit-scrollbar {
-
             display: none;
         }
 
@@ -46,9 +47,38 @@
             padding: 30px;
         }
 
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .report-title {
+            font-size: 24px;
+            color: white;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-btn {
+            background-color: #2d3748;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -70,19 +100,20 @@
             font-weight: bold;
         }
 
-        .maintenance-form {
+        .filters-section {
             background-color: #1a1d21;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
         }
 
-        .form-title {
-            font-size: 18px;
-            margin-bottom: 20px;
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
 
-        .form-group {
+        .filter-group {
             margin-bottom: 15px;
         }
 
@@ -92,8 +123,8 @@
             margin-bottom: 8px;
         }
 
-        input,
-        textarea {
+        select,
+        input {
             width: 100%;
             padding: 10px;
             background-color: #2d3748;
@@ -102,132 +133,523 @@
             color: white;
         }
 
-        .add-btn {
+        .apply-btn {
             background-color: #0284c7;
             color: white;
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin-top: 15px;
         }
 
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .metric-card {
+        .sales-table {
             background-color: #1a1d21;
-            padding: 20px;
             border-radius: 8px;
+            overflow: hidden;
         }
 
-        .metric-title {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        th {
+            background-color: #2d3748;
             color: #a0aec0;
-            margin-bottom: 10px;
         }
 
-        .metric-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        tr:hover {
+            background-color: #2d3748;
         }
 
-        .metric-change {
-            font-size: 14px;
-            color: #a0aec0;
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
         }
 
-        .positive-change {
+        .status-completed {
+            background-color: #065f46;
             color: #34d399;
         }
 
-        .negative-change {
-            color: #ef4444;
+        .status-pending {
+            background-color: #92400e;
+            color: #fbbf24;
+        }
+
+        .export-btn {
+            background-color: #2d3748;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .export-btn:hover {
+            background-color: #4a5568;
         }
     </style>
+
+    <style id="pdfStyles">
+        .pdf-content {
+            display: none;
+            background: white;
+            color: black;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .pdf-content .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .pdf-content .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .pdf-content .header .date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .pdf-content .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .pdf-content .summary-item {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .pdf-content .summary-item .label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .pdf-content .summary-item .value {
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .pdf-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        .pdf-content th,
+        .pdf-content td {
+            padding: 12px 8px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
+        .pdf-content th {
+            background: #f4f4f4;
+            color: #333;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Specific column widths */
+        .pdf-content th:nth-child(1),
+        .pdf-content td:nth-child(1) {
+            width: 18%;
+            /* Order ID */
+        }
+
+        .pdf-content th:nth-child(2),
+        .pdf-content td:nth-child(2) {
+            width: 12%;
+            /* Date */
+        }
+
+        .pdf-content th:nth-child(3),
+        .pdf-content td:nth-child(3) {
+            width: 18%;
+            /* Customer */
+        }
+
+        .pdf-content th:nth-child(4),
+        .pdf-content td:nth-child(4),
+        .pdf-content th:nth-child(5),
+        .pdf-content td:nth-child(5),
+        .pdf-content th:nth-child(6),
+        .pdf-content td:nth-child(6) {
+            width: 13%;
+            /* Amount columns */
+            text-align: right;
+        }
+
+        .pdf-content th:nth-child(7),
+        .pdf-content td:nth-child(7) {
+            width: 10%;
+            /* Status */
+            text-align: center;
+        }
+
+        .pdf-content td {
+            color: #333;
+            vertical-align: middle;
+        }
+
+        .pdf-content .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .pdf-content .status-completed {
+            background: #e6f4ea;
+            color: #1e7e34;
+        }
+
+        .pdf-content .status-pending {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+
+        .pdf-content .amount {
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
     <div class="sidebar">
-        <a href="/admin/" class="sidebar-item">Dashboard</a>
+        <a href="/admin/sales-report" class="sidebar-item">Dashboard</a>
         <a href="/admin/users" class="sidebar-item">Customers</a>
         <a href="/admin/category" class="sidebar-item">Category</a>
         <a href="/admin/addProducts" class="sidebar-item">Add product</a>
         <a href="/admin/products" class="sidebar-item">Product</a>
-        <a href="#" class="sidebar-item">Coupon</a>
+        <a href="/admin/coupons" class="sidebar-item">Coupon</a>
         <a href="#" class="sidebar-item">Banner</a>
         <a href="/admin/orders" class="sidebar-item">Orders</a>
         <a href="/admin/logout" class="sidebar-item">Logout</a>
     </div>
 
+
     <div class="main-content">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-title">Total Users</div>
-                <div class="stat-value">3002</div>
+        <div class="report-header">
+            <h1 class="report-title">Sales Report</h1>
+            <div class="export-buttons">
+                <button class="export-btn" onclick="downloadPDF()">
+                    Download PDF
+                </button>
             </div>
-            <div class="stat-card">
-                <div class="stat-title">Total Products</div>
-                <div class="stat-value">266</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Overall Sales Count</div>
+            <div class="stat-value">
+
+                <%= stats && stats.salesCount !==undefined ? stats.salesCount : 0 %>
             </div>
-            <div class="stat-card">
-                <div class="stat-title">Total Orders</div>
-                <div class="stat-value">66</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Overall Order Amount</div>
+            <div class="stat-value">
+                ₹<%= stats && stats.orderAmount !==undefined ? stats.orderAmount.toLocaleString() : '0' %>
             </div>
-            <div class="stat-card">
-                <div class="stat-title">Weekly Sales</div>
-                <div class="stat-value">277</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Overall Discount</div>
+            <div class="stat-value">
+                ₹<%= stats && stats.discount !==undefined ? stats.discount.toLocaleString() : '0' %>
             </div>
         </div>
 
-        <div class="maintenance-form">
-            <h2 class="form-title">Add Maintenance</h2>
-            <form>
-                <div class="form-group">
-                    <label>Start time</label>
-                    <input type="text" placeholder="dd-mm-yyyy">
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Date Range</label>
+                    <select id="dateRange">
+                        <option value="custom">Custom Range</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label>End time</label>
-                    <input type="text" placeholder="dd-mm-yyyy">
+                <div class="filter-group">
+                    <label>Start Date</label>
+                    <input type="date" id="startDate" value="<%= startDate %>">
                 </div>
-                <div class="form-group">
-                    <label>Message</label>
-                    <textarea placeholder="Enter a message" rows="3"></textarea>
+                <div class="filter-group">
+                    <label>End Date</label>
+                    <input type="date" id="endDate" value="<%= endDate %>">
                 </div>
-                <button type="submit" class="add-btn">Add</button>
-            </form>
+            </div>
+            <button class="apply-btn" onclick="applyFilters()">Apply Filters</button>
         </div>
 
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-title">Revenue</div>
-                <div class="metric-value">$32123</div>
-                <div class="metric-change">
-                    <span class="positive-change">+3.5%</span>
-                    11.38% Since last month
-                </div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">Sales</div>
-                <div class="metric-value">$45850</div>
-                <div class="metric-change">
-                    <span class="positive-change">+8.3%</span>
-                    9.61% Since last month
-                </div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">Purchase</div>
-                <div class="metric-value">$2039</div>
-                <div class="metric-change">
-                    <span class="negative-change">-2.1%</span>
-                    2.27% Since last month
-                </div>
-            </div>
+        <div class="sales-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Discount</th>
+                        <th>Final Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order=> { %>
+                        <tr>
+                            <td>
+                                <%= order.orderId %>
+                            </td>
+                            <td>
+                                <%= new Date(order.createdOn).toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <%= order.userId.name %>
+                            </td>
+                            <td>₹<%= order.totalPrice.toLocaleString() %>
+                            </td>
+                            <td>₹<%= order.discount.toLocaleString() %>
+                            </td>
+                            <td>₹<%= order.finalAmount.toLocaleString() %>
+                            </td>
+                            <td>
+                                <span class="status-badge status-<%= order.status.toLowerCase() %>">
+                                    <%= order.status %>
+                                </span>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
         </div>
     </div>
+
+    <div class="pdf-content" id="pdfContent">
+        <div class="header">
+            <h1>Sales Report</h1>
+            <div class="date">Generated on: <span id="reportDate"></span></div>
+        </div>
+
+        <div class="summary">
+            <div class="summary-item">
+                <div class="label">Total Sales</div>
+                <div class="value" id="pdfSalesCount">0</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Total Revenue</div>
+                <div class="value" id="pdfRevenue">₹0</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Total Discount</div>
+                <div class="value" id="pdfDiscount">₹0</div>
+            </div>
+        </div>
+
+        <table id="pdfTable">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Discount</th>
+                    <th>Final Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="pdfTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function applyFilters() {
+            const dateRange = document.getElementById('dateRange').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            try {
+                const response = await fetch('/admin/sales-report/filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ dateRange, startDate, endDate })
+                });
+
+                const data = await response.json();
+
+                if (!data.success && data.error) {
+
+                    alert(data.error);
+                    return;
+                }
+
+                updateDisplay(data);
+            } catch (error) {
+                console.error('Error applying filters:', error);
+                alert('An error occurred while filtering the sales report');
+            }
+        }
+
+        function updateDisplay(data) {
+            // Update stats
+            document.querySelectorAll('.stat-value')[0].textContent = data.stats.salesCount;
+            document.querySelectorAll('.stat-value')[1].textContent = '₹' + data.stats.orderAmount.toLocaleString();
+            document.querySelectorAll('.stat-value')[2].textContent = '₹' + data.stats.discount.toLocaleString();
+
+            // Update table
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = data.orders.map(order => `
+        <tr>
+            <td>${order.orderId}</td>
+            <td>${new Date(order.createdOn).toLocaleDateString()}</td>
+            <td>${order.userId.name}</td>
+            <td>₹${order.totalPrice.toLocaleString()}</td>
+            <td>₹${order.discount.toLocaleString()}</td>
+            <td>₹${order.finalAmount.toLocaleString()}</td>
+            <td>
+                <span class="status-badge status-${order.status.toLowerCase()}">
+                    ${order.status}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+        }
+
+
+        document.getElementById('dateRange').addEventListener('change', function () {
+            const customDateFields = document.querySelectorAll('input[type="date"]');
+            if (this.value === 'custom') {
+                customDateFields.forEach(field => field.style.display = 'block');
+            } else {
+                customDateFields.forEach(field => field.style.display = 'none');
+            }
+        });
+
+        async function downloadPDF() {
+            try {
+                // Update the report date
+                document.getElementById('reportDate').textContent = new Date().toLocaleDateString();
+
+                // Get stat values with error checking
+                const statElements = document.querySelectorAll('.stat-value');
+                if (statElements.length >= 3) {
+                    document.getElementById('pdfSalesCount').textContent = statElements[0].textContent;
+                    document.getElementById('pdfRevenue').textContent = statElements[1].textContent;
+                    document.getElementById('pdfDiscount').textContent = statElements[2].textContent;
+                }
+
+                // Get the table body with error checking
+                const pdfTableBody = document.getElementById('pdfTableBody');
+                const salesTable = document.querySelector('.sales-table tbody');
+
+                if (!salesTable) {
+                    throw new Error('Sales table not found');
+                }
+
+                const originalRows = salesTable.getElementsByTagName('tr');
+
+                // Map through rows with corrected column indices
+                pdfTableBody.innerHTML = Array.from(originalRows).map(row => {
+                    const cells = row.getElementsByTagName('td');
+                    if (cells.length < 7) { // Adjusted for removed coupon column
+                        return ''; // Skip invalid rows
+                    }
+
+                    // Safely get the status badge
+                    const statusBadge = cells[6].querySelector('.status-badge'); // Adjusted index for status
+                    const statusClass = statusBadge ? statusBadge.classList[1]?.split('-')[1] || 'default' : 'default';
+                    const statusText = cells[6].textContent.trim(); // Adjusted index for status
+
+                    return `
+                <tr>
+                    <td>${cells[0]?.textContent || ''}</td>
+                    <td>${cells[1]?.textContent || ''}</td>
+                    <td>${cells[2]?.textContent || ''}</td>
+                    <td class="amount">${cells[3]?.textContent || ''}</td>
+                    <td class="amount">${cells[4]?.textContent || ''}</td>
+                    <td class="amount">${cells[5]?.textContent || ''}</td>
+                    <td><span class="status status-${statusClass}">${statusText}</span></td>
+                </tr>
+            `;
+                }).join('');
+
+                const opt = {
+                    margin: [15, 10],
+                    filename: `sales-report-${new Date().toISOString().split('T')[0]}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'landscape'
+                    }
+                };
+
+                const element = document.getElementById('pdfContent');
+                if (!element) {
+                    throw new Error('PDF content element not found');
+                }
+
+                element.style.display = 'block';
+                await html2pdf().set(opt).from(element).save();
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+            } finally {
+                const element = document.getElementById('pdfContent');
+                if (element) {
+                    element.style.display = 'none';
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>

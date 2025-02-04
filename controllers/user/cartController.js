@@ -1,5 +1,6 @@
 const Cart = require('../../models/cartSchema');
 const Product = require('../../models/productSchema');
+const Coupon = require('../../models/couponSchema');
 
 
 
@@ -145,7 +146,6 @@ const updateCartItem = async (req, res) => {
         const { itemId, quantity } = req.body;
         const userId = req.user._id;
 
-
         if (quantity < 1 || quantity > 5) {
             return res.status(400).json({
                 success: false,
@@ -169,7 +169,6 @@ const updateCartItem = async (req, res) => {
             });
         }
 
-
         const product = await Product.findById(cartItem.productId);
         if (!product || product.isBlocked || product.status !== "Available") {
             return res.status(400).json({
@@ -188,12 +187,44 @@ const updateCartItem = async (req, res) => {
 
         cartItem.quantity = quantity;
         cartItem.totalPrice = cartItem.price * quantity;
+
+   
+        if (cart.appliedCoupon.couponId) {
+            const coupon = await Coupon.findById(cart.appliedCoupon.couponId);
+            if (coupon) {
+              
+                const newCartTotal = cart.items.reduce((sum, item) => sum + (item._id.equals(itemId) ? cartItem.totalPrice : item.totalPrice), 0);
+
+                if (newCartTotal < coupon.minimumPurchase || newCartTotal > coupon.maximumPurchase) {
+                  
+                    await Coupon.findByIdAndUpdate(
+                        cart.appliedCoupon.couponId,
+                        { $pull: { userId: userId } }
+                    );
+                    cart.appliedCoupon = { couponId: null, discount: 0 };
+                } else {
+               
+                    let newDiscount = 0;
+                    if (coupon.discountPercentage) {
+                        newDiscount = (newCartTotal * coupon.discountPercentage) / 100;
+                    } else if (coupon.offerPrice) {
+                        newDiscount = Math.min(coupon.offerPrice, newCartTotal);
+                    }
+                    cart.appliedCoupon.discount = newDiscount;
+                }
+            }
+        }
+
         await cart.save();
+
+        const finalTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0) - (cart.appliedCoupon.discount || 0);
 
         res.status(200).json({
             success: true,
-            message: 'Cart updated successfully',
-            newTotal: cartItem.totalPrice
+            message: cart.appliedCoupon.couponId ? 'Cart updated and coupon adjusted' : 'Cart updated successfully',
+            newTotal: finalTotal,
+            couponRemoved: cart.appliedCoupon.couponId === null,
+            discount: cart.appliedCoupon.discount
         });
 
     } catch (error) {
@@ -204,7 +235,6 @@ const updateCartItem = async (req, res) => {
         });
     }
 };
-
 
 const removeCartItem = async (req, res) => {
     try {

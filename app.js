@@ -50,6 +50,8 @@ app.use((req, res, next) => {
 
 
 
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -74,6 +76,13 @@ app.use((err, req, res, next) => {
 app.set('view engine','ejs');
 app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')]);
 app.use(express.static(path.join(__dirname,'public')));
+
+
+
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+});
 
 app.use('/',userRouter);
 app.use('/admin',adminRouter);

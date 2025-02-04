@@ -172,7 +172,7 @@ const editAddress = async (req, res) => {
             pinCode: userAddress.address[addressIndex].pincode,
             phoneNumber: userAddress.address[addressIndex].phone,
             alternativePhone: userAddress.address[addressIndex].altPhone,
-            addressIndex: addressIndex
+            addressIndex: addressIndex,
         });
 
     } catch (error) {

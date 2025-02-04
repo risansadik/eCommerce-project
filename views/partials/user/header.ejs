@@ -115,6 +115,9 @@
 							<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
 								<li><a class="nav-link" href="/cart"><img src="images/cart.svg"></a></li>
 							</ul>
+							<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
+								<li><a class="nav-link" href="/wishlist"><i class="fa-solid fa-heart" style="font-size: 150%; margin-top: 45%;"></i></a></li>
+							</ul>
 			</div>
 		</div>
 
@@ -129,7 +132,6 @@
             item.classList.remove('active');
         });
 
-        // Add active class based on current path
         let activeLink;
         if (currentPath === '/') {
             activeLink = document.querySelector('.custom-navbar-nav .nav-item:first-child');

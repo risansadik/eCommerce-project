@@ -320,6 +320,140 @@
             border-radius: 4px;
             font-size: 0.9em;
         }
+
+        .return-btn {
+            padding: 8px 16px;
+            background-color: #437A59;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .fa-money-bill::before {
+            content: "\f0d6";
+        }
+
+        .fa-wallet::before {
+            content: "\f555";
+        }
+
+        .fa-credit-card::before {
+            content: "\f09d";
+        }
+
+        .payment-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .payment-method i {
+            color: #437A59;
+            width: 20px;
+        }
+
+        .payment-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .payment-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: white;
+            margin-left: 8px;
+        }
+
+        .status-completed {
+            background-color: #28a745;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .status-failed {
+            background-color: #dc3545;
+        }
+
+        .status-refunded {
+            background-color: #6c757d;
+        }
+
+        .transaction-id {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 
@@ -344,11 +478,14 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="/userProfile" class="sidebar-item"><span><i class="fa-solid fa-gauge"></i></span>Dashboard</a>
-            <a href="#" class="sidebar-item active"><span><i class="fa-solid fa-box"></i></span> Orders</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-location-dot"></i></span> My Address</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-wallet"></i></span> Wallet</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-sharp fa-solid fa-users"></i></span> Referral</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+            <a href="/orders" class="sidebar-item active"><span><i class="fa-solid fa-box"></i></span> Orders</a>
+            <a href="/addresses" class="sidebar-item"><span><i class="fa-solid fa-location-dot"></i></span> My
+                Address</a>
+            <a href="/wallet" class="sidebar-item"><span><i class="fa-solid fa-wallet"></i></span> Wallet</a>
+            <a href="/referral" class="sidebar-item"><span><i class="fa-sharp fa-solid fa-users"></i></span>
+                Referral</a>
+            <a href="/logout" class="sidebar-item"><span><i class="fa-solid fa-right-from-bracket"></i></span>
+                Logout</a>
         </div>
 
         <!-- Main Content -->
@@ -358,22 +495,28 @@
             <div class="order-details-container">
                 <div class="order-header">
                     <div class="order-info">
-                        <h2>Order #<%= order.orderId %>
-                        </h2>
-                        <p>Placed on <%= new Date(order.createdOn).toLocaleDateString() %>
-                        </p>
+                        <h2>Order #<%= order.orderId %></h2>
+                        <p>Placed on <%= new Date(order.createdOn).toLocaleDateString() %></p>
                     </div>
                     <div class="order-status">
                         <span class="status-badge status-<%= order.status.toLowerCase() %>">
                             <%= order.status %>
                         </span>
-                        <% if (order.canCancel && order.status !=='Cancelled' ) { %>
+                
+                        <% if (order.status !== 'Returned' && order.canCancel && order.status !== 'Cancelled') { %>
                             <button onclick="confirmCancelOrder('<%= order.orderId %>')" class="cancel-btn">
                                 Cancel Order
                             </button>
-                            <% } %>
+                        <% } %>
+                        
+                        <% if (order.status === 'Delivered') { %>
+                            <button onclick="openReturnModal('<%= order.orderId %>')" class="return-btn">
+                                Return Order
+                            </button>
+                        <% } %>
                     </div>
                 </div>
+
 
                 <div class="order-grid">
                     <div class="info-box">
@@ -394,116 +537,159 @@
                         </p>
                     </div>
 
+
                     <div class="info-box">
                         <h3>Order Information</h3>
-                        <p>Order Status: <%= order.status %>
-                        </p>
-                        <p>Order Date: <%= new Date(order.createdOn).toLocaleDateString() %>
-                        </p>
+                        <p>Order Status: <%= order.status %></p>
+                        <p>Order Date: <%= new Date(order.createdOn).toLocaleDateString() %></p>
                         <% if (order.invoiceDate) { %>
-                            <p>Invoice Date: <%= new Date(order.invoiceDate).toLocaleDateString() %>
-                            </p>
-                            <% } %>
-                    </div>
-                </div>
-
-
-
-                <% // Sort items to show active items first, then cancelled const
-                    sortedItems=[...order.orderedItems].sort((a, b)=> {
-                    if (a.status === 'Cancelled' && b.status !== 'Cancelled') return 1;
-                    if (a.status !== 'Cancelled' && b.status === 'Cancelled') return -1;
-                    return 0;
-                    });
-                    %>
-
-                    <div class="order-items">
-                        <h3>Order Items</h3>
-                        <% sortedItems.forEach(item=> { %>
-                            <div class="item-card <%= item.status === 'Cancelled' ? 'cancelled-item' : '' %>"
-                                id="item-<%= item._id %>" data-item-id="<%= item._id %>"
-                                data-item-status="<%= item.status %>">
-
-                                <% if (item.product && item.product.productImage && item.product.productImage.length> 0)
-                                    { %>
-                                    <img src="/uploads/product-images/<%= item.product.productImage[0] %>"
-                                        alt="<%= item.product.productName %>" class="item-image"
-                                        onerror="this.src='/images/default-product.jpg'">
-                                    <% } else { %>
-                                        <img src="/images/default-product.jpg" alt="Product image" class="item-image">
-                                        <% } %>
-
-                                            <div class="item-details">
-                                                <h4>
-                                                    <%= item.product ? item.product.productName : 'Product Unavailable'
-                                                        %>
-                                                </h4>
-                                                <p>Size: <%= item.size %>
-                                                </p>
-                                                <p>Quantity: <%= item.quantity %>
-                                                </p>
-                                                <% if (item.status==='Cancelled' ) { %>
-                                                    <span class="status-badge status-cancelled">Cancelled</span>
-                                                    <% } else if (order.canCancel) { %>
-                                                        <button
-                                                            onclick="confirmCancelItem('<%= order.orderId %>', '<%= item._id %>')"
-                                                            class="cancel-btn">
-                                                            Cancel Item
-                                                        </button>
-                                                        <% } %>
-                                            </div>
-
-                                            <div class="item-price">
-                                                <p>₹<%= item.price.toFixed(2)/item.quantity %> × <%= item.quantity %></p>
-                                                <p><strong>Total: ₹<%= ((item.price/item.quantity) * item.quantity).toFixed(2) %></strong></p>
-                                                <% if (item.status==='Cancelled' ) { %>
-                                                    <p class="cancelled-text">Item Cancelled</p>
-                                                    <% } %>
-                                            </div>
-                            </div>
-                            <% }); %>
-                    </div>
-
-                    
-
-                    <div class="price-summary">
-                        <% const activeItems = order.orderedItems.filter(item => item.status !== 'Cancelled'); %>
-                        <% const subtotal = activeItems.reduce((sum, item) => sum + (item.price/item.quantity * item.quantity), 0); %>
-                        
-                        <div class="price-row">
-                            <span>Subtotal</span>
-                            <span>₹<%= subtotal.toFixed(2) %></span>
-                        </div>
-                        
-                        <% if (order.discount > 0) { %>
-                            <div class="price-row">
-                                <span>Discount</span>
-                                <span>-₹<%= order.discount.toFixed(2) %></span>
-                            </div>
+                            <p>Invoice Date: <%= new Date(order.invoiceDate).toLocaleDateString() %></p>
                         <% } %>
                         
-                        <div class="price-row total">
-                            <span>Total</span>
-                            <span>₹<%= order.finalAmount.toFixed(2) %></span>
+                        <div class="payment-info">
+                            <div class="payment-method">
+                                <i class="fa-solid 
+                                    <%= order.paymentMethod === 'cod' ? 'fa-money-bill' : 
+                                        order.paymentMethod === 'wallet' ? 'fa-wallet' : 
+                                        'fa-credit-card' %>">
+                                </i>
+                                <span>Payment Method:</span>
+                                <span class="payment-badge">
+                                    <%= order.paymentMethod === 'cod' ? 'Cash on Delivery' :
+                                        order.paymentMethod === 'wallet' ? 'Wallet' :
+                                        'Razorpay' %>
+                                </span>
+                                <% if (order.status !== 'Cancelled' && order.status !== 'Returned') { %>
+                                    <span class="payment-status status-<%= order.paymentStatus %>">
+                                        <%= order.paymentStatus %>
+                                    </span>
+                                <% } %>
+                            </div>
+                            
+                            <% if (order.status !== 'Cancelled' && order.status !== 'Returned' && order.paymentMethod === 'razorpay' && order.razorpayPaymentId) { %>
+                                <p>Transaction ID: <span class="transaction-id"><%= order.razorpayPaymentId %></span></p>
+                            <% } %>
                         </div>
                     </div>
-            </div>
-        </div>
-
-        <!-- Confirmation Modal -->
-        <div id="confirmModal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeModal()">&times;</span>
-                <h3 id="modalTitle">Confirm Cancellation</h3>
-                <p id="modalMessage"></p>
-                <div style="margin-top: 20px">
-                    <button onclick="closeModal()" style="margin-right: 10px">No, Keep It</button>
-                    <button id="confirmButton" class="cancel-btn">Yes, Cancel</button>
                 </div>
             </div>
+
+
+
+            <% // Sort items to show active items first, then cancelled const
+                sortedItems=[...order.orderedItems].sort((a, b)=> {
+                if (a.status === 'Cancelled' && b.status !== 'Cancelled') return 1;
+                if (a.status !== 'Cancelled' && b.status === 'Cancelled') return -1;
+                return 0;
+                });
+                %>
+
+                <div class="order-items">
+                    <h3>Order Items</h3>
+                    <% sortedItems.forEach(item=> { %>
+                        <div class="item-card <%= item.status === 'Cancelled' ? 'cancelled-item' : '' %>"
+                            id="item-<%= item._id %>" data-item-id="<%= item._id %>"
+                            data-item-status="<%= item.status %>">
+
+                            <% if (item.product && item.product.productImage && item.product.productImage.length> 0)
+                                { %>
+                                <img src="/uploads/product-images/<%= item.product.productImage[0] %>"
+                                    alt="<%= item.product.productName %>" class="item-image"
+                                    onerror="this.src='/images/default-product.jpg'">
+                                <% } else { %>
+                                    <img src="/images/default-product.jpg" alt="Product image" class="item-image">
+                                    <% } %>
+
+                                        <div class="item-details">
+                                            <h4>
+                                                <%= item.product ? item.product.productName : 'Product Unavailable' %>
+                                            </h4>
+                                            <p>Size: <%= item.size %>
+                                            </p>
+                                            <p>Quantity: <%= item.quantity %>
+                                            </p>
+                                            <% if (item.status==='Cancelled' ) { %>
+                                                <span class="status-badge status-cancelled">Cancelled</span>
+                                                <% } else if (order.canCancel) { %>
+                                                    <button
+                                                        onclick="confirmCancelItem('<%= order.orderId %>', '<%= item._id %>')"
+                                                        class="cancel-btn">
+                                                        Cancel Item
+                                                    </button>
+                                                    <% } %>
+                                        </div>
+
+
+
+                                        <div class="item-price">
+                                            <p>₹<%= item.price.toFixed(2)/item.quantity %> × <%= item.quantity %>
+                                            </p>
+                                            <p><strong>Total: ₹<%= ((item.price/item.quantity) *
+                                                        item.quantity).toFixed(2) %></strong></p>
+                                            <% if (item.status==='Cancelled' ) { %>
+                                                <p class="cancelled-text">Item Cancelled</p>
+                                                <% } %>
+                                        </div>
+                        </div>
+                        <% }); %>
+                </div>
+
+
+
+                <div class="price-summary">
+                    <% const activeItems=order.orderedItems.filter(item=> item.status !== 'Cancelled'); %>
+                        <% const subtotal=activeItems.reduce((sum, item)=> sum + (item.price/item.quantity *
+                            item.quantity), 0); %>
+
+                            <div class="price-row">
+                                <span>Subtotal</span>
+                                <span>₹<%= subtotal.toFixed(2) %></span>
+                            </div>
+
+                            <% if (order.discount> 0) { %>
+                                <div class="price-row">
+                                    <span>Discount</span>
+                                    <span>-₹<%= order.discount.toFixed(2) %></span>
+                                </div>
+                                <% } %>
+
+                                    <div class="price-row total">
+                                        <span>Total</span>
+                                        <span>₹<%= order.finalAmount.toFixed(2) %></span>
+                                    </div>
+                </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">Confirm Cancellation</h3>
+            <p id="modalMessage"></p>
+            <div style="margin-top: 20px">
+                <button onclick="closeModal()" style="margin-right: 10px">No, Keep It</button>
+                <button id="confirmButton" class="cancel-btn">Yes, Cancel</button>
+            </div>
         </div>
     </div>
     </div>
+    </div>
+    </div>
+    <!-- Return Request Modal -->
+    <div id="returnModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeReturnModal()">&times;</span>
+            <h3>Return Order</h3>
+            <form id="returnForm">
+                <input type="hidden" id="returnOrderId" name="orderId" value="<%= order._id %>">
+                <div class="form-group">
+                    <label for="returnReason">Reason for Return</label>
+                    <textarea id="returnReason" name="returnReason" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="return-btn">Submit Return Request</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -660,6 +846,57 @@
                 });
             }
         };
+
+
+        function openReturnModal(orderId) {
+            document.getElementById('returnOrderId').value = orderId;
+            document.getElementById('returnModal').style.display = 'block';
+        }
+
+
+        function closeReturnModal() {
+            document.getElementById('returnModal').style.display = 'none';
+        }
+
+
+        document.getElementById('returnForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const orderId = document.getElementById('returnOrderId').value; // This should be orderId (UUID)
+            const returnReason = document.getElementById('returnReason').value;
+
+            try {
+                const response = await fetch('/submit-return', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId, returnReason })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Return request submitted successfully.',
+                        icon: 'success'
+                    });
+                    closeReturnModal();
+                    window.location.reload(); // Refresh the page to update the status
+                } else {
+                    throw new Error(data.message || 'Failed to submit return request');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Failed to submit return request',
+                    icon: 'error'
+                });
+            }
+        });
     </script>
 </body>
 

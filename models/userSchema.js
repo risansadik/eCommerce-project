@@ -23,7 +23,8 @@ const userSchema = new Schema({
     },
     googleId: {
         type: String,
-        unique: true
+        unique: true,
+       
     },
     password: {
         type: String,
@@ -72,9 +73,6 @@ const userSchema = new Schema({
         category: {
             type: Schema.Types.ObjectId,
             ref: "Category",
-        },
-        brand: {
-            type: String
         },
         searchOn: {
             type: Date,

@@ -1,108 +1,153 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brossoc - My Addresses</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        :root {
+            --primary-color: #3b7254;
+            --secondary-color: #f5f5f5;
+            --text-color: #333;
+        }
+
+        body {
+            background-color: #f0f0f0;
         }
 
         .header {
-            background-color: #437A59;
-            color: white;
-            padding: 15px 20px;
+            background-color: var(--primary-color);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: white;
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 1.5rem;
             font-weight: bold;
         }
 
-        .nav-items {
+        .nav-menu {
             display: flex;
-            gap: 20px;
+            gap: 2rem;
+            align-items: center;
         }
 
-        .container {
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
+        }
+
+        .nav-icons {
             display: flex;
-            min-height: calc(100vh - 60px);
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 64px);
         }
 
         .sidebar {
             width: 250px;
             background-color: white;
-            padding: 20px 0;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
 
-        .sidebar-item {
-            padding: 12px 20px;
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 1rem 0;
+        }
+
+        .sidebar-menu a {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #333;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            color: var(--text-color);
             text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
         }
 
-        .sidebar-item.active {
-            background-color: #f0f0f0;
+        .sidebar-menu a:hover {
+            background-color: var(--secondary-color);
         }
 
-        .main-content {
+        .sidebar-menu a.active {
+            background-color: var(--secondary-color);
+        }
+
+        .content {
             flex: 1;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 2rem;
         }
 
+        /* Address specific styles */
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--text-color);
         }
 
         .add-button {
-            background-color: #437A59;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 4px;
-            padding: 10px 20px;
+            padding: 0.75rem 1.5rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.5rem;
+            text-decoration: none;
         }
 
         .address-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 1.5rem;
         }
 
         .content-card {
             background: white;
             border-radius: 4px;
-            padding: 20px;
+            padding: 1.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             position: relative;
         }
 
         .delete-icon {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 0.75rem;
+            right: 0.75rem;
             color: #ff4444;
             cursor: pointer;
-            padding: 5px;
+            padding: 0.5rem;
             transition: color 0.2s ease;
         }
 
@@ -110,72 +155,76 @@
             color: #cc0000;
         }
 
-        .section-title {
-            font-size: 24px;
-            margin: 0;
-            color: #333;
-        }
-
         .field-group {
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
 
         .field-label {
             color: #666;
-            font-size: 12px;
-            margin-bottom: 4px;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
         }
 
         .field-value {
-            color: #333;
-            font-size: 14px;
+            color: var(--text-color);
+            font-size: 1rem;
+            line-height: 1.5;
         }
 
         .edit-button {
             display: block;
             width: 100%;
-            padding: 8px;
-            background-color: #437A59;
+            padding: 0.75rem;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 1.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .edit-button:hover {
+            background-color: #2c5840;
         }
     </style>
 </head>
-
 <body>
-    <div class="header">
+    <header class="header">
         <div class="logo">Brossoc</div>
-        <div class="nav-items">
-            <div>Home</div>
-            <div>Shop</div>
-            <div>About us</div>
-            <div>Contact us</div>
-        </div>
+        <nav class="nav-menu">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="#">About us</a>
+            <a href="#">Contact us</a>
+        </nav>
         <div class="nav-icons">
             <span><i class="fa-solid fa-heart"></i></span>
             <span><i class="fa-solid fa-user"></i></span>
             <span><i class="fa-solid fa-cart-shopping"></i></span>
         </div>
-    </div>
-    <div class="container">
-        <div class="sidebar">
-            <a href="/userProfile" class="sidebar-item"><span><i class="fa-solid fa-gauge"></i></span>Dashboard</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-box"></i></span> Orders</a>
-            <a href="#" class="sidebar-item active"><span><i class="fa-solid fa-location-dot"></i></span> My Address</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-wallet"></i></span> Wallet</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-sharp fa-solid fa-users"></i></span> Referral</a>
-            <a href="#" class="sidebar-item"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
-        </div>
-        <div class="main-content">
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="/userProfile"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                <li><a href="/orders"><i class="fa-solid fa-box"></i> Orders</a></li>
+                <li><a href="/addresses" class="active"><i class="fa-solid fa-location-dot"></i> My Address</a></li>
+                <li><a href="/wallet"><i class="fa-solid fa-wallet"></i> Wallet</a></li>
+                <li><a href="/referral"><i class="fa-sharp fa-solid fa-users"></i> Referral</a></li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
             <div class="page-header">
                 <h2 class="section-title">My Addresses</h2>
-               <a href="/addAddress" style="text-decoration: none;"><button class="add-button"><i class="fa-solid fa-plus"></i>
-                        Add New Address
-
-                </button></a>
+                <a href="/addAddress" style="text-decoration: none;">
+                    <button class="add-button">
+                        <i class="fa-solid fa-plus"></i> Add New Address
+                    </button>
+                </a>
             </div>
 
             <div class="address-grid">
@@ -187,11 +236,9 @@
                             </a>
                             <div class="field-group">
                                 <div class="field-label">Full Name</div>
-                                <div class="field-value">
-                                    <%= address.name %>
-                                </div>
+                                <div class="field-value"><%= address.name %></div>
                             </div>
-        
+
                             <div class="field-group">
                                 <div class="field-label">Address</div>
                                 <div class="field-value">
@@ -200,7 +247,7 @@
                                     <%=address.pincode%>
                                 </div>
                             </div>
-        
+
                             <div class="field-group">
                                 <div class="field-label">Contact Information</div>
                                 <div class="field-value">
@@ -208,76 +255,73 @@
                                     Alternative: <%=address.altPhone%>
                                 </div>
                             </div>
-        
-                            <a href="/editAddress/<%= index %>"><button class="edit-button">Edit</button></a> 
+
+                            <a href="/editAddress/<%= index %>">
+                                <button class="edit-button">Edit</button>
+                            </a>
                         </div>
                     <%});%>
                 <% } else { %>
                     <div>No addresses found. Please add an address.</div>
                 <% } %>
             </div>
-        
-        </div>
+        </main>
     </div>
-</body>
 
-<script>
-   function confirmDelete(addressIndex, event) {
-    event.preventDefault();
-    
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#437A59',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
+    <script>
+        function confirmDelete(addressIndex, event) {
+            event.preventDefault();
             
-            const headers = {
-                'Content-Type': 'application/json'
-               
-            };
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3b7254',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
 
-            fetch(`/deleteAddress/${addressIndex}`, {
-                method: 'DELETE',
-                headers: headers,
-                credentials: 'include' 
-            })
-            .then(async response => {
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.message || 'Failed to delete address');
-                }
-                
-                return data;
-            })
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Deleted!',
-                        text: 'Your address has been deleted.',
-                        icon: 'success'
-                    }).then(() => {
-                        location.reload();
+                    fetch(`/deleteAddress/${addressIndex}`, {
+                        method: 'DELETE',
+                        headers: headers,
+                        credentials: 'include' 
+                    })
+                    .then(async response => {
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Failed to delete address');
+                        }
+                        
+                        return data;
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Your address has been deleted.',
+                                icon: 'success'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'Something went wrong',
+                            icon: 'error'
+                        });
                     });
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: 'Error!',
-                    text: error.message || 'Something went wrong',
-                    icon: 'error'
-                });
             });
         }
-    });
-}
-
-</script>
-
+    </script>
+</body>
 </html>

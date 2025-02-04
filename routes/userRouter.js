@@ -5,7 +5,12 @@ const profileController = require('../controllers/user/profileController');
 const addressController = require('../controllers/user/addressController');
 const cartController = require('../controllers/user/cartController');
 const checkoutController = require('../controllers/user/checkoutController');
-const orderController = require('../controllers/user/orderController')
+const orderController = require('../controllers/user/orderController');
+const couponController = require('../controllers/user/couponController');
+const wishlistController = require('../controllers/user/wishlistController');
+const walletController = require('../controllers/user/walletController');
+const referralController = require('../controllers/user/referralController');
+
 const passport = require('passport');
 const { blockAuth,userAuth , adminAuth , redirectIfAuthenticated} = require('../middlewares/auth');
 
@@ -26,7 +31,7 @@ router.get('/productDetails',blockAuth, userController.getProductDetails);
 router.get('/auth/google', 
     passport.authenticate('google', { 
         scope: ['profile', 'email'],
-        prompt: 'select_account'  // Forces Google account selection
+        prompt: 'select_account' 
     })
 );
 
@@ -86,14 +91,39 @@ router.delete('/removeCart/:itemId', userAuth, cartController.removeCartItem);
 
 router.get('/checkout', userAuth, checkoutController.getCheckout);
 router.post('/process-checkout', userAuth, checkoutController.processCheckout);
+router.post('/create-razorpay-order', userAuth, checkoutController.createRazorpayOrder);
+router.post('/verify-payment', userAuth, checkoutController.verifyPayment);
 
-//order management
+
 
 router.get('/orders', userAuth, orderController.getUserOrders);
 router.post('/orders/create', userAuth, orderController.createOrder);
 router.post('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
 router.post('/orders/:orderId/items/:itemId/cancel',userAuth, orderController.cancelOrderItem);
 router.get('/orders/:orderId', userAuth, orderController.getOrderDetails);
+
+router.post('/submit-return',userAuth,orderController.submitReturnRequest);
+router.get('/return-requests',userAuth,orderController.getReturnRequests);
+router.post('/process-return',userAuth,orderController.processReturnRequest);
+
+
+
+router.post('/apply-coupon', userAuth, couponController.applyCoupon);
+router.post('/remove-coupon', userAuth, couponController.removeCoupon);
+router.get('/available-coupons', userAuth, couponController.getAvailableCoupons);
+
+router.get('/wishlist', userAuth, wishlistController.getWishlist);
+router.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
+router.delete('/wishlist/remove/:productId', userAuth, wishlistController.removeFromWishlist);
+
+
+router.get('/wallet', userAuth, walletController.getWallet);
+router.post('/wallet/refund/return', userAuth, walletController.processReturnRefund);
+router.post('/wallet/pay', userAuth, walletController.useWalletForOrder);
+
+router.get('/referral',userAuth,referralController.getReferral)
+
+
 
 
 

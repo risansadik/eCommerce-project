@@ -8,7 +8,6 @@ const orderSchema = new Schema({
         default: () => uuidv4(),
         unique: true
     },
-
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -20,7 +19,6 @@ const orderSchema = new Schema({
         required: true
     },
     orderedItems: [{
-
         product: {
             type: Schema.Types.ObjectId,
             ref: 'Product',
@@ -36,7 +34,7 @@ const orderSchema = new Schema({
         },
         price: {
             type: Number,
-            required:true
+            required: true
         },
         status: {
             type: String,
@@ -69,10 +67,37 @@ const orderSchema = new Schema({
         default: Date.now,
     },
     couponApplied: {
-        type: Boolean,
-        default: false
+        couponCode: {
+            type: String,
+            default: null
+        },
+        couponId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Coupon',
+            default: null
+        },
+        discountAmount: {
+            type: Number,
+            default: 0
+        }
     },
-})
+    paymentMethod: {
+        type: String,
+        enum: ['cod', 'razorpay','wallet'],
+        required: true
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'completed', 'failed','refunded'],
+        default: 'pending'
+    },
+    razorpayOrderId: {
+        type: String
+    },
+    razorpayPaymentId: {
+        type: String
+    }
+});
 
 orderSchema.pre('find', function(next) {
     console.log('Finding order with query:', this.getQuery());
@@ -97,7 +122,6 @@ orderSchema.methods.recalculateTotals = function() {
             throw new Error(`Invalid numeric values at index ${index}`);
         }
 
-      
         const subtotal = Number((basePrice * quantity).toFixed(2));
         
         return {
@@ -108,7 +132,6 @@ orderSchema.methods.recalculateTotals = function() {
         };
     });
 
-   
     console.log('Normalized items:', normalizedItems.map(item => ({
         pricePerUnit: item.price,
         quantity: item.quantity,
@@ -116,15 +139,13 @@ orderSchema.methods.recalculateTotals = function() {
         subtotal: item.subtotal
     })));
 
-  
     const activeItems = normalizedItems.filter(item => item.status !== 'Cancelled');
 
-   
     this.totalPrice = Number(
         activeItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2)
     );
 
-  
+    // Get discount from coupon if applied
     const discount = Number(this.discount || 0);
     this.finalAmount = Number((this.totalPrice - discount).toFixed(2));
 
@@ -135,6 +156,13 @@ orderSchema.methods.recalculateTotals = function() {
         this.totalPrice = 0;
         this.finalAmount = 0;
         this.discount = 0;
+        
+        // Reset coupon information
+        this.couponApplied = {
+            couponCode: null,
+            couponId: null,
+            discountAmount: 0
+        };
     }
 
     console.log('Final calculation:', {

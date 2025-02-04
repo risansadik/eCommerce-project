@@ -39,11 +39,22 @@ const cartSchema = new Schema({
             type: String,
             default: "none"
         }
-    }]
+    }],
+    appliedCoupon: {
+        couponId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Coupon',
+            default: null
+        },
+        discount: {
+            type: Number,
+            default: 0
+        }
+    }
 });
 
 // Pre-save middleware to calculate totalPrice
-cartSchema.pre('save', function(next) {
+cartSchema.pre('save', function (next) {
     this.items.forEach(item => {
         item.totalPrice = item.price * item.quantity;
     });
