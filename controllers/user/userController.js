@@ -365,7 +365,7 @@ const getShopPage = async (req, res) => {
             query.category = req.query.category;
         }
         
-        // Add price range filter
+     
         if (priceRange) {
             const [min, max] = priceRange.split('-');
             if (max === 'above') {
@@ -484,7 +484,7 @@ const getProductDetails = async (req, res) => {
             product: productData,
             relatedProducts: relatedProducts,
             user: null,
-            isInWishlist: false  // Default value
+            isInWishlist: false  
         };
 
         if (user) {

@@ -195,24 +195,24 @@
             });
         }
         function validateOTPForm() {
-    // Collect OTP from the form inputs
+
     let otp = '';
     document.querySelectorAll('.otp-input').forEach(input => {
         otp += input.value;
     });
 
-    // Send OTP to backend for verification via Fetch
+  
     fetch('/verify-passForgot-otp', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ otp: otp })  // OTP entered by the user
+        body: JSON.stringify({ otp: otp })  
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Show success message using SweetAlert
+            
             Swal.fire({
                 icon: "success",
                 title: "OTP Verified",
@@ -220,11 +220,11 @@
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                // Redirect to login page after the success message
-                window.location.href = '/reset-password';  // Adjust to your login page URL
+             
+                window.location.href = '/reset-password';  
             });
         } else {
-            // Show error message
+            
             Swal.fire({
                 icon: "error",
                 title: "Error",
@@ -240,7 +240,7 @@
         });
     });
 
-    return false; // Prevent the form from submitting traditionally
+    return false; 
 }
 
     </script>

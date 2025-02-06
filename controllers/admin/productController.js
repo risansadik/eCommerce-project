@@ -222,7 +222,7 @@ const removeProductOffer = async (req, res) => {
     try {
         const { productId } = req.body;
 
-        // Input validation
+       
         if (!productId) {
             return res.status(400).json({
                 status: false,

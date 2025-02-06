@@ -63,6 +63,8 @@ const securePassword = async (password) => {
 
     } catch (error) {
 
+        console.log('error hashing password : ',error);
+
     }
 }
 
@@ -168,6 +170,7 @@ const postNewPassword = async (req, res) => {
         const email = req.session.email;
 
         if (newPass1 === newPass2) {
+
             const passwordHash = await securePassword(newPass1);
             await User.updateOne({ email: email }, { $set: { password: passwordHash } });
             res.json({ success: true });

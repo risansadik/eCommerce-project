@@ -41,7 +41,7 @@ router.get('/auth/google/callback',
         failureMessage: true
     }),
     (req, res) => {
-        // Set both passport user and your session user
+       
         req.session.user = req.user._id;
         console.log('Google auth successful, session user set:', req.session.user);
         res.redirect('/');

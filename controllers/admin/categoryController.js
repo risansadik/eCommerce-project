@@ -6,9 +6,9 @@ const categoryInfo = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 4;
         const skip = (page - 1) * limit;
-        const search = req.query.search ? req.query.search.trim() : ""; // Trim the search input
+        const search = req.query.search ? req.query.search.trim() : ""; 
 
-        // Create search query with case-insensitive search
+      
         const searchQuery = {
             $or: [
                 // Using $regex with $options: 'i' for case-insensitive search
@@ -178,24 +178,24 @@ const editCategory = async (req, res) => {
         const id = req.params.id;
         const { categoryName, description } = req.body;
 
-        // Check if either categoryName or description is empty
+    
         if (!categoryName || !description) {
             return res.status(400).json({ error: "Name and description cannot be empty" });
         }
 
-        // Fetch the current category to compare with new values
+  
         const currentCategory = await Category.findById(id);
 
         if (!currentCategory) {
             return res.status(404).json({ error: "Category not found" });
         }
 
-        // Check if name and description are the same as the current category
+
         if (currentCategory.name === categoryName && currentCategory.description === description) {
             return res.status(400).json({ error: "No changes were made" });
         }
 
-        // Check if another category with the same name exists (excluding the current category by ID)
+
         const existingCategory = await Category.findOne({
             name: categoryName,
             _id: { $ne: id }
@@ -205,7 +205,7 @@ const editCategory = async (req, res) => {
             return res.status(400).json({ error: "Category with the same name already exists" });
         }
 
-        // Proceed with the update
+     
         const updatedCategory = await Category.findByIdAndUpdate(
             id,
             { name: categoryName, description: description },

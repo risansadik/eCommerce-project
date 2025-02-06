@@ -3,23 +3,27 @@ const Product = require('../../models/productSchema');
 
 const getWishlist = async (req, res) => {
     try {
-        const userId = req.session.user; 
+        const userId = req.session.user;
+
         const wishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products.productId',
-            model: 'Product'
+            model: 'Product',
+            select: 'productName productImage regularPrice salePrice sizeVariants'
         });
-        
-        res.render('wishlist', { 
+
+        console.log('Wishlist data:', wishlist); // Add this for debugging
+
+        res.render('wishlist', {
             wishlist: wishlist || { products: [] }
         });
     } catch (error) {
         console.error('Wishlist fetch error:', error);
-        res.render('wishlist', { 
+        res.render('wishlist', {
             wishlist: { products: [] },
             error: 'Failed to load wishlist'
         });
     }
-}
+};
 
 const addToWishlist = async (req, res) => {
     try {
@@ -29,7 +33,7 @@ const addToWishlist = async (req, res) => {
         console.log('Adding to wishlist:', { userId, productId }); // Debug log
 
         let wishlist = await Wishlist.findOne({ userId });
-        
+
         if (!wishlist) {
             wishlist = new Wishlist({
                 userId,
@@ -37,15 +41,15 @@ const addToWishlist = async (req, res) => {
             });
         } else {
             // Check if product already exists
-            const productExists = wishlist.products.some(item => 
+            const productExists = wishlist.products.some(item =>
                 item.productId.toString() === productId
             );
-            
+
             if (!productExists) {
                 wishlist.products.push({ productId });
             }
         }
-        
+
         await wishlist.save();
         console.log('Wishlist saved successfully'); // Debug log
         res.json({ success: true });
@@ -64,7 +68,7 @@ const removeFromWishlist = async (req, res) => {
             { userId },
             { $pull: { products: { productId } } }
         );
-        
+
         res.json({ success: true });
     } catch (error) {
         console.error('Remove from wishlist error:', error);
