@@ -111,36 +111,7 @@
 
 <body>
 
-    <!-- Start Header/Navigation -->
-    <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
-
-        <div class="container">
-            <a class="navbar-brand" href="index.html">Furni<span>.</span></a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni"
-                aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarsFurni">
-                <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-                    <li class="nav-item ">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li><a class="nav-link" href="/shop">Shop</a></li>
-                    <li><a class="nav-link" href="about.html">About us</a></li>
-                    <li><a class="nav-link" href="contact.html">Contact us</a></li>
-                </ul>
-
-                <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
-                    <li><a class="nav-link" href="#"><img src="images/user.svg"></a></li>
-                    <li><a class="nav-link" href="/cart"><img src="images/cart.svg"></a></li>
-                </ul>
-            </div>
-        </div>
-
-    </nav>
-    <!-- End Header/Navigation -->
+  <%-include('../../views/partials/user/header.ejs')%>
 
     <!-- Start Hero Section -->
     <div class="hero">
@@ -363,12 +334,16 @@
                                             <div class="form-group mb-2 mt-3">
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" id="cod" name="paymentMethod" value="cod"
-                                                        class="custom-control-input" checked>
+                                                        class="custom-control-input" <%=finalAmount> 5000 ? 'disabled' :
+                                                    'checked' %>>
                                                     <label class="custom-control-label" for="cod">
                                                         Cash on Delivery
                                                         <small class="d-block text-muted">Payment will be collected at
-                                                            the
-                                                            time of delivery</small>
+                                                            the time of delivery</small>
+                                                        <% if (finalAmount> 5000) { %>
+                                                            <small class="d-block text-danger">COD is not available for
+                                                                orders above ₹5,000</small>
+                                                            <% } %>
                                                     </label>
                                                 </div>
                                             </div>
@@ -421,66 +396,7 @@
         </div>
     </div>
 
-    <!-- Start Footer Section -->
-    <footer class="footer-section">
-        <div class="container relative">
-
-            <div class="sofa-img">
-                <img src="/images/black-hoodie-removebg-preview.png" alt="Image" class="img-fluid">
-            </div>
-
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="subscription-form">
-                        <h3 class="d-flex align-items-center"><span class="me-1"><img src="images/envelope-outline.svg"
-                                    alt="Image" class="img-fluid"></span><span>Subscribe to Newsletter</span></h3>
-
-                        <form action="#" class="row g-3">
-                            <div class="col-auto">
-                                <input type="text" class="form-control" placeholder="Enter your name">
-                            </div>
-                            <div class="col-auto">
-                                <input type="email" class="form-control" placeholder="Enter your email">
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-primary">
-                                    <span class="fa fa-paper-plane"></span>
-                                </button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-5 mb-5">
-                <div class="col-lg-4">
-                    <div class="mb-4 footer-logo-wrap"><a href="#" class="footer-logo">Brossoc<span>.</span></a>
-                    </div>
-                    <p class="mb-4">Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl
-                        dapibus
-                        malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor
-                        tristique.
-                        Pellentesque habitant</p>
-
-                    <ul class="list-unstyled custom-social">
-                        <li><a href="#"><span class="fa fa-brands fa-facebook-f"></span></a></li>
-                        <li><a href="#"><span class="fa fa-brands fa-twitter"></span></a></li>
-                        <li><a href="#"><span class="fa fa-brands fa-instagram"></span></a></li>
-                        <li><a href="#"><span class="fa fa-brands fa-linkedin"></span></a></li>
-                    </ul>
-                </div>
-
-
-            </div>
-
-        </div>
-
-
-
-        </div>
-    </footer>
-    <!-- End Footer Section -->
+   <%-include('../../views/partials/user/footer.ejs')%>
 
 
     <script src="js/bootstrap.bundle.min.js"></script>
@@ -492,6 +408,7 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const checkoutForm = document.getElementById('checkoutForm');
+            let rzpOptions = null; // Store Razorpay options globally
 
             const walletRadio = document.getElementById('wallet');
 
@@ -508,6 +425,12 @@
                     walletRadio.nextElementSibling.querySelector('small').textContent =
                         `Available balance: ₹${walletBalance.toFixed(2)}`;
                 }
+            }
+
+            // Function to initialize Razorpay payment
+            function initializeRazorpay(options) {
+                const rzp = new Razorpay(options);
+                rzp.open();
             }
 
             if (checkoutForm) {
@@ -594,7 +517,7 @@
                                 throw new Error(orderData.message);
                             }
 
-                            const options = {
+                            rzpOptions = {
                                 key: orderData.key,
                                 amount: orderData.order.amount,
                                 currency: orderData.order.currency,
@@ -612,7 +535,7 @@
                                                 razorpay_order_id: response.razorpay_order_id,
                                                 razorpay_payment_id: response.razorpay_payment_id,
                                                 razorpay_signature: response.razorpay_signature
-                                            })
+                                            }),
                                         });
 
                                         const result = await verifyResponse.json();
@@ -642,7 +565,48 @@
                                             icon: 'error',
                                             title: 'Payment Verification Failed',
                                             text: error.message || 'Please contact support if amount is deducted',
-                                            confirmButtonColor: '#dc3545'
+                                            confirmButtonColor: '#dc3545',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Retry Payment',
+                                            cancelButtonText: 'Cancel'
+                                        }).then((result) => {
+                                            if (result.isConfirmed && rzpOptions) {
+                                                initializeRazorpay(rzpOptions);
+                                            }
+                                        });
+                                    }
+                                },
+                                modal: {
+                                    ondismiss: function () {
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Payment Cancelled',
+                                            text: 'Your payment process was cancelled. Please try again.',
+                                            confirmButtonColor: '#4A665B',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Retry Payment',
+                                            cancelButtonText: 'Cancel'
+                                        }).then((result) => {
+                                            if (result.isConfirmed && rzpOptions) {
+                                                initializeRazorpay(rzpOptions);
+                                            }
+                                        });
+                                    }
+                                },
+                                payment: {
+                                    failed: function (response) {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Payment Failed',
+                                            text: 'The payment could not be processed. Please try again or choose a different payment method.',
+                                            confirmButtonColor: '#dc3545',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Retry Payment',
+                                            cancelButtonText: 'Cancel'
+                                        }).then((result) => {
+                                            if (result.isConfirmed && rzpOptions) {
+                                                initializeRazorpay(rzpOptions);
+                                            }
                                         });
                                     }
                                 },
@@ -656,15 +620,21 @@
                                 }
                             };
 
-                            const rzp = new Razorpay(options);
-                            rzp.open();
+                            initializeRazorpay(rzpOptions);
 
                         } catch (error) {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Payment Initialization Failed',
                                 text: error.message || 'Please try again',
-                                confirmButtonColor: '#dc3545'
+                                confirmButtonColor: '#dc3545',
+                                showCancelButton: true,
+                                confirmButtonText: 'Retry Payment',
+                                cancelButtonText: 'Cancel'
+                            }).then((result) => {
+                                if (result.isConfirmed && rzpOptions) {
+                                    initializeRazorpay(rzpOptions);
+                                }
                             });
                         }
                     } else {
@@ -680,7 +650,6 @@
                             })
                         })
                             .then(async response => {
-                                // Add logging to check response
                                 const result = await response.json();
                                 console.log('COD Response:', result);
                                 if (!response.ok) {

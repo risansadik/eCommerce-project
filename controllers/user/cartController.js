@@ -21,11 +21,10 @@ const getCart = async (req, res) => {
             });
 
         if (cart && cart.items.length > 0) {
-            // Filter out invalid products and check stock
+         
             const validItems = cart.items.filter(item => {
                 const isValid = !item.productId.isBlocked && item.productId.category?.isListed;
                 
-                // Check stock in size variant
                 const sizeVariant = item.productId.sizeVariants.find(v => v.size === item.size);
                 const hasStock = sizeVariant && sizeVariant.quantity >= item.quantity;
                 
@@ -42,7 +41,7 @@ const getCart = async (req, res) => {
             });
 
             if (itemsRemoved) {
-                // Update cart with only valid items
+               
                 cart.items = validItems;
                 await cart.save();
             }
@@ -134,6 +133,12 @@ const addToCart = async (req, res) => {
 
     } catch (error) {
         console.error('Add to cart error:', error);
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please sign in to continue'
+            });
+        }
         res.status(500).json({
             success: false,
             message: 'Error adding product to cart'

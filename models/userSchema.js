@@ -60,7 +60,17 @@ const userSchema = new Schema({
     },
     referalCode: {
         type: String,
-
+        unique: true,
+        default: () => generateUniqueReferralCode()
+    },
+    referredBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
+    referralCount: {
+        type: Number,
+        default: 0
     },
     redeemed: {
         type: Boolean
@@ -81,6 +91,12 @@ const userSchema = new Schema({
     }]
 })
 
-const User = mongoose.model("User",userSchema);
+function generateUniqueReferralCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 
-module.exports = User;
+
+module.exports = mongoose.model("User", userSchema);
+
+
+module.exports.generateUniqueReferralCode = generateUniqueReferralCode;

@@ -176,14 +176,14 @@
 			}
 		}
 
-	
+
 		#priceSort {
 			margin-left: 50%;
 			width: 200px;
-			
+
 		}
 
-	
+
 		@media screen and (max-width: 1200px) {
 			#priceSort {
 				margin-left: 40%;
@@ -210,7 +210,7 @@
 			}
 		}
 
-		
+
 		@media screen and (max-width: 375px) {
 			#priceSort {
 				width: 120px;
@@ -241,7 +241,7 @@
 			background-color: #000;
 		}
 
-		
+
 		.filter-section {
 			padding: 20px;
 			margin-bottom: 30px;
@@ -368,7 +368,7 @@
 													<div class="d-flex justify-content-between align-items-center">
 														<div>
 															<strong class="text-success">₹<%= product.salePrice %>
-																	</strong>
+															</strong>
 															<% if (product.regularPrice> product.salePrice) { %>
 																<small
 																	class="text-muted text-decoration-line-through ms-2">
@@ -422,17 +422,64 @@
 						urlParams.delete(key);
 					}
 				}
-				return `${window.location.pathname}?${urlParams.toString()}`;
+				return urlParams.toString();
 			}
 
-			
+			async function fetchAndRender(params) {
+				try {
+					const response = await fetch(`/shop?${params}`, {
+						headers: {
+							'X-Requested-With': 'XMLHttpRequest'
+						}
+					});
+					if (!response.ok) throw new Error('Network response was not ok');
+					const data = await response.json();
+
+				
+					const newUrl = `${window.location.pathname}?${params}`;
+					window.history.pushState({ path: newUrl }, '', newUrl);
+
+					location.reload();
+				} catch (error) {
+					console.error('Error:', error);
+				}
+			}
+
 			function sortProducts(sortValue) {
-				window.location.href = updateQueryParams({ sort: sortValue });
+				const params = updateQueryParams({ sort: sortValue });
+				fetchAndRender(params);
 			}
 
 			function filterByPrice(range) {
-				window.location.href = updateQueryParams({ priceRange: range });
+				const params = updateQueryParams({ priceRange: range });
+				fetchAndRender(params);
 			}
+
+	
+			document.querySelector('.search-bar form').addEventListener('submit', function (e) {
+				e.preventDefault();
+				const searchValue = this.querySelector('input[name="search"]').value;
+				const params = updateQueryParams({ search: searchValue });
+				fetchAndRender(params);
+			});
+
+			document.querySelectorAll('.category-pills .nav-link').forEach(link => {
+				link.addEventListener('click', function (e) {
+					e.preventDefault();
+					let params;
+
+					if (this.getAttribute('href') === '/shop') {
+					
+						params = updateQueryParams({ category: '' });
+					} else {
+					
+						const categoryId = new URL(this.href).searchParams.get('category');
+						params = updateQueryParams({ category: categoryId });
+					}
+
+					fetchAndRender(params);
+				});
+			});
 		</script>
 </body>
 

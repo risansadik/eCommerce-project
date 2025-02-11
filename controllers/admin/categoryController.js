@@ -11,7 +11,7 @@ const categoryInfo = async (req, res) => {
       
         const searchQuery = {
             $or: [
-                // Using $regex with $options: 'i' for case-insensitive search
+              
                 { name: { $regex: new RegExp(search, 'i') } },
                 { description: { $regex: new RegExp(search, 'i') } }
             ]

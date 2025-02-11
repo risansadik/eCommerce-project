@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brossoc - Referral Program</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css">
     <style>
+        /* Your existing styles remain unchanged */
         * {
             margin: 0;
             padding: 0;
@@ -64,7 +67,7 @@
             width: 250px;
             background-color: white;
             padding: 1rem;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar-menu {
@@ -95,20 +98,11 @@
             padding: 2rem;
         }
 
-        .back-button {
-            color: #3b7254;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
         .referral-card {
             background-color: white;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
             max-width: 600px;
             margin: 0 auto;
@@ -174,26 +168,28 @@
             color: #666;
             font-size: 0.9rem;
         }
-        .txt{
 
+        .txt {
             text-decoration: none;
             color: white;
         }
     </style>
 </head>
+
 <body>
+    <!-- Your existing HTML structure remains unchanged -->
     <header class="header">
         <div class="logo">Brossoc</div>
         <nav class="nav-menu">
             <a href="/">Home</a>
             <a href="/shop">Shop</a>
-            <a href="#">About us</a>
-            <a href="#">Contact us</a>
+            <a href="/about">About us</a>
+            <a href="/contact">Contact us</a>
         </nav>
         <div class="nav-icons">
             <a href="/wishlist" class="txt"><span><i class="fa-solid fa-heart"></i></span></a>
             <a href="/userProfile" class="txt"><span><i class="fa-solid fa-user"></i></span></a>
-            <a href="/cart" class="txt"<span><i class="fa-solid fa-cart-shopping"></i></span></a>
+            <a href="/cart" class="txt"><span><i class="fa-solid fa-cart-shopping"></i></span></a>
         </div>
     </header>
 
@@ -210,18 +206,12 @@
         </aside>
 
         <div class="content">
-            <a href="#" class="back-button">
-                <i class="fa-solid fa-arrow-left"></i>
-                Back
-            </a>
-            
             <div class="referral-card">
                 <h1 class="referral-title">Invite Friends, Earn Rewards</h1>
-                <p class="referral-subtitle">For every friend who makes their first purchase</p>
-                
+                <p class="referral-subtitle">Earn ₹100 for every friend who signs up</p>
                 <div class="referral-code-container">
-                    <span class="referral-code">71SZ4B</span>
-                    <button class="copy-btn">
+                    <span class="referral-code"><%= referralCode %></span>
+                    <button class="copy-btn" onclick="copyReferralCode()">
                         <i class="fa-regular fa-copy"></i>
                         Copy
                     </button>
@@ -229,12 +219,106 @@
 
                 <div class="progress-container">
                     <div class="progress-bar">
-                        <div class="progress-fill"></div>
+                        <div class="progress-fill" style="width: <%=(referralCount / 10) * 100 %>%"></div>
                     </div>
-                    <p class="progress-text">6/10 referrals until next reward tier</p>
+                    <p class="progress-text"><%= referralCount %>/10 referrals until next reward tier</p>
+                </div>
+
+                <div class="referral-rewards">
+                    <h3>Your Referral Earnings</h3>
+                    <p>Total Wallet Balance: ₹<%= wallet.toFixed(2) %></p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Add SweetAlert2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
+    
+    <script>
+        function copyReferralCode() {
+            const referralCode = document.querySelector('.referral-code').textContent.trim();
+            
+            navigator.clipboard.writeText(referralCode).then(() => {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Referral code copied to clipboard',
+                    icon: 'success',
+                    confirmButtonColor: '#3b7254',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false
+                });
+            }).catch(() => {
+                // Fallback for browsers that don't support clipboard API
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = referralCode;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+                
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Referral code copied to clipboard',
+                    icon: 'success',
+                    confirmButtonColor: '#3b7254',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false
+                });
+            });
+        }
+
+        function shareReferralCode() {
+            const referralCode = document.querySelector('.referral-code').textContent.trim();
+            const shareText = `Join Brossoc and use my referral code ${referralCode} to get ₹100!`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Brossoc Referral',
+                    text: shareText
+                }).then(() => {
+                    Swal.fire({
+                        title: 'Shared!',
+                        text: 'Thank you for sharing',
+                        icon: 'success',
+                        confirmButtonColor: '#3b7254',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false
+                    });
+                }).catch((error) => {
+                    console.error('Error sharing:', error);
+                    showShareFallback();
+                });
+            } else {
+                showShareFallback();
+            }
+        }
+
+        function showShareFallback() {
+            const referralCode = document.querySelector('.referral-code').textContent.trim();
+            Swal.fire({
+                title: 'Share Your Referral Code',
+                text: `Your referral code is: ${referralCode}`,
+                icon: 'info',
+                confirmButtonColor: '#3b7254',
+                showCancelButton: true,
+                confirmButtonText: 'Copy Code',
+                cancelButtonText: 'Close'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    copyReferralCode();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

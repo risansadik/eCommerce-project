@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 
-// Product images storage configuration
+
 const productStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'public/uploads/product-images');
@@ -12,7 +12,7 @@ const productStorage = multer.diskStorage({
     }
 });
 
-// File filter for images
+
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
@@ -21,17 +21,17 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Create the multer upload middleware
+
 const uploadProduct = multer({
     storage: productStorage,
     limits: {
-        fileSize: 5 * 1024 * 1024,  // 5MB limit
-        files: 4  // Maximum 4 files
+        fileSize: 5 * 1024 * 1024,  
+        files: 4  
     },
     fileFilter: fileFilter
 }).array('images', 4);
 
-// Export the middleware
+
 module.exports = {
     uploadProduct
 };

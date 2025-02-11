@@ -27,7 +27,7 @@ const createOrder = async (req, res) => {
             });
         }
 
-        // Get cart
+
         const cart = await Cart.findOne({ userId })
             .populate('items.productId');
 
@@ -70,7 +70,7 @@ const createOrder = async (req, res) => {
             discountAmount: 0
         };
 
-        // If cart has an applied coupon, transfer it to the order
+    
         if (cart.appliedCoupon && cart.appliedCoupon.couponId) {
             const coupon = await Coupon.findById(cart.appliedCoupon.couponId);
             if (coupon) {
@@ -95,10 +95,10 @@ const createOrder = async (req, res) => {
             couponApplied: couponDetails
         });
 
-        // Save order
+    
         await order.save();
 
-        // Update product inventory
+      
         for (const item of cart.items) {
             await Product.updateOne(
                 {
@@ -111,7 +111,7 @@ const createOrder = async (req, res) => {
             );
         }
 
-        // Clear cart
+       
         await Cart.findByIdAndDelete(cart._id);
 
         return res.json({
@@ -547,6 +547,12 @@ const getOrderDetails = async (req, res) => {
                 (!item.status || item.status !== 'Cancelled')
         }));
 
+        const canDownloadInvoice = (
+            (order.paymentMethod === 'cod' && order.status === 'Delivered') ||
+            (order.paymentMethod !== 'cod' && ['Shipped', 'Delivered'].includes(order.status))
+        );
+
+
         const processedOrder = {
             _id: order._id,
             orderId: order.orderId,
@@ -561,10 +567,12 @@ const getOrderDetails = async (req, res) => {
             invoiceDate: order.invoiceDate,
             canCancel: ['Pending', 'Processing'].includes(order.status),
             paymentMethod: order.paymentMethod,
-            // Update payment status to completed if order is delivered
             paymentStatus: order.status === 'Delivered' ? 'completed' : order.paymentStatus,
             razorpayOrderId: order.razorpayOrderId,
-            razorpayPaymentId: order.razorpayPaymentId
+            razorpayPaymentId: order.razorpayPaymentId,
+            invoiceNumber: order.invoiceNumber,
+            invoiceGeneratedAt: order.invoiceGeneratedAt,
+            canDownloadInvoice,
         };
 
         if (req.xhr && req.accepts('json')) {
@@ -622,7 +630,7 @@ const submitReturnRequest = async (req, res) => {
 
         console.log('Received return request:', { orderId, userId, returnReason });
 
-        // Validate order
+
         const order = await Order.findOne({ orderId: orderId, userId });
         console.log('Order found:', order);
 
@@ -686,11 +694,11 @@ const processReturnRequest = async (req, res) => {
         const order = returnOrder.orderId;
 
         if (action === 'approve') {
-            // Update return status
+      
             returnOrder.returnStatus = 'Approved';
             returnOrder.processedDate = new Date();
 
-            // Update order status
+          
             order.status = 'Returned';
             if (['razorpay', 'wallet'].includes(order.paymentMethod) && order.paymentStatus === 'completed') {
                 try {
@@ -734,7 +742,101 @@ const processReturnRequest = async (req, res) => {
     }
 };
 
+const generateInvoicePDF = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { orderId } = req.params;
 
+        const order = await Order.findOne({
+            orderId: orderId,
+            userId: userId
+        }).populate([
+            {
+                path: 'orderedItems.product',
+                select: 'productName productImage price',
+                model: 'Product'
+            }
+        ]);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        const activeItems = order.orderedItems.filter(item => item.status !== 'Cancelled');
+
+        const totalPrice = activeItems.reduce((sum, item) => sum + item.price, 0);
+        const finalAmount = totalPrice - (order.discount || 0);
+
+
+       
+        let addressDocument = await Address.findById(order.address);
+
+        if (!addressDocument) {
+            addressDocument = await Address.findOne({
+                userId: order.userId,
+                'address._id': order.address
+            });
+        }
+
+       
+        let addressInfo;
+        if (addressDocument) {
+            const addressData = addressDocument.address.find(
+                addr => addr._id.toString() === order.address.toString()
+            ) || addressDocument.address[0];
+
+            addressInfo = {
+                name: addressData.name || 'N/A',
+                street: addressData.landmark || addressData.street || 'N/A',
+                city: addressData.city || 'N/A',
+                state: addressData.state || 'N/A',
+                pincode: addressData.pincode || 'N/A',
+                mobile: addressData.phone || addressData.mobile || addressData.altPhone || 'N/A'
+            };
+        } else {
+            addressInfo = {
+                name: 'N/A',
+                street: 'N/A',
+                city: 'N/A',
+                state: 'N/A',
+                pincode: 'N/A',
+                mobile: 'N/A'
+            };
+        }
+
+        const canDownloadInvoice = (
+            (order.paymentMethod === 'cod' && order.status === 'Delivered') ||
+            (order.paymentMethod !== 'cod' && ['Shipped', 'Delivered'].includes(order.status))
+        );
+
+        if (!canDownloadInvoice) {
+            return res.status(403).json({ success: false, message: 'Invoice not available yet' });
+        }
+
+       
+        return res.json({
+            success: true,
+            order: {
+                orderId: order.orderId,
+                invoiceNumber: order.invoiceNumber || `INV-${order.orderId}`,
+                invoiceGeneratedAt: order.invoiceGeneratedAt || new Date(),
+                orderedItems: activeItems, 
+                totalPrice: totalPrice, 
+                discount: order.discount || 0,
+                finalAmount: finalAmount, 
+                address: addressInfo,
+                status: order.status,
+                paymentMethod: order.paymentMethod,
+                paymentStatus: order.status === 'Delivered' ? 'completed' : order.paymentStatus,
+                orderDate: order.createdOn,
+                razorpayPaymentId: order.razorpayPaymentId
+            }
+        });
+    } catch (error) {
+        console.error('Error in generateInvoicePDF:', error);
+        res.status(500).json({ success: false, message: 'Failed to generate invoice' });
+    }
+};
 module.exports = {
 
     createOrder,
@@ -744,5 +846,6 @@ module.exports = {
     getOrderDetails,
     getReturnRequests,
     processReturnRequest,
-    submitReturnRequest
+    submitReturnRequest,
+    generateInvoicePDF
 }

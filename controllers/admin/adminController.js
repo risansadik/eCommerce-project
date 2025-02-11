@@ -30,14 +30,14 @@ const login = async (req, res) => {
             return res.render('admin-login', { message: 'Invalid Password' });
         }
 
-        // Set admin session
+       
         req.session.admin = {
             _id: adminData._id,
             email: adminData.email,
             isAdmin: adminData.isAdmin
         };
 
-        // Save session explicitly
+       
         req.session.save((err) => {
             if (err) {
                 console.log('Session save error:', err);
@@ -60,7 +60,7 @@ const pageError = async (req,res) => {
 
 const logout = async (req, res) => {
     try {
-        // Only destroy admin part of session
+       
         req.session.admin = null;
         req.session.save((err) => {
             if (err) {

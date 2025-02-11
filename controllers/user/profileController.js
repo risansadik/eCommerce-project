@@ -33,7 +33,7 @@ const sendVerificationEmail = async (email, otp) => {
             debug: true
         });
 
-        // Verify transporter configuration
+       
         await transporter.verify();
         console.log('Transporter verified successfully');
 
@@ -55,18 +55,17 @@ const sendVerificationEmail = async (email, otp) => {
 }
 
 const securePassword = async (password) => {
-
-    try {
-
-        const passwordHash = await bcrypt.hash(password, 10);
-        return passwordHash;
-
-    } catch (error) {
-
-        console.log('error hashing password : ',error);
-
+    if (!password) {
+        throw new Error('Password is required');
     }
-}
+    
+    try {
+        return await bcrypt.hash(password, 10);
+    } catch (error) {
+        console.error('Password hashing failed:', error);
+        throw error; 
+    }
+};
 
 const getForgotPassPage = async (req, res) => {
     try {
@@ -167,27 +166,46 @@ const resendOtp = async (req, res) => {
 const postNewPassword = async (req, res) => {
     try {
         const { newPass1, newPass2 } = req.body;
-        const email = req.session.email;
+        const email = req.session.email;  
 
-        if (newPass1 === newPass2) {
+        if (!email) {
+            return res.json({
+                success: false,
+                message: "Session expired. Please try again"
+            });
+        }
 
-            const passwordHash = await securePassword(newPass1);
-            await User.updateOne({ email: email }, { $set: { password: passwordHash } });
-            res.json({ success: true });
-        } else {
-            res.json({
+        if (!newPass1 || !newPass2) {
+            return res.json({
+                success: false,
+                message: "Please provide both passwords"
+            });
+        }
+
+        if (newPass1 !== newPass2) {
+            return res.json({
                 success: false,
                 message: "Passwords do not match"
             });
         }
+
+        const passwordHash = await securePassword(newPass1);
+        await User.updateOne({ email: email }, { $set: { password: passwordHash } });
+
+        
+        req.session.userOtp = null;
+        req.session.email = null;
+
+        return res.json({ success: true });
+
     } catch (error) {
-        res.json({
+        console.error('Password reset error:', error);
+        return res.json({
             success: false,
             message: "An error occurred while changing your password"
         });
     }
 };
-
 const loadDashboard = async (req, res) => {
     try {
      

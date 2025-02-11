@@ -8,7 +8,7 @@ const razorpay = new Razorpay({
 const createOrder = async (amount, receipt) => {
     try {
         const options = {
-            amount: amount * 100, // Razorpay expects amount in paise
+            amount: amount * 100, 
             currency: 'INR',
             receipt,
             payment_capture: 1

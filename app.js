@@ -18,9 +18,9 @@ app.use(nocache());
 app.use(express.json());
 
 app.use((req, res, next) => {
-    // For AJAX requests, ensure we never try to render views
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-        res.renderJSON = res.json;  // Store original json method
+        res.renderJSON = res.json;  
         res.json = function(data) {
             res.set('Content-Type', 'application/json');
             return res.renderJSON(data);
@@ -76,6 +76,7 @@ app.use((err, req, res, next) => {
 app.set('view engine','ejs');
 app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')]);
 app.use(express.static(path.join(__dirname,'public')));
+
 
 
 

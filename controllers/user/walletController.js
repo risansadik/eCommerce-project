@@ -12,7 +12,7 @@ const walletController = {
             
             const userId = req.user._id;
             
-            // Find or create wallet
+          
             let wallet = await Wallet.findOne({ userId })
                 .populate({
                     path: 'transactions.orderId',
@@ -28,9 +28,9 @@ const walletController = {
                 await wallet.save();
             }
 
-            // Format the wallet data for the template
+          
             const formattedWallet = {
-                balance: Number(wallet.balance || 0), // Ensure balance is a number
+                balance: Number(wallet.balance || 0), 
                 transactions: wallet.transactions.map(transaction => ({
                     type: transaction.type,
                     amount: Number(transaction.amount || 0),
@@ -49,7 +49,7 @@ const walletController = {
 
         } catch (error) {
             console.error('Error fetching wallet:', error);
-            // Render with empty wallet data in case of error
+           
             res.render('wallet', {
                 wallet: {
                     balance: 0,
@@ -60,7 +60,7 @@ const walletController = {
         }
     },
 
-    // Process refund from order return
+   
     processReturnRefund: async (req, res) => {
         try {
             const { returnOrderId } = req.body;
@@ -69,7 +69,7 @@ const walletController = {
             }
             const userId = req.user._id;
 
-            // Find return order and validate
+           
             const returnOrder = await ReturnOrder.findById(returnOrderId)
                 .populate({
                     path: 'orderId',
@@ -84,13 +84,13 @@ const walletController = {
                 throw new Error('Refund already processed');
             }
 
-            // Only process refund for Razorpay payments
+          
             if (returnOrder.orderId.paymentMethod !== 'razorpay' || 
                 returnOrder.orderId.paymentStatus !== 'completed') {
                 throw new Error('Only Razorpay payments are eligible for wallet refunds');
             }
 
-            // Find or create wallet
+           
             let wallet = await Wallet.findOne({ userId });
             if (!wallet) {
                 wallet = new Wallet({ 
@@ -99,11 +99,11 @@ const walletController = {
                 });
             }
 
-            // Process refund
+            
             const refundAmount = returnOrder.orderId.finalAmount;
             await wallet.addRefund(refundAmount, returnOrder.orderId._id);
 
-            // Update return order status
+          
             returnOrder.refundStatus = 'Processed';
             returnOrder.processedDate = new Date();
             await returnOrder.save();
@@ -123,7 +123,7 @@ const walletController = {
         }
     },
 
-    // Use wallet balance for order
+
     useWalletForOrder: async (req, res) => {
         try {
             const { orderId, amount } = req.body;
@@ -132,13 +132,13 @@ const walletController = {
             }
             const userId = req.user._id;
 
-            // Validate amount
+          
             const paymentAmount = parseFloat(amount);
             if (isNaN(paymentAmount) || paymentAmount <= 0) {
                 throw new Error('Invalid payment amount');
             }
 
-            // Validate order
+     
             const order = await Order.findById(orderId);
             if (!order || order.userId.toString() !== userId.toString()) {
                 throw new Error('Invalid order');
@@ -148,7 +148,7 @@ const walletController = {
                 throw new Error('Order already paid');
             }
 
-            // Find wallet and validate balance
+       
             const wallet = await Wallet.findOne({ userId });
             if (!wallet) {
                 throw new Error('Wallet not found');
@@ -158,10 +158,10 @@ const walletController = {
                 throw new Error('Insufficient wallet balance');
             }
 
-            // Process purchase
+          
             await wallet.useForPurchase(paymentAmount, orderId);
 
-            // Update order payment status if full amount paid from wallet
+            
             if (paymentAmount === order.finalAmount) {
                 order.paymentStatus = 'completed';
                 order.paymentMethod = 'wallet';

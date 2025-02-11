@@ -21,7 +21,7 @@ const checkoutController = {
 
             const cartTotal = cart.items.reduce((total, item) => total + item.totalPrice, 0);
 
-            // Get or create wallet
+           
             let wallet = await Wallet.findOne({ userId });
             if (!wallet) {
                 wallet = new Wallet({
@@ -32,7 +32,7 @@ const checkoutController = {
                 await wallet.save();
             }
 
-            // Remove the userId filter to show all coupons
+           
             const coupons = await Coupon.find({
                 status: 'active',
                 expireOn: { $gt: new Date() },
@@ -54,7 +54,7 @@ const checkoutController = {
             const userAddresses = await Address.findOne({ userId });
             let finalAmount = cartTotal;
 
-            // Handle applied coupon logic
+            
             if (cart.appliedCoupon?.couponId) {
                 const coupon = await Coupon.findById(cart.appliedCoupon.couponId);
                 if (coupon) {
@@ -80,7 +80,7 @@ const checkoutController = {
                 addresses: userAddresses ? userAddresses.address : [],
                 user: req.user,
                 coupons: availableCoupons,
-                walletBalance: wallet.balance // Now we can safely use wallet.balance
+                walletBalance: wallet.balance 
             });
 
         } catch (error) {
@@ -92,6 +92,8 @@ const checkoutController = {
         try {
             const userId = req.user._id;
             const { addressId, paymentMethod } = req.body;
+
+    
 
             const userAddress = await Address.findOne({
                 userId,
@@ -165,7 +167,7 @@ const checkoutController = {
 
             let order;
 
-            // Handle wallet payment
+        
             if (paymentMethod === 'wallet') {
                 const wallet = await Wallet.findOne({ userId });
                 if (!wallet || wallet.balance < finalAmount) {
@@ -179,7 +181,7 @@ const checkoutController = {
                 order = new Order(orderData);
                 await order.save();
 
-                // Process wallet transaction
+              
                 await wallet.useForPurchase(finalAmount, order._id);
 
                 // Update user's wallet balance
@@ -187,7 +189,7 @@ const checkoutController = {
                     $inc: { wallet: -finalAmount }
                 });
             }
-            // Handle COD or Razorpay
+           
             else {
                 if (paymentMethod === 'cod') {
                     orderData.paymentStatus = 'pending';
@@ -196,7 +198,7 @@ const checkoutController = {
                 await order.save();
             }
 
-            // Update inventory
+         
             for (const item of cart.items) {
                 await Product.updateOne(
                     {
@@ -209,12 +211,12 @@ const checkoutController = {
                 );
             }
 
-            // Add to user's order history
+            
             await User.findByIdAndUpdate(userId, {
                 $push: { orderHistory: order._id }
             });
 
-            // Clear cart
+            
             await Cart.findByIdAndDelete(cart._id);
 
             res.status(200).json({

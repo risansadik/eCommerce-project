@@ -235,8 +235,8 @@
                 }
             });
 
-            if (isValid) {
 
+            if (isValid) {
                 const formData = {
                     name: document.getElementById('name').value,
                     addressType: document.getElementById('addressType').value,
@@ -263,9 +263,12 @@
                             Swal.fire({
                                 title: 'Success!',
                                 text: 'Address updated successfully',
-                                icon: 'success'
+                                icon: 'success',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false
                             }).then(() => {
-                                window.location.href = '/addresses';
+                                // Replace the current history entry with the addresses page
+                                window.location.replace('/addresses');
                             });
                         } else {
                             Swal.fire({
@@ -285,6 +288,7 @@
                     });
             }
         }
+
 
 
         document.getElementById('edit-address-form').addEventListener('submit', validateForm);

@@ -201,6 +201,73 @@
         .export-btn:hover {
             background-color: #4a5568;
         }
+
+        .chart-btn {
+            background-color: #2d3748;
+            color: #a0aec0;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chart-btn:hover {
+            background-color: #4a5568;
+            color: white;
+        }
+
+        .chart-btn.active {
+            background-color: #0284c7;
+            color: white;
+        }
+
+        .chart-wrapper {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .chart-wrapper:hover {
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .table-container {
+            margin-top: 15px;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th,
+        .table-container td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .table-container th {
+            background-color: #1a1d21;
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .table-container tr:hover {
+            background-color: #2d3748;
+        }
     </style>
 
     <style id="pdfStyles">
@@ -349,9 +416,27 @@
             font-family: 'Courier New', monospace;
             white-space: nowrap;
         }
+
+        .pdf-analytics {
+            margin-top: 30px;
+            page-break-before: always;
+        }
+
+        .pdf-section {
+            margin-bottom: 30px;
+        }
+
+        .pdf-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #eee;
+        }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -394,6 +479,87 @@
             <div class="stat-title">Overall Discount</div>
             <div class="stat-value">
                 ₹<%= stats && stats.discount !==undefined ? stats.discount.toLocaleString() : '0' %>
+            </div>
+        </div>
+
+        <div class="charts-section" style="margin: 30px 0;">
+            <div class="stat-card">
+                <div class="chart-controls" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                    <button class="export-btn" onclick="changePeriod('daily')" id="dailyBtn">Daily</button>
+                    <button class="export-btn" onclick="changePeriod('weekly')" id="weeklyBtn">Weekly</button>
+                    <button class="export-btn" onclick="changePeriod('monthly')" id="monthlyBtn">Monthly</button>
+                    <button class="export-btn" onclick="changePeriod('yearly')" id="yearlyBtn">Yearly</button>
+                </div>
+                <div style="height: 400px; width: 100%;">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Top Products Card -->
+            <div class="stat-card">
+                <div class="card-header" style="margin-bottom: 15px;">
+                    <h2 class="stat-title" style="font-size: 18px;">Top 10 Products</h2>
+                </div>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% topProducts.forEach(product=> { %>
+                                <tr>
+                                    <td>
+                                        <%= product.productName %>
+                                    </td>
+                                    <td class="text-right">
+                                        <%= product.totalQuantity %>
+                                    </td>
+                                    <td class="text-right">₹<%= product.totalRevenue.toLocaleString() %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Top Categories Card -->
+            <div class="stat-card">
+                <div class="card-header" style="margin-bottom: 15px;">
+                    <h2 class="stat-title" style="font-size: 18px;">Top 10 Categories</h2>
+                </div>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category Name</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% topCategories.forEach(category=> { %>
+                                <tr>
+                                    <td>
+                                        <%= category.categoryName %>
+                                    </td>
+                                    <td class="text-right">
+                                        <%= category.totalQuantity %>
+                                    </td>
+                                    <td class="text-right">₹<%= category.totalRevenue.toLocaleString() %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -485,6 +651,38 @@
             </div>
         </div>
 
+        <div class="pdf-analytics">
+            <div class="pdf-section">
+                <h2>Top 10 Products</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdfTopProducts">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pdf-section">
+                <h2>Top 10 Categories</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                            <th>Quantity</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdfTopCategories">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <table id="pdfTable">
             <thead>
                 <tr>
@@ -538,24 +736,51 @@
             document.querySelectorAll('.stat-value')[1].textContent = '₹' + data.stats.orderAmount.toLocaleString();
             document.querySelectorAll('.stat-value')[2].textContent = '₹' + data.stats.discount.toLocaleString();
 
-            // Update table
-            const tbody = document.querySelector('tbody');
-            tbody.innerHTML = data.orders.map(order => `
-        <tr>
-            <td>${order.orderId}</td>
-            <td>${new Date(order.createdOn).toLocaleDateString()}</td>
-            <td>${order.userId.name}</td>
-            <td>₹${order.totalPrice.toLocaleString()}</td>
-            <td>₹${order.discount.toLocaleString()}</td>
-            <td>₹${order.finalAmount.toLocaleString()}</td>
-            <td>
-                <span class="status-badge status-${order.status.toLowerCase()}">
-                    ${order.status}
-                </span>
-            </td>
-        </tr>
-    `).join('');
+
+            const ordersTbody = document.querySelector('.sales-table tbody');
+            if (ordersTbody && data.orders) {
+                ordersTbody.innerHTML = data.orders.map(order => `
+            <tr>
+                <td>${order.orderId}</td>
+                <td>${new Date(order.createdOn).toLocaleDateString()}</td>
+                <td>${order.userId.name}</td>
+                <td>₹${order.totalPrice.toLocaleString()}</td>
+                <td>₹${order.discount.toLocaleString()}</td>
+                <td>₹${order.finalAmount.toLocaleString()}</td>
+                <td>
+                    <span class="status-badge status-${order.status.toLowerCase()}">
+                        ${order.status}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+            }
+
+
+            const topProductsBody = document.querySelector('.stat-card:nth-child(1) tbody');
+            if (topProductsBody && data.topProducts) {
+                topProductsBody.innerHTML = data.topProducts.map(product => `
+            <tr>
+                <td>${product.productName}</td>
+                <td class="text-right">${product.totalQuantity}</td>
+                <td class="text-right">₹${product.totalRevenue.toLocaleString()}</td>
+            </tr>
+        `).join('');
+            }
+
+            const topCategoriesBody = document.querySelector('.stat-card:nth-child(2) tbody');
+            if (topCategoriesBody && data.topCategories) {
+                topCategoriesBody.innerHTML = data.topCategories.map(category => `
+            <tr>
+                <td>${category.categoryName}</td>
+                <td class="text-right">${category.totalQuantity}</td>
+                <td class="text-right">₹${category.totalRevenue.toLocaleString()}</td>
+            </tr>
+        `).join('');
+            }
         }
+
+
 
 
         document.getElementById('dateRange').addEventListener('change', function () {
@@ -569,10 +794,10 @@
 
         async function downloadPDF() {
             try {
-                // Update the report date
+
                 document.getElementById('reportDate').textContent = new Date().toLocaleDateString();
 
-                // Get stat values with error checking
+
                 const statElements = document.querySelectorAll('.stat-value');
                 if (statElements.length >= 3) {
                     document.getElementById('pdfSalesCount').textContent = statElements[0].textContent;
@@ -580,7 +805,7 @@
                     document.getElementById('pdfDiscount').textContent = statElements[2].textContent;
                 }
 
-                // Get the table body with error checking
+
                 const pdfTableBody = document.getElementById('pdfTableBody');
                 const salesTable = document.querySelector('.sales-table tbody');
 
@@ -590,17 +815,25 @@
 
                 const originalRows = salesTable.getElementsByTagName('tr');
 
-                // Map through rows with corrected column indices
+
                 pdfTableBody.innerHTML = Array.from(originalRows).map(row => {
                     const cells = row.getElementsByTagName('td');
-                    if (cells.length < 7) { // Adjusted for removed coupon column
-                        return ''; // Skip invalid rows
+                    const statusBadge = cells[6].querySelector('.status-badge');
+                    const statusClass = statusBadge ? statusBadge.classList[1]?.split('-')[1] || 'default' : 'default';
+                    const statusText = cells[6].textContent.trim();
+
+                    const topProductsBody = document.getElementById('pdfTopProducts');
+                    const productsTable = document.querySelector('.stat-card:nth-child(1) tbody');
+                    if (productsTable) {
+                        topProductsBody.innerHTML = productsTable.innerHTML;
                     }
 
-                    // Safely get the status badge
-                    const statusBadge = cells[6].querySelector('.status-badge'); // Adjusted index for status
-                    const statusClass = statusBadge ? statusBadge.classList[1]?.split('-')[1] || 'default' : 'default';
-                    const statusText = cells[6].textContent.trim(); // Adjusted index for status
+
+                    const topCategoriesBody = document.getElementById('pdfTopCategories');
+                    const categoriesTable = document.querySelector('.stat-card:nth-child(2) tbody');
+                    if (categoriesTable) {
+                        topCategoriesBody.innerHTML = categoriesTable.innerHTML;
+                    }
 
                     return `
                 <tr>
@@ -649,6 +882,119 @@
                 }
             }
         }
+
+
+    </script>
+
+    <script>
+        let salesChart = null;
+
+        function changePeriod(period) {
+
+            document.querySelectorAll('.export-btn').forEach(btn => {
+                btn.style.backgroundColor = '#2d3748';
+            });
+
+            document.getElementById(period + 'Btn').style.backgroundColor = '#4a5568';
+
+            initializeChart(period);
+        }
+
+        function initializeChart(period = 'daily') {
+            const ctx = document.getElementById('salesChart');
+            const chartData = <%-chartData%>;
+
+            if (salesChart) {
+                salesChart.destroy();
+            }
+
+
+            const yAxisFormat = (value) => {
+                if (period === 'yearly' && value >= 1000000) {
+                    return '₹' + (value / 1000000).toFixed(1) + 'M';
+                } else if (value >= 1000) {
+                    return '₹' + (value / 1000).toFixed(1) + 'K';
+                }
+                return '₹' + value.toLocaleString();
+            };
+
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData[period].labels,
+                    datasets: [
+                        {
+                            label: 'Sales Amount (₹)',
+                            data: chartData[period].sales,
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Number of Orders',
+                            data: chartData[period].count,
+                            borderColor: '#34d399',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#a0aec0'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1a1d21',
+                            titleColor: '#fff',
+                            bodyColor: '#a0aec0',
+                            callbacks: {
+                                label: function (context) {
+                                    if (context.dataset.label.includes('Sales')) {
+                                        return `Sales: ${yAxisFormat(context.raw)}`;
+                                    }
+                                    return `Orders: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#2d3748'
+                            },
+                            ticks: {
+                                color: '#a0aec0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#2d3748'
+                            },
+                            ticks: {
+                                color: '#a0aec0',
+                                callback: yAxisFormat
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeChart('daily');
+
+            document.getElementById('dailyBtn').style.backgroundColor = '#4a5568';
+        });
     </script>
 </body>
 

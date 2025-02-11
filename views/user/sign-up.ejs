@@ -13,7 +13,7 @@
         min-height: 100vh;
     }
 
-    ::-webkit-scrollbar{
+    ::-webkit-scrollbar {
 
         display: none;
     }
@@ -132,8 +132,9 @@
         color: #4A665B;
         text-decoration: none;
     }
-    .error-message{
-        color:red;
+
+    .error-message {
+        color: red;
         font-size: 0.75rem;
         display: none
     }
@@ -168,6 +169,10 @@
             <div class="input-group">
                 <input type="password" id="cPassword" placeholder="Confirm Password" name="cPassword">
                 <div id="error5" class="error-message"></div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="referralCode" placeholder="Referral Code (Optional)" name="referralCode">
             </div>
 
             <button type="submit">Create an account</button>
@@ -282,14 +287,14 @@
 
         document.addEventListener('DOMContentLoaded', function () {
 
-           " <% if (typeof message !== 'undefined') { %>"
-           
+            " <% if (typeof message !== 'undefined') { %>"
+
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: '<%= message %>', 
+                text: '<%= message %>',
             });
-       " <% } %>"
+            " <% } %>"
 
             signForm.addEventListener('submit', function (e) {
 

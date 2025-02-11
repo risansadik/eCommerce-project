@@ -62,20 +62,20 @@ const adminAuth = async (req, res, next) => {
 
 const blockAuth = async (req, res, next) => {
     try {
-        // If no user in session, allow access (public routes)
+      
         if (!req.session.user) {
             return next();
         }
 
-        // Check if user is blocked
+        
         const currentUser = await User.findById(req.session.user);
 
-        // If user not found or is blocked
+       
         if (!currentUser || currentUser.isBlocked) {
-            // Only clear user session data, preserve admin session
+           
             req.session.user = null;
             
-            // Save the modified session instead of destroying it
+           
             await new Promise((resolve) => {
                 req.session.save((err) => {
                     if (err) console.log('Session save error:', err);
@@ -83,14 +83,14 @@ const blockAuth = async (req, res, next) => {
                 });
             });
 
-            // Redirect based on block status
+            
             if (currentUser && currentUser.isBlocked) {
                 return res.redirect('/signin?blocked=true');
             }
             return res.redirect('/signin?error=true');
         }
 
-        // User exists and is not blocked, proceed
+      
         next();
     } catch (error) {
         console.log('BlockAuth error:', error);
@@ -100,15 +100,15 @@ const blockAuth = async (req, res, next) => {
 
 const redirectIfAuthenticated = async (req, res, next) => {
     try {
-        // If user is already logged in
+       
         if (req.session.user) {
-            // Verify if the user exists and is not blocked
+          
             const user = await User.findById(req.session.user);
             if (user && !user.isBlocked) {
-                return res.redirect('/'); // Redirect to home page
+                return res.redirect('/'); 
             }
             
-            // If user doesn't exist or is blocked, clear the session
+           
             req.session.user = null;
             await new Promise((resolve) => {
                 req.session.save((err) => {
@@ -118,11 +118,11 @@ const redirectIfAuthenticated = async (req, res, next) => {
             });
         }
         
-        // If no valid session exists, proceed to signin/signup page
+     
         next();
     } catch (error) {
         console.log('RedirectIfAuthenticated error:', error);
-        next(); // Proceed to signin/signup page in case of error
+        next(); 
     }
 };
 

@@ -4,15 +4,15 @@ const getCoupon = async (req, res) => {
     try {
         const coupons = await Coupon.find().sort({ createdAt: -1 });
         
-        // Get messages from session
+       
         const successMessage = req.session.successMessage;
         const errorMessage = req.session.errorMessage;
         
-        // Clear messages from session
+       
         delete req.session.successMessage;
         delete req.session.errorMessage;
         
-        // If there's a success message, show it
+      
         if (successMessage) {
             res.render('coupons', { 
                 coupons,
@@ -52,7 +52,7 @@ const createCoupon = async (req, res) => {
             expireOn
         } = req.body;
 
-        // Check for existing coupon
+       
         const existingCoupon = await Coupon.findOne({ code });
         if (existingCoupon) {
             return res.redirect('/admin/addCoupons');

@@ -53,7 +53,7 @@ const cartSchema = new Schema({
     }
 });
 
-// Pre-save middleware to calculate totalPrice
+
 cartSchema.pre('save', function (next) {
     this.items.forEach(item => {
         item.totalPrice = item.price * item.quantity;

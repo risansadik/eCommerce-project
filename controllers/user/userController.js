@@ -1,10 +1,12 @@
 const User = require('../../models/userSchema');
+const generateUniqueReferralCode = require('../../models/userSchema').generateUniqueReferralCode;
 const Category = require('../../models/categorySchema');
 const Product = require('../../models/productSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const Wallet = require('../../models/walletSchema')
 
 
 const loadHomePage = async (req, res) => {
@@ -51,6 +53,70 @@ const loadHomePage = async (req, res) => {
         });
     }
 };
+
+const about = async (req, res) => {
+
+    try {
+
+        const user = req.session.user;
+
+        const renderObj = {
+            user: null
+        }
+
+        if (user) {
+
+            const userData = await User.findById(user);
+            if (userData) {
+
+                renderObj.user = userData;
+            } else {
+
+                console.log('user not found');
+            }
+        }
+
+
+
+        res.render('about', renderObj);
+    } catch (error) {
+        console.log('error loading about page', error);
+        res.render('page-404');
+
+    }
+}
+
+const contact = async (req, res) => {
+
+    try {
+
+        const user = req.session.user;
+
+        const renderObj = {
+            user: null
+        }
+
+        if (user) {
+
+            const userData = await User.findById(user);
+            if (userData) {
+
+                renderObj.user = userData;
+            } else {
+
+                console.log('user not found');
+            }
+        }
+
+
+
+        res.render('contact', renderObj);
+    } catch (error) {
+        console.log('Error loading contact page : ', error);
+        res.render('page-404');
+
+    }
+}
 const pageNotFound = async (req, res) => {
 
     try {
@@ -121,32 +187,60 @@ async function sendVerificationEmail(email, otp) {
 
 const signup = async (req, res) => {
     try {
-        const { name, mobile, email, password, cPassword } = req.body;
+        const { name, mobile, email, password, cPassword, referralCode } = req.body;
 
         if (password !== cPassword) {
             return res.render('sign-up', { message: "Passwords do not match" });
         }
 
-       
         const findUser = await User.findOne({ email });
         if (findUser) {
             return res.render('sign-up', { message: "User already exists" });
         }
 
-      
         const hashedPassword = await bcrypt.hash(password, 10);
+        const newReferralCode = generateUniqueReferralCode();
 
-        
         const pendingUser = {
             name,
             phone: mobile,
             email,
             password: hashedPassword,
+            referalCode: newReferralCode,
             isAdmin: false,
             isBlocked: false
         };
 
      
+        if (referralCode) {
+            const referrer = await User.findOne({ referalCode: referralCode });
+
+            if (referrer) {
+       
+                pendingUser.referredBy = referrer._id;
+
+          
+                let referrerWallet = await Wallet.findOne({ userId: referrer._id });
+                if (!referrerWallet) {
+                    referrerWallet = new Wallet({ 
+                        userId: referrer._id,
+                        balance: 0
+                    });
+                }
+
+               
+                try {
+                    await referrerWallet.addRefund(100, null, 'Referral Signup Bonus', 'referral');
+                    
+               
+                    referrer.referralCount += 1;
+                    await referrer.save();
+                } catch (error) {
+                    console.error("Error adding referral bonus:", error);
+                }
+            }
+        }
+
         const otp = generateOtp();
         const emailSent = await sendVerificationEmail(email, otp);
 
@@ -154,7 +248,6 @@ const signup = async (req, res) => {
             return res.json("Email-error");
         }
 
-       
         req.session.userOtp = otp;
         req.session.pendingUser = pendingUser;
 
@@ -166,6 +259,7 @@ const signup = async (req, res) => {
         res.redirect("/pageNotFound");
     }
 };
+
 
 const verifyOtp = async (req, res) => {
     try {
@@ -181,15 +275,46 @@ const verifyOtp = async (req, res) => {
         }
 
         if (userOtp === otp) {
-            
             const newUser = new User(pendingUser);
             await newUser.save();
             console.log("New user saved after OTP verification:", newUser);
 
            
-            req.session.user = newUser._id;
+            const newWallet = new Wallet({
+                userId: newUser._id,
+                balance: 0
+            });
+            await newWallet.save();
 
-       
+            
+            if (newUser.referredBy) {
+                try {
+                    
+                    let referrerWallet = await Wallet.findOne({ userId: newUser.referredBy });
+                    
+                   
+                    if (!referrerWallet) {
+                        referrerWallet = new Wallet({
+                            userId: newUser.referredBy,
+                            balance: 0
+                        });
+                    }
+
+                   
+                    await referrerWallet.addRefund(
+                        100, 
+                        null, 
+                        `Referral bonus for ${newUser.email}`, 
+                        'referral'
+                    );
+                } catch (error) {
+                    console.error("Error processing referral bonus:", error);
+                   
+                }
+            }
+
+            // Set session
+            req.session.user = newUser._id;
             await new Promise((resolve, reject) => {
                 req.session.save((err) => {
                     if (err) reject(err);
@@ -197,7 +322,7 @@ const verifyOtp = async (req, res) => {
                 });
             });
 
-            
+           
             req.session.userOtp = null;
             req.session.pendingUser = null;
 
@@ -335,11 +460,11 @@ const getShopPage = async (req, res) => {
         const sortOption = req.query.sort;
         const priceRange = req.query.priceRange;
         const searchQuery = req.query.search;
-        
-  
+
+
         const categories = await Category.find({ isListed: true });
-        
-        
+
+
         const query = {
             isBlocked: false,
             category: { $in: categories.map(category => category._id) },
@@ -350,8 +475,8 @@ const getShopPage = async (req, res) => {
             },
             displayLocation: { $in: ['shop', 'both'] }
         };
-        
-        
+
+
         if (searchQuery) {
             query.$or = [
                 { productName: { $regex: searchQuery, $options: 'i' } },
@@ -359,13 +484,13 @@ const getShopPage = async (req, res) => {
                 { brand: { $regex: searchQuery, $options: 'i' } }
             ];
         }
-        
-        
+
+
         if (req.query.category) {
             query.category = req.query.category;
         }
-        
-     
+
+
         if (priceRange) {
             const [min, max] = priceRange.split('-');
             if (max === 'above') {
@@ -377,21 +502,21 @@ const getShopPage = async (req, res) => {
                 };
             }
         }
-        
-   
+
+
         let productData = await Product.find(query).populate('category');
-        
-      
+
+
         const customSort = (a, b) => {
             const nameA = a.productName.replace(/^the\s+/i, '').toLowerCase();
             const nameB = b.productName.replace(/^the\s+/i, '').toLowerCase();
-            
+
             if (nameA === nameB) {
                 return a.productName.toLowerCase().localeCompare(b.productName.toLowerCase());
             }
             return nameA.localeCompare(nameB);
         };
-        
+
         if (sortOption) {
             switch (sortOption) {
                 case 'low':
@@ -412,8 +537,8 @@ const getShopPage = async (req, res) => {
         } else {
             productData.sort((a, b) => b.createdAt - a.createdAt);
         }
-        
-     
+
+
         const renderObj = {
             products: productData,
             categories: categories,
@@ -424,8 +549,8 @@ const getShopPage = async (req, res) => {
             error: null,
             user: null
         };
-        
-       
+
+
         if (user) {
             const userData = await User.findById(user);
             if (userData) {
@@ -435,9 +560,13 @@ const getShopPage = async (req, res) => {
                 return res.redirect('/signin');
             }
         }
-        
+
+        if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            return res.json(renderObj); 
+        }
+
         return res.render('shop', renderObj);
-        
+
     } catch (error) {
         console.error('Shop page error:', error);
         return res.render('shop', {
@@ -473,31 +602,31 @@ const getProductDetails = async (req, res) => {
                 }
             }
         })
-        .populate('category')
-        .limit(4)
-        .sort({ createdAt: -1 })
-        .then(products => products.filter(product => 
-            product.category && product.category.isListed
-        ));
+            .populate('category')
+            .limit(4)
+            .sort({ createdAt: -1 })
+            .then(products => products.filter(product =>
+                product.category && product.category.isListed
+            ));
 
         const renderData = {
             product: productData,
             relatedProducts: relatedProducts,
             user: null,
-            isInWishlist: false  
+            isInWishlist: false
         };
 
         if (user) {
             const userData = await User.findById(user);
             if (userData) {
                 renderData.user = userData;
-                
-                
+
+
                 const wishlist = await Wishlist.findOne({
                     userId: user,
                     'products.productId': productId
                 });
-                
+
                 renderData.isInWishlist = !!wishlist;
             }
         }
@@ -512,6 +641,8 @@ const getProductDetails = async (req, res) => {
 module.exports = {
     loadHomePage,
     pageNotFound,
+    about,
+    contact,
     loadSignIn,
     loadSignUp,
     signup,
@@ -521,6 +652,7 @@ module.exports = {
     logout,
     getShopPage,
     getProductDetails,
-   
+
+
 
 }

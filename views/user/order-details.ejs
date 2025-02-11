@@ -454,12 +454,53 @@
             border-radius: 3px;
             font-size: 0.9em;
         }
+
         .txt {
 
             text-decoration: none;
             color: white;
         }
+
+        .invoice-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .invoice-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: #437A59;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .invoice-btn:hover {
+            background-color: #3a6a4d;
+        }
+
+        .invoice-btn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .invoice-btn i {
+            font-size: 16px;
+        }
+        .txt{
+
+            text-decoration: none;
+            color: white;
+        }
     </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
@@ -467,15 +508,15 @@
     <div class="header">
         <div class="logo">Brossoc</div>
         <div class="nav-items">
-            <div>Home</div>
-            <div>Shop</div>
-            <div>About us</div>
-            <div>Contact us</div>
+            <a href="/" class="txt"><div>Home</div></a>
+            <a href="/shop" class="txt"><div>Shop</div></a>
+            <a href="/about" class="txt"><div>About us</div></a>
+            <a href="/contact" class="txt"><div>Contact us</div></a>
         </div>
         <div class="nav-icons">
             <a href="/wishlist" class="txt"><span><i class="fa-solid fa-heart"></i></span></a>
             <a href="/userProfile" class="txt"><span><i class="fa-solid fa-user"></i></span></a>
-            <a href="/cart" class="txt"<span><i class="fa-solid fa-cart-shopping"></i></span></a>
+            <a href="/cart" class="txt" <span><i class="fa-solid fa-cart-shopping"></i></span></a>
         </div>
     </div>
 
@@ -500,25 +541,73 @@
             <div class="order-details-container">
                 <div class="order-header">
                     <div class="order-info">
-                        <h2>Order #<%= order.orderId %></h2>
-                        <p>Placed on <%= new Date(order.createdOn).toLocaleDateString() %></p>
+                        <div class="info-box">
+                            <h3>Order Information</h3>
+                            <p>Order Status: <%= order.status %>
+                            </p>
+                            <p>Order Date: <%= new Date(order.createdOn).toLocaleDateString() %>
+                            </p>
+
+                            <div class="payment-info">
+                                <div class="payment-method">
+                                    <i class="fa-solid 
+                                        <%= order.paymentMethod === 'cod' ? 'fa-money-bill' : 
+                                            order.paymentMethod === 'wallet' ? 'fa-wallet' : 
+                                            'fa-credit-card' %>">
+                                    </i>
+                                    <span>Payment Method:</span>
+                                    <span class="payment-badge">
+                                        <%= order.paymentMethod==='cod' ? 'Cash on Delivery' :
+                                            order.paymentMethod==='wallet' ? 'Wallet' : 'Razorpay' %>
+                                    </span>
+                                    <% if (order.status !=='Cancelled' && order.status !=='Returned' ) { %>
+                                        <span class="payment-status status-<%= order.paymentStatus %>">
+                                            <%= order.paymentStatus %>
+                                        </span>
+                                        <% } %>
+                                </div>
+
+                                <% if (order.paymentMethod==='razorpay' && order.razorpayPaymentId) { %>
+                                    <p>Transaction ID: <span class="transaction-id">
+                                            <%= order.razorpayPaymentId %>
+                                        </span></p>
+                                    <% } %>
+
+                                        <!-- Invoice Download Section -->
+                                        <% if (order.canDownloadInvoice) { %>
+                                            <div class="invoice-section">
+                                                <% if (order.invoiceNumber) { %>
+                                                    <p>Invoice Number: <%= order.invoiceNumber %>
+                                                    </p>
+                                                    <p>Generated on: <%= new
+                                                            Date(order.invoiceGeneratedAt).toLocaleDateString() %>
+                                                    </p>
+                                                    <% } %>
+                                                        <button onclick="downloadInvoice('<%= order.orderId %>', this)"
+                                                            class="invoice-btn">
+                                                            <i class="fas fa-file-pdf"></i> Download Invoice
+                                                        </button>
+                                            </div>
+                                            <% } %>
+                            </div>
+                        </div>
                     </div>
                     <div class="order-status">
                         <span class="status-badge status-<%= order.status.toLowerCase() %>">
                             <%= order.status %>
                         </span>
-                
-                        <% if (order.status !== 'Returned' && order.canCancel && order.status !== 'Cancelled') { %>
+
+                        <% if (order.status !=='Returned' && order.canCancel && order.status !=='Cancelled' ) { %>
                             <button onclick="confirmCancelOrder('<%= order.orderId %>')" class="cancel-btn">
                                 Cancel Order
                             </button>
-                        <% } %>
-                        
-                        <% if (order.status === 'Delivered') { %>
-                            <button onclick="openReturnModal('<%= order.orderId %>')" class="return-btn">
-                                Return Order
-                            </button>
-                        <% } %>
+                            <% } %>
+
+                                <% if (order.status==='Delivered' ) { %>
+                                    <button onclick="openReturnModal('<%= order.orderId %>')" class="return-btn">
+                                        Return Order
+                                    </button>
+                                    <% } %>
                     </div>
                 </div>
 
@@ -545,36 +634,41 @@
 
                     <div class="info-box">
                         <h3>Order Information</h3>
-                        <p>Order Status: <%= order.status %></p>
-                        <p>Order Date: <%= new Date(order.createdOn).toLocaleDateString() %></p>
+                        <p>Order Status: <%= order.status %>
+                        </p>
+                        <p>Order Date: <%= new Date(order.createdOn).toLocaleDateString() %>
+                        </p>
                         <% if (order.invoiceDate) { %>
-                            <p>Invoice Date: <%= new Date(order.invoiceDate).toLocaleDateString() %></p>
-                        <% } %>
-                        
-                        <div class="payment-info">
-                            <div class="payment-method">
-                                <i class="fa-solid 
+                            <p>Invoice Date: <%= new Date(order.invoiceDate).toLocaleDateString() %>
+                            </p>
+                            <% } %>
+
+                                <div class="payment-info">
+                                    <div class="payment-method">
+                                        <i class="fa-solid 
                                     <%= order.paymentMethod === 'cod' ? 'fa-money-bill' : 
                                         order.paymentMethod === 'wallet' ? 'fa-wallet' : 
                                         'fa-credit-card' %>">
-                                </i>
-                                <span>Payment Method:</span>
-                                <span class="payment-badge">
-                                    <%= order.paymentMethod === 'cod' ? 'Cash on Delivery' :
-                                        order.paymentMethod === 'wallet' ? 'Wallet' :
-                                        'Razorpay' %>
-                                </span>
-                                <% if (order.status !== 'Cancelled' && order.status !== 'Returned') { %>
-                                    <span class="payment-status status-<%= order.paymentStatus %>">
-                                        <%= order.paymentStatus %>
-                                    </span>
-                                <% } %>
-                            </div>
-                            
-                            <% if (order.status !== 'Cancelled' && order.status !== 'Returned' && order.paymentMethod === 'razorpay' && order.razorpayPaymentId) { %>
-                                <p>Transaction ID: <span class="transaction-id"><%= order.razorpayPaymentId %></span></p>
-                            <% } %>
-                        </div>
+                                        </i>
+                                        <span>Payment Method:</span>
+                                        <span class="payment-badge">
+                                            <%= order.paymentMethod==='cod' ? 'Cash on Delivery' :
+                                                order.paymentMethod==='wallet' ? 'Wallet' : 'Razorpay' %>
+                                        </span>
+                                        <% if (order.status !=='Cancelled' && order.status !=='Returned' ) { %>
+                                            <span class="payment-status status-<%= order.paymentStatus %>">
+                                                <%= order.paymentStatus %>
+                                            </span>
+                                            <% } %>
+                                    </div>
+
+                                    <% if (order.status !=='Cancelled' && order.status !=='Returned' &&
+                                        order.paymentMethod==='razorpay' && order.razorpayPaymentId) { %>
+                                        <p>Transaction ID: <span class="transaction-id">
+                                                <%= order.razorpayPaymentId %>
+                                            </span></p>
+                                        <% } %>
+                                </div>
                     </div>
                 </div>
             </div>
@@ -902,6 +996,353 @@
                 });
             }
         });
+
+        async function downloadInvoice(orderId, buttonElement) {
+            const btn = buttonElement || event.target.closest('.invoice-btn');
+            const originalText = btn ? btn.innerHTML : '';
+
+            try {
+                const response = await fetch(`/orders/${orderId}/invoice`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch invoice details');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to generate invoice');
+                }
+
+                const { order } = data;
+
+                // Provide default address if null
+                const address = order.address || {
+                    name: 'N/A',
+                    street: 'N/A',
+                    city: 'N/A',
+                    state: 'N/A',
+                    pincode: 'N/A',
+                    mobile: 'N/A'
+                };
+
+                // Update the billToDetails template in downloadInvoice function
+                const billToDetails = `
+    <div class="bill-to-details">
+        <h3>Bill To</h3>
+        <p>${address.name}</p>
+        <p>${address.street}</p>
+        <p>${address.city}, ${address.state}</p>
+        <p>${address.pincode}</p>
+        <p>Phone: ${address.mobile}</p>
+    </div>
+`;
+
+                const invoiceHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            font-family: 'Helvetica', Arial, sans-serif; 
+            margin: 0; 
+            padding: 40px; 
+            max-width: 800px; 
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .invoice-header { 
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eef2f7;
+        }
+        .invoice-header h1 {
+            color: #1a3353;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .invoice-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+        }
+        .meta-item {
+            flex: 1;
+        }
+        .meta-item h4 {
+            color: #64748b;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .meta-item p {
+            color: #1e293b;
+            margin: 0;
+            font-size: 15px;
+        }
+        .invoice-details { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 40px;
+            gap: 40px;
+        }
+        .from-details, .bill-to-details { 
+            flex: 1;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .section-title {
+            color: #1a3353;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .address-details p {
+            margin: 5px 0;
+            color: #475569;
+            line-height: 1.5;
+        }
+        .order-items { 
+            width: 100%; 
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .order-items th { 
+            background-color: #f8fafc;
+            padding: 12px 15px;
+            text-align: left;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .order-items td { 
+            padding: 15px;
+            border-top: 1px solid #e2e8f0;
+            color: #475569;
+        }
+        .product-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .payment-details {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .totals { 
+            text-align: right; 
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 40px;
+            margin-bottom: 8px;
+        }
+        .final-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #16a34a;
+            padding-top: 10px;
+            margin-top: 10px;
+            border-top: 2px solid #e2e8f0;
+        }
+        .notes {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fffbeb;
+            border-radius: 8px;
+            color: #92400e;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-header">
+        <h1>Invoice</h1>
+        <p>Brossoc</p>
+    </div>
+
+    <div class="invoice-meta">
+        <div class="meta-item">
+            <h4>Invoice Number</h4>
+            <p>${order.invoiceNumber}</p>
+        </div>
+        <div class="meta-item">
+            <h4>Order Date</h4>
+            <p>${new Date(order.orderDate).toLocaleDateString()}</p>
+        </div>
+        <div class="meta-item">
+            <h4>Invoice Date</h4>
+            <p>${new Date(order.invoiceGeneratedAt).toLocaleDateString()}</p>
+        </div>
+        <div class="meta-item">
+            <h4>Status</h4>
+            <p><span class="status-badge">${order.status}</span></p>
+        </div>
+    </div>
+
+    <div class="invoice-details">
+        <div class="from-details">
+            <h3 class="section-title">From</h3>
+            <div class="address-details">
+                <p><strong>Brossoc Pvt. Ltd.</strong></p>
+                <p>No. 123, 4th Main,</p>
+                <p>Indiranagar, 2nd Stage,</p>
+                <p>Bengaluru, Karnataka 560038</p>
+                <p>India</p>
+                <p>Email: contact@brossoc.com</p>
+            </div>
+        </div>
+
+        <div class="bill-to-details">
+            <h3 class="section-title">Bill To</h3>
+            <div class="address-details">
+                <p><strong>${address.name}</strong></p>
+                <p>${address.street}</p>
+                <p>${address.city}, ${address.state} ${address.pincode}</p>
+                <p>Phone: ${address.mobile}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-details">
+        <h3 class="section-title">Payment Information</h3>
+        <div class="payment-row">
+            <span>Payment Method:</span>
+            <span>${order.paymentMethod.toUpperCase()}</span>
+        </div>
+        <div class="payment-row">
+            <span>Payment Status:</span>
+            <span>${order.paymentStatus.toUpperCase()}</span>
+        </div>
+        ${order.razorpayPaymentId ? `
+        <div class="payment-row">
+            <span>Transaction ID:</span>
+            <span>${order.razorpayPaymentId}</span>
+        </div>
+        ` : ''}
+    </div>
+
+    <table class="order-items">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Size</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+       <tbody>
+    ${order.orderedItems
+        .filter(item => item.status !== 'Cancelled') // Extra safety check
+        .map(item => `
+            <tr>
+                <td>
+                    <span class="product-name">${item.product?.productName || 'Product'}</span>
+                </td>
+                <td>${item.size}</td>
+                <td>${item.quantity}</td>
+                <td>₹${(item.price / item.quantity).toFixed(2)}</td>
+                <td>₹${item.price.toFixed(2)}</td>
+            </tr>
+        `).join('')}
+</tbody>
+    </table>
+
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal:</span>
+            <span>₹${order.totalPrice.toFixed(2)}</span>
+        </div>
+        ${order.discount > 0 ? `
+        <div class="total-row">
+            <span>Discount:</span>
+            <span>₹${order.discount.toFixed(2)}</span>
+        </div>
+        ` : ''}
+        <div class="total-row final-amount">
+            <span>Final Amount:</span>
+            <span>₹${order.finalAmount.toFixed(2)}</span>
+        </div>
+    </div>
+
+    <div class="notes">
+        <p><strong>Note:</strong> This is a computer-generated invoice. No signature is required.</p>
+    </div>
+</body>
+</html>
+`;
+
+                // Create a temporary element to generate PDF
+                const element = document.createElement('div');
+                element.innerHTML = invoiceHtml;
+                document.body.appendChild(element);
+
+                // Generate PDF
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5], // Adjust margins
+                    filename: `invoice-${order.orderId}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false
+                    },
+                    jsPDF: {
+                        unit: 'in',
+                        format: 'a4', // Use A4 format
+                        orientation: 'portrait'
+                    }
+                };
+
+                html2pdf().set(opt).from(element).save();
+
+                // Remove temporary element
+                document.body.removeChild(element);
+
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to download invoice',
+                    icon: 'error'
+                });
+            } finally {
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
     </script>
 </body>
 

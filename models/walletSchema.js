@@ -23,11 +23,11 @@ const walletTransactionSchema = new Schema({
     orderId: {
         type: Schema.Types.ObjectId,
         ref: 'Order',
-        required: true
+        required: false
     },
     transactionType: {
         type: String,
-        enum: ['refund', 'purchase'],
+        enum: ['refund', 'purchase','referral'],
         required: true
     },
     createdAt: {
@@ -55,7 +55,7 @@ const walletSchema = new Schema({
     }
 });
 
-// Method to add refund money to wallet
+
 walletSchema.methods.addRefund = async function(amount, orderId) {
     try {
         const transaction = {
@@ -77,7 +77,7 @@ walletSchema.methods.addRefund = async function(amount, orderId) {
     }
 };
 
-// Method to use wallet balance for purchase
+
 walletSchema.methods.useForPurchase = async function(amount, orderId) {
     try {
         if (this.balance < amount) {
@@ -103,6 +103,26 @@ walletSchema.methods.useForPurchase = async function(amount, orderId) {
     }
 };
 
+walletSchema.methods.addRefund = async function(amount, orderId = null, description = 'Refund', transactionType = 'refund') {
+    try {
+        const transaction = {
+            userId: this.userId,
+            type: 'credit',
+            amount: amount,
+            description: description,
+            orderId: orderId,
+            transactionType: transactionType
+        };
+
+        this.balance += amount;
+        this.transactions.push(transaction);
+        this.lastUpdated = Date.now();
+
+        return await this.save();
+    } catch (error) {
+        throw error;
+    }
+};
 const Wallet = mongoose.model('Wallet', walletSchema);
 
 module.exports = Wallet;

@@ -96,6 +96,19 @@ const orderSchema = new Schema({
     },
     razorpayPaymentId: {
         type: String
+    },
+    invoiceNumber: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    invoiceGeneratedAt: {
+        type: Date
+    },
+    invoiceStatus: {
+        type: String,
+        enum: ['pending', 'generated', 'failed'],
+        default: 'pending'
     }
 });
 
@@ -112,10 +125,10 @@ orderSchema.pre('findOne', function(next) {
 orderSchema.methods.recalculateTotals = function() {
     console.log('Starting recalculation...');
     
-    // Validate and normalize all items first
+
     const normalizedItems = this.orderedItems.map((item, index) => {
         // Ensure numeric values
-        const basePrice = Number(item.price/item.quantity); // This should be the price per unit
+        const basePrice = Number(item.price/item.quantity); 
         const quantity = Number(item.quantity);
         
         if (isNaN(basePrice) || isNaN(quantity)) {
@@ -145,11 +158,11 @@ orderSchema.methods.recalculateTotals = function() {
         activeItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2)
     );
 
-    // Get discount from coupon if applied
+ 
     const discount = Number(this.discount || 0);
     this.finalAmount = Number((this.totalPrice - discount).toFixed(2));
 
-    // Handle fully cancelled orders
+   
     if (activeItems.length === 0) {
         console.log('Order fully cancelled - resetting totals');
         this.status = 'Cancelled';
@@ -157,7 +170,7 @@ orderSchema.methods.recalculateTotals = function() {
         this.finalAmount = 0;
         this.discount = 0;
         
-        // Reset coupon information
+     
         this.couponApplied = {
             couponCode: null,
             couponId: null,
@@ -176,7 +189,7 @@ orderSchema.methods.recalculateTotals = function() {
     return this;
 };
 
-// Pre-save middleware
+
 orderSchema.pre('save', function(next) {
     try {
         this.recalculateTotals();
@@ -185,6 +198,31 @@ orderSchema.pre('save', function(next) {
         next(error);
     }
 });
+
+orderSchema.methods.generateInvoiceNumber = async function() {
+    if (!this.invoiceNumber) {
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        
+      
+        const latestInvoice = await this.constructor.findOne({
+            invoiceNumber: { $regex: `INV-${year}${month}-` }
+        })
+        .sort({ invoiceNumber: -1 });
+
+        let sequence = '00001';
+        if (latestInvoice && latestInvoice.invoiceNumber) {
+            const lastSequence = parseInt(latestInvoice.invoiceNumber.split('-')[2]) + 1;
+            sequence = String(lastSequence).padStart(5, '0');
+        }
+
+        this.invoiceNumber = `INV-${year}${month}-${sequence}`;
+        this.invoiceGeneratedAt = date;
+        this.invoiceStatus = 'generated';
+    }
+    return this.invoiceNumber;
+};
 
 const Order = mongoose.model("Order", orderSchema);
 

@@ -8,20 +8,20 @@ passport.use(new googleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/auth/google/callback',
-    passReqToCallback: true  // Added this to access request object
+    passReqToCallback: true 
 }, async (req, accessToken, refreshToken, profile, done) => {
     try {
         console.log('Google Strategy - Profile received:', profile.id);
         
-        // First check if user exists with Google ID
+       
         let user = await User.findOne({ googleId: profile.id });
         
-        // If no user found with Google ID, check email
+      
         if (!user) {
             user = await User.findOne({ email: profile.emails[0].value });
             
             if (user) {
-                // Update existing user with Google ID
+               
                 user.googleId = profile.id;
                 await user.save();
             } else {
@@ -37,7 +37,7 @@ passport.use(new googleStrategy({
             }
         }
 
-        // Check if user is blocked
+       
         if (user.isBlocked) {
             return done(null, false, { message: 'Your account has been blocked' });
         }

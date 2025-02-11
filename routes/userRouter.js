@@ -10,6 +10,7 @@ const couponController = require('../controllers/user/couponController');
 const wishlistController = require('../controllers/user/wishlistController');
 const walletController = require('../controllers/user/walletController');
 const referralController = require('../controllers/user/referralController');
+const reviewController = require('../controllers/user/reviewController');
 
 const passport = require('passport');
 const { blockAuth,userAuth , adminAuth , redirectIfAuthenticated} = require('../middlewares/auth');
@@ -17,6 +18,8 @@ const { blockAuth,userAuth , adminAuth , redirectIfAuthenticated} = require('../
 
 router.get('/', blockAuth, userController.loadHomePage);
 router.get('/pageNotFound', userController.pageNotFound);
+router.get('/about',userController.about);
+router.get('/contact',userController.contact);
 router.get('/signin',redirectIfAuthenticated, userController.loadSignIn);
 router.post('/signin',redirectIfAuthenticated, userController.signin);
 router.get('/signup',redirectIfAuthenticated, userController.loadSignUp)
@@ -101,6 +104,7 @@ router.post('/orders/create', userAuth, orderController.createOrder);
 router.post('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
 router.post('/orders/:orderId/items/:itemId/cancel',userAuth, orderController.cancelOrderItem);
 router.get('/orders/:orderId', userAuth, orderController.getOrderDetails);
+router.get('/orders/:orderId/invoice', userAuth, orderController.generateInvoicePDF);
 
 router.post('/submit-return',userAuth,orderController.submitReturnRequest);
 router.get('/return-requests',userAuth,orderController.getReturnRequests);
@@ -122,6 +126,10 @@ router.post('/wallet/refund/return', userAuth, walletController.processReturnRef
 router.post('/wallet/pay', userAuth, walletController.useWalletForOrder);
 
 router.get('/referral',userAuth,referralController.getReferral)
+
+router.get('/:productId/reviews', reviewController.getProductReviews);
+router.post('/:productId/reviews', userAuth, reviewController.addReview);
+router.delete('/reviews/:reviewId', userAuth, reviewController.deleteReview);
 
 
 

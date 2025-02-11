@@ -259,84 +259,265 @@
             stroke: #ef4444;
         }
 
-        .reviews {
-            padding-top: 2rem;
-            border-top: 1px solid #e5e7eb;
+        .reviews-section {
+            width: 100%;
+            margin: 20px 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Dropdown Button */
+        .reviews-dropdown-btn {
+            width: 100%;
+            padding: 15px 20px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reviews-dropdown-btn:hover {
+            background: #f8f8f8;
+        }
+
+        .reviews-summary-preview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stars-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #FFB800;
+            font-size: 18px;
+        }
+
+        #averageScore {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .dropdown-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        /* Dropdown Content */
+        .reviews-dropdown-content {
+            display: none;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-top: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .reviews-dropdown-content.active {
+            display: block;
+        }
+
+        .reviews-container {
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .reviews-title {
-            font-size: 1.25rem;
+            font-size: 24px;
             font-weight: 600;
-            color: #111827;
-            margin-bottom: 1rem;
+            color: #333;
+            margin-bottom: 25px;
         }
 
         .reviews-summary {
             display: flex;
-            align-items: flex-start;
-            gap: 2rem;
+            gap: 40px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            margin-bottom: 30px;
         }
 
         .average-rating {
             text-align: center;
-            min-width: 100px;
+            min-width: 200px;
         }
 
-        .average-score {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #111827;
+        .average-score-large {
+            font-size: 48px;
+            font-weight: 700;
+            color: #333;
             line-height: 1;
+            margin-bottom: 10px;
         }
 
-        .stars {
-            color: #fbbf24;
-            font-size: 0.875rem;
-            margin: 0.25rem 0;
+        .stars-large {
+            color: #FFB800;
+            font-size: 24px;
+            margin-bottom: 5px;
         }
 
-        .review-count {
-            font-size: 0.75rem;
-            color: #6b7280;
+        .review-count-large {
+            color: #666;
+            font-size: 14px;
         }
 
         .rating-bars {
-            flex: 1;
-            max-width: 400px;
+            flex-grow: 1;
         }
 
         .rating-bar {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.75rem;
-            margin-bottom: 0.375rem;
+            gap: 10px;
+            margin: 8px 0;
         }
 
         .bar-label {
-            width: 2rem;
-            color: #6b7280;
+            width: 35px;
+            color: #666;
+            font-size: 14px;
         }
 
         .bar-container {
-            flex: 1;
-            height: 0.375rem;
-            background: #e5e7eb;
-            border-radius: 9999px;
+            flex-grow: 1;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .bar-fill {
             height: 100%;
-            background: #fbbf24;
-            border-radius: 9999px;
+            background: #FFB800;
             transition: width 0.3s ease;
         }
 
         .bar-count {
-            width: 1.5rem;
-            color: #6b7280;
+            width: 40px;
             text-align: right;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Review Form */
+        .review-form-container {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .review-form-container h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .rating-input {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .rating-input input {
+            display: none;
+        }
+
+        .rating-input label {
+            font-size: 28px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .rating-input label:hover,
+        .rating-input label:hover~label,
+        .rating-input input:checked~label {
+            color: #FFB800;
+        }
+
+        #reviewText {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 15px;
+            resize: vertical;
+        }
+
+        .submit-review-btn {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-review-btn:hover {
+            background: #357ABD;
+        }
+
+        /* Review List */
+        .review-item {
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .reviewer-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .review-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .review-rating {
+            color: #FFB800;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .review-text {
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .login-prompt {
+            text-align: center;
+            padding: 30px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+
+        .login-prompt a {
+            color: #4A90E2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-prompt a:hover {
+            text-decoration: underline;
         }
 
         .zoomed-image {
@@ -577,50 +758,70 @@
                 </div>
 
                 <!-- Reviews Section -->
-                <div class="reviews">
-                    <h2 class="reviews-title">Reviews</h2>
-                    <div class="reviews-summary">
-                        <div class="average-rating">
-                            <div class="average-score">4.1</div>
-                            <div class="stars">★★★★☆</div>
-                            <div class="review-count">48 reviews</div>
+                <div class="reviews-section" data-product-id="<%= product._id %>">
+                    <!-- Reviews Summary Button -->
+                    <button class="reviews-dropdown-btn" id="reviewsToggle">
+                        <div class="reviews-summary-preview">
+                            <div class="stars-preview">
+                                <div id="averageStars">★★★★★</div>
+                                <span id="averageScore">0</span>
+                            </div>
+                            <span id="reviewCount">0 reviews</span>
+                            <span class="dropdown-arrow">▼</span>
                         </div>
-                        <div class="rating-bars">
-                            <div class="rating-bar">
-                                <div class="bar-label">5★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 43.75%"></div>
+                    </button>
+
+                    <!-- Dropdown Content -->
+                    <div class="reviews-dropdown-content" id="reviewsContent">
+                        <div class="reviews-container">
+                            <h2 class="reviews-title">Customer Reviews</h2>
+
+                            <div class="reviews-summary">
+                                <div class="average-rating">
+                                    <div class="average-score-large" id="averageScoreLarge">0</div>
+                                    <div class="stars-large" id="averageStarsLarge">★★★★★</div>
+                                    <div class="review-count-large" id="reviewCountLarge">0 reviews</div>
                                 </div>
-                                <div class="bar-count">21</div>
-                            </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">4★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 31.25%"></div>
+
+                                <div class="rating-bars">
+                                    <% for(let i=5; i>= 1; i--) { %>
+                                        <div class="rating-bar">
+                                            <div class="bar-label">
+                                                <%= i %>★
+                                            </div>
+                                            <div class="bar-container">
+                                                <div class="bar-fill" id="bar<%= i %>" style="width: 0%"></div>
+                                            </div>
+                                            <div class="bar-count" id="count<%= i %>">0</div>
+                                        </div>
+                                        <% } %>
                                 </div>
-                                <div class="bar-count">15</div>
                             </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">3★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 14.58%"></div>
+
+                            <% if (locals.user) { %>
+                                <div class="review-form-container">
+                                    <h3>Write a Review</h3>
+                                    <form id="reviewForm">
+                                        <div class="rating-input">
+                                            <% for(let i=5; i>= 1; i--) { %>
+                                                <input type="radio" id="star<%= i %>" name="rating" value="<%= i %>">
+                                                <label for="star<%= i %>">★</label>
+                                                <% } %>
+                                        </div>
+                                        <textarea name="review" id="reviewText" required
+                                            placeholder="Share your thoughts about this product..."></textarea>
+                                        <button type="submit" class="submit-review-btn">Submit Review</button>
+                                    </form>
                                 </div>
-                                <div class="bar-count">7</div>
-                            </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">2★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 6.25%"></div>
-                                </div>
-                                <div class="bar-count">3</div>
-                            </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">1★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 4.17%"></div>
-                                </div>
-                                <div class="bar-count">2</div>
-                            </div>
+                                <% } else { %>
+                                    <div class="login-prompt">
+                                        <p>Please <a href="/login">login</a> to write a review</p>
+                                    </div>
+                                    <% } %>
+
+                                        <div class="reviews-list" id="reviewsList">
+                                            <!-- Reviews will be loaded here dynamically -->
+                                        </div>
                         </div>
                     </div>
                 </div>
@@ -677,12 +878,12 @@
                 mainImage.src = images[currentImageIndex];
                 zoomedImage.src = images[currentImageIndex];
 
-                // Update thumbnails
+
                 document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
                     thumb.classList.toggle('active', index === currentImageIndex);
                 });
 
-                // Reinitialize zoom functionality
+
                 setTimeout(initializeZoom, 100);
             }
         }
@@ -708,7 +909,7 @@
             }
         }
 
-        // Initialize the gallery when the document loads
+
         document.addEventListener('DOMContentLoaded', () => {
             updateMainImage();
             initializeZoom();
@@ -763,7 +964,6 @@
                 zoomedImage.style.transform = `scale(${ZOOM_LEVEL})`;
             }
 
-            // Add touch support
             let touchTimeout;
             container.addEventListener('touchstart', (e) => {
                 e.preventDefault();
@@ -793,7 +993,6 @@
                 clearTimeout(touchTimeout);
             });
 
-            // Mouse events
             container.addEventListener('mouseenter', () => {
                 isZoomed = true;
                 zoomedImage.classList.add('active');
@@ -807,13 +1006,13 @@
                 zoomedImage.classList.remove('active');
             });
 
-            // Update on window resize
+           
             window.addEventListener('resize', () => {
                 containerRect = container.getBoundingClientRect();
             });
         }
 
-        // Add these styles to your existing CSS
+      
         const additionalStyles = `
 .zoomed-image {
     position: absolute;
@@ -838,7 +1037,7 @@
 }
 `;
 
-        // Add the styles programmatically
+
         const styleSheet = document.createElement("style");
         styleSheet.textContent = additionalStyles;
         document.head.appendChild(styleSheet);
@@ -874,12 +1073,12 @@
                 updateAddToCartButton();
             });
 
-            // Listen for both input and change events
+            
             ['input', 'change'].forEach(eventType => {
                 quantityInput.addEventListener(eventType, handleQuantityChange);
             });
 
-            // Handle manual input using keydown
+            
             quantityInput.addEventListener('keydown', function (e) {
                 if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
                     setTimeout(handleQuantityChange, 0);
@@ -942,11 +1141,9 @@
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Debug logs
             console.log('Product ID:', '<%= product._id %>');
             console.log('Is in wishlist:', '<%= isInWishlist %>');
 
-            // Add to Cart functionality
             const addToCartBtn = document.getElementById('addToCartBtn');
             const sizeSelect = document.getElementById('sizeSelect');
             const quantityInput = document.getElementById('quantityInput');
@@ -997,9 +1194,15 @@
                             quantity: quantity
                         })
                     })
-                        .then(response => response.json())
+                        .then(response => {
+                            if (response.status === 401) {
+                                window.location.href = '/signin';
+                                return;
+                            }
+                            return response.json();
+                        })
                         .then(data => {
-                            if (data.success) {
+                            if (data && data.success) {
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Success!',
@@ -1016,14 +1219,17 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Oops...',
-                                text: error.message || 'Something went wrong! Please try again.',
+                                text: 'Please signin to continue',
                                 confirmButtonColor: '#4A665B'
+                            }).then(() => {
+
+                                window.location.href = '/signin'
                             });
                         });
                 };
             }
 
-            // Wishlist functionality
+
             const wishlistBtn = document.getElementById('wishlistBtn');
             if (wishlistBtn) {
                 const heartIcon = wishlistBtn.querySelector('.heart-icon');
@@ -1074,11 +1280,174 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops...',
-                            text: 'Failed to update wishlist. Please try again.'
+                            text: 'Please Sign in to continue!'
+                        }).then(() => {
+
+                            window.location = '/signin'
                         });
                     }
                 });
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const productId = document.querySelector('.reviews-section').dataset.productId;
+            const reviewsToggle = document.getElementById('reviewsToggle');
+            const reviewsContent = document.getElementById('reviewsContent');
+            let reviewsLoaded = false;
+
+            
+            reviewsToggle.addEventListener('click', function () {
+                const isActive = reviewsContent.classList.toggle('active');
+                reviewsToggle.querySelector('.dropdown-arrow').style.transform =
+                    isActive ? 'rotate(180deg)' : 'rotate(0)';
+
+                
+                if (isActive && !reviewsLoaded) {
+                    loadReviews();
+                    reviewsLoaded = true;
+                }
+            });
+
+            async function loadReviews() {
+                try {
+                    const response = await fetch(`/${productId}/reviews`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        updateReviewStats(data.stats);
+                        displayReviews(data.reviews);
+                    } else {
+                        throw new Error('Failed to load reviews');
+                    }
+                } catch (error) {
+                    console.error('Error loading reviews:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Failed to load reviews. Please try again later.',
+                        confirmButtonColor: '#3b7254'
+                    });
+                }
+            }
+
+            function updateReviewStats(stats) {
+                // Update preview (in button)
+                document.getElementById('averageScore').textContent = stats.averageRating.toFixed(1);
+                document.getElementById('reviewCount').textContent = `${stats.totalReviews} reviews`;
+
+                // Update detailed view
+                document.getElementById('averageScoreLarge').textContent = stats.averageRating.toFixed(1);
+                document.getElementById('reviewCountLarge').textContent = `${stats.totalReviews} reviews`;
+
+                const starsDisplay = '★'.repeat(Math.round(stats.averageRating)) +
+                    '☆'.repeat(5 - Math.round(stats.averageRating));
+                document.getElementById('averageStars').textContent = starsDisplay;
+                document.getElementById('averageStarsLarge').textContent = starsDisplay;
+
+                // Update bars
+                for (let i = 1; i <= 5; i++) {
+                    const percentage = (stats.ratingDistribution[i] / stats.totalReviews * 100) || 0;
+                    document.getElementById(`bar${i}`).style.width = `${percentage}%`;
+                    document.getElementById(`count${i}`).textContent = stats.ratingDistribution[i];
+                }
+            }
+
+            function displayReviews(reviews) {
+                const reviewsList = document.getElementById('reviewsList');
+                reviewsList.innerHTML = reviews.map(review => `
+            <div class="review-item">
+                <div class="review-header">
+                    <span class="reviewer-name">${review.userId.name}</span>
+                    <span class="review-date">${new Date(review.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div class="review-rating">
+                    ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                </div>
+                <div class="review-text">${review.review}</div>
+            </div>
+        `).join('');
+            }
+
+            const reviewForm = document.getElementById('reviewForm');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const rating = document.querySelector('input[name="rating"]:checked')?.value;
+                    const review = document.getElementById('reviewText').value;
+
+                    if (!rating) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Rating Required',
+                            text: 'Please select a rating before submitting your review',
+                            confirmButtonColor: '#3b7254',
+                            toast: true,
+                            position: 'top-end',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                        return;
+                    }
+
+                    try {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Submitting Review...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        const response = await fetch(`/${productId}/reviews`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ rating, review })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Close loading indicator
+                            Swal.close();
+
+                            // Show success message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Review Submitted!',
+                                text: 'Thank you for your feedback',
+                                confirmButtonColor: '#3b7254',
+                                toast: true,
+                                position: 'top-end',
+                                timer: 3000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+
+                            reviewForm.reset();
+                            loadReviews();
+                        } else {
+                            throw new Error(data.message || 'Error submitting review');
+                        }
+                    } catch (error) {
+                        console.error('Error submitting review:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Submission Failed',
+                            text: error.message || 'Failed to submit review. Please try again.',
+                            confirmButtonColor: '#3b7254'
+                        });
+                    }
+                });
+            }
+
+            // Load initial preview stats
+            loadReviews();
         });
     </script>
 </body>
