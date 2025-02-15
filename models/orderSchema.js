@@ -40,8 +40,24 @@ const orderSchema = new Schema({
             type: String,
             enum: ['Active', 'Cancelled'],
             default: 'Active'
+        },
+        cancellationReason: {
+            type: String,
+            default: null
+        },
+        cancelledAt: {
+            type: Date,
+            default: null
         }
     }],
+    cancellationReason: {
+        type: String,
+        default: null
+    },
+    cancelledAt: {
+        type: Date,
+        default: null
+    },
     totalPrice: {
         type: Number,
         required: true
@@ -113,17 +129,14 @@ const orderSchema = new Schema({
 });
 
 orderSchema.pre('find', function(next) {
-    console.log('Finding order with query:', this.getQuery());
     next();
 });
 
 orderSchema.pre('findOne', function(next) {
-    console.log('Finding one order with query:', this.getQuery());
     next();
 });
 
 orderSchema.methods.recalculateTotals = function() {
-    console.log('Starting recalculation...');
     
 
     const normalizedItems = this.orderedItems.map((item, index) => {
@@ -144,14 +157,6 @@ orderSchema.methods.recalculateTotals = function() {
             subtotal
         };
     });
-
-    console.log('Normalized items:', normalizedItems.map(item => ({
-        pricePerUnit: item.price,
-        quantity: item.quantity,
-        status: item.status,
-        subtotal: item.subtotal
-    })));
-
     const activeItems = normalizedItems.filter(item => item.status !== 'Cancelled');
 
     this.totalPrice = Number(
@@ -164,7 +169,6 @@ orderSchema.methods.recalculateTotals = function() {
 
    
     if (activeItems.length === 0) {
-        console.log('Order fully cancelled - resetting totals');
         this.status = 'Cancelled';
         this.totalPrice = 0;
         this.finalAmount = 0;
@@ -177,14 +181,6 @@ orderSchema.methods.recalculateTotals = function() {
             discountAmount: 0
         };
     }
-
-    console.log('Final calculation:', {
-        activeItemCount: activeItems.length,
-        totalPrice: this.totalPrice,
-        discount,
-        finalAmount: this.finalAmount,
-        status: this.status
-    });
 
     return this;
 };

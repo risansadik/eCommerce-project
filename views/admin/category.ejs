@@ -423,14 +423,14 @@
             const searchForm = document.querySelector('.search-container form');
             const searchInput = searchForm.querySelector('input[name="search"]');
 
-            // Pre-fill search input with current search term from URL
+
             const urlParams = new URLSearchParams(window.location.search);
             const currentSearch = urlParams.get('search');
             if (currentSearch) {
                 searchInput.value = currentSearch;
             }
 
-            // Handle search on Enter key
+
             searchInput.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -438,11 +438,10 @@
                 }
             });
 
-            // Optional: Handle empty search
+        
             searchInput.addEventListener('input', function () {
                 if (this.value.trim() === '') {
-                    // Uncomment the next line if you want to auto-submit when search is cleared
-                    // searchForm.submit();
+             
                 }
             });
         });

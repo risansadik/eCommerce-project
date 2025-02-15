@@ -493,10 +493,32 @@
         .invoice-btn i {
             font-size: 16px;
         }
-        .txt{
+
+        .txt {
 
             text-decoration: none;
             color: white;
+        }
+
+        .cancellation-reason {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .swal2-textarea {
+            width: 100% !important;
+            min-height: 100px !important;
+            margin: 10px 0 !important;
+            padding: 8px !important;
+        }
+
+        .swal2-label {
+            display: block;
+            margin-bottom: 8px;
+            text-align: left;
+            font-weight: 500;
         }
     </style>
 
@@ -508,10 +530,18 @@
     <div class="header">
         <div class="logo">Brossoc</div>
         <div class="nav-items">
-            <a href="/" class="txt"><div>Home</div></a>
-            <a href="/shop" class="txt"><div>Shop</div></a>
-            <a href="/about" class="txt"><div>About us</div></a>
-            <a href="/contact" class="txt"><div>Contact us</div></a>
+            <a href="/" class="txt">
+                <div>Home</div>
+            </a>
+            <a href="/shop" class="txt">
+                <div>Shop</div>
+            </a>
+            <a href="/about" class="txt">
+                <div>About us</div>
+            </a>
+            <a href="/contact" class="txt">
+                <div>Contact us</div>
+            </a>
         </div>
         <div class="nav-icons">
             <a href="/wishlist" class="txt"><span><i class="fa-solid fa-heart"></i></span></a>
@@ -805,23 +835,39 @@
         const confirmCancelItem = async (orderId, itemId) => {
             try {
                 const result = await Swal.fire({
-                    title: 'Cancel Item?',
-                    text: 'Are you sure you want to cancel this item?',
+                    title: 'Cancel Item',
+                    html: `
+                <div class="form-group">
+                    <label for="cancelReason" class="swal2-label">Reason for Cancellation</label>
+                    <textarea id="cancelReason" class="swal2-textarea" placeholder="Please provide a reason for cancellation" rows="4" style="margin-top: 10px;"></textarea>
+                </div>
+            `,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Yes, cancel it!',
-                    cancelButtonText: 'No, keep it'
+                    cancelButtonText: 'No, keep it',
+                    preConfirm: () => {
+                        const reason = document.getElementById('cancelReason').value;
+                        if (!reason.trim()) {
+                            Swal.showValidationMessage('Please provide a reason for cancellation');
+                            return false;
+                        }
+                        return reason;
+                    }
                 });
 
-                if (result.isConfirmed) {
+                if (result.isConfirmed && result.value) {
                     const response = await fetch(`/orders/${orderId}/items/${itemId}/cancel`, {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
                             'Content-Type': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({
+                            reason: result.value
+                        })
                     });
 
                     const data = await response.json();
@@ -841,7 +887,14 @@
                                 statusBadge.textContent = 'Cancelled';
                                 cancelBtn.parentNode.replaceChild(statusBadge, cancelBtn);
                             }
+
+                            // Add cancellation reason if you want to display it
+                            const reasonElement = document.createElement('p');
+                            reasonElement.className = 'cancellation-reason';
+                            reasonElement.textContent = `Cancellation reason: ${result.value}`;
+                            itemCard.querySelector('.item-details').appendChild(reasonElement);
                         }
+
 
                         // Update price summary
                         const priceSummary = document.querySelector('.price-summary');
@@ -877,12 +930,9 @@
 
                         await Swal.fire({
                             title: data.updatedOrder.isFullyCancelled ? 'Order Cancelled' : 'Item Cancelled',
-                            text: data.updatedOrder.isFullyCancelled ?
-                                'The entire order has been cancelled.' :
-                                'The item has been cancelled successfully.',
+                            text: data.message,
                             icon: 'success'
                         });
-
                     } else {
                         throw new Error(data.message || 'Failed to cancel item');
                     }
@@ -899,23 +949,40 @@
         const confirmCancelOrder = async (orderId) => {
             try {
                 const result = await Swal.fire({
-                    title: 'Cancel Order?',
-                    text: 'Are you sure you want to cancel this entire order?',
+                    title: 'Cancel Order',
+                    html: `
+                <div class="form-group">
+                    <label for="cancelReason" class="swal2-label">Reason for Cancellation</label>
+                    <textarea id="cancelReason" class="swal2-textarea" placeholder="Please provide a reason for cancellation" rows="4" style="margin-top: 10px;"></textarea>
+                </div>
+            `,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Yes, cancel it!',
-                    cancelButtonText: 'No, keep it'
+                    cancelButtonText: 'No, keep it',
+                    preConfirm: () => {
+                        const reason = document.getElementById('cancelReason').value;
+                        if (!reason.trim()) {
+                            Swal.showValidationMessage('Please provide a reason for cancellation');
+                            return false;
+                        }
+                        return reason;
+                    }
                 });
 
-                if (result.isConfirmed) {
+                if (result.isConfirmed && result.value) {
                     const response = await fetch(`/orders/${orderId}/cancel`, {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
+                            'Content-Type': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
-                        }
+                        },
+                        body: JSON.stringify({
+                            reason: result.value
+                        })
                     });
 
                     if (!response.ok) {
@@ -945,58 +1012,6 @@
                 });
             }
         };
-
-
-        function openReturnModal(orderId) {
-            document.getElementById('returnOrderId').value = orderId;
-            document.getElementById('returnModal').style.display = 'block';
-        }
-
-
-        function closeReturnModal() {
-            document.getElementById('returnModal').style.display = 'none';
-        }
-
-
-        document.getElementById('returnForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const orderId = document.getElementById('returnOrderId').value; // This should be orderId (UUID)
-            const returnReason = document.getElementById('returnReason').value;
-
-            try {
-                const response = await fetch('/submit-return', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ orderId, returnReason })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Return request submitted successfully.',
-                        icon: 'success'
-                    });
-                    closeReturnModal();
-                    window.location.reload(); // Refresh the page to update the status
-                } else {
-                    throw new Error(data.message || 'Failed to submit return request');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: 'Error!',
-                    text: error.message || 'Failed to submit return request',
-                    icon: 'error'
-                });
-            }
-        });
-
         async function downloadInvoice(orderId, buttonElement) {
             const btn = buttonElement || event.target.closest('.invoice-btn');
             const originalText = btn ? btn.innerHTML : '';
@@ -1263,8 +1278,8 @@
         </thead>
        <tbody>
     ${order.orderedItems
-        .filter(item => item.status !== 'Cancelled') // Extra safety check
-        .map(item => `
+                        .filter(item => item.status !== 'Cancelled') // Extra safety check
+                        .map(item => `
             <tr>
                 <td>
                     <span class="product-name">${item.product?.productName || 'Product'}</span>

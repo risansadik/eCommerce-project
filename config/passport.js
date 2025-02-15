@@ -11,7 +11,6 @@ passport.use(new googleStrategy({
     passReqToCallback: true 
 }, async (req, accessToken, refreshToken, profile, done) => {
     try {
-        console.log('Google Strategy - Profile received:', profile.id);
         
        
         let user = await User.findOne({ googleId: profile.id });
@@ -42,7 +41,6 @@ passport.use(new googleStrategy({
             return done(null, false, { message: 'Your account has been blocked' });
         }
 
-        console.log('Google Strategy - User found/created:', user);
         return done(null, user);
     } catch (error) {
         console.error('Google Strategy Error:', error);
@@ -51,15 +49,12 @@ passport.use(new googleStrategy({
 }));
 
 passport.serializeUser((user, done) => {
-    console.log('Serializing user:', user);
     done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
-    console.log('Attempting to deserialize user:', id);
     try {
         const user = await User.findById(id);
-        console.log('Deserialized user:', user);
         done(null, user);
     } catch (err) {
         console.error('Deserialize Error:', err);

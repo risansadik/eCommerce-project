@@ -9,19 +9,76 @@ const Wallet = require('../../models/walletSchema')
 const { createOrder, verifyPayment } = require('../../config/razorpay');
 
 const checkoutController = {
-    getCheckout: async (req, res) => {
+    getCheckout : async (req, res) => {
         try {
             const userId = req.user._id;
             const cart = await Cart.findOne({ userId })
                 .populate('items.productId');
-
+    
             if (!cart || cart.items.length === 0) {
                 return res.redirect('/cart');
             }
+    
+            let updatedItems = [];
+            let cartTotal = 0;
+            let hasInvalidItems = false;
+            let errorHtml = '';
+    
+         
+            for (const item of cart.items) {
+                const product = await Product.findById(item.productId._id);
+                
+                if (!product) {
+                    errorHtml += `• ${item.productId.productName} is no longer available<br>`;
+                    hasInvalidItems = true;
+                    continue;
+                }
+    
+                if (product.isBlocked) {
+                    errorHtml += `• ${item.productId.productName} is temporarily unavailable<br>`;
+                    hasInvalidItems = true;
+                    continue;
+                }
+    
+                if (product.status !== 'Available') {
+                    errorHtml += `• ${item.productId.productName} is currently ${product.status.toLowerCase()}<br>`;
+                    hasInvalidItems = true;
+                    continue;
+                }
+    
+                const sizeVariant = product.sizeVariants.find(v => v.size === item.size);
+                if (!sizeVariant) {
+                    errorHtml += `• Size ${item.size} not available for ${item.productId.productName}<br>`;
+                    hasInvalidItems = true;
+                    continue;
+                }
+    
+                if (sizeVariant.quantity < item.quantity) {
+                    errorHtml += sizeVariant.quantity === 0 
+                        ? `• ${item.productId.productName} (${item.size}) is out of stock<br>`
+                        : `• Only ${sizeVariant.quantity} units left for ${item.productId.productName} (${item.size})<br>`;
+                    hasInvalidItems = true;
+                    continue;
+                }
+    
+                updatedItems.push(item);
+                cartTotal += item.totalPrice;
+            }
+    
+          
+            if (hasInvalidItems) {
+                cart.items = updatedItems;
+                await cart.save();
+    
+                if (updatedItems.length === 0) {
+                    return res.redirect('/cart?showAlert=true&message=' + encodeURIComponent(errorHtml));
+                }
+    
+                
+                res.locals.showAlert = true;
+                res.locals.alertMessage = errorHtml;
+            }
 
-            const cartTotal = cart.items.reduce((total, item) => total + item.totalPrice, 0);
-
-           
             let wallet = await Wallet.findOne({ userId });
             if (!wallet) {
                 wallet = new Wallet({
@@ -32,7 +89,6 @@ const checkoutController = {
                 await wallet.save();
             }
 
-           
             const coupons = await Coupon.find({
                 status: 'active',
                 expireOn: { $gt: new Date() },
@@ -54,7 +110,6 @@ const checkoutController = {
             const userAddresses = await Address.findOne({ userId });
             let finalAmount = cartTotal;
 
-            
             if (cart.appliedCoupon?.couponId) {
                 const coupon = await Coupon.findById(cart.appliedCoupon.couponId);
                 if (coupon) {
@@ -70,8 +125,6 @@ const checkoutController = {
                 }
             }
 
-            console.log('Available Coupons being sent to template:', availableCoupons);
-
             res.render('checkout', {
                 cart,
                 cartTotal,
@@ -80,9 +133,11 @@ const checkoutController = {
                 addresses: userAddresses ? userAddresses.address : [],
                 user: req.user,
                 coupons: availableCoupons,
-                walletBalance: wallet.balance 
+                walletBalance: wallet.balance,
+                showAlert: res.locals.showAlert,
+                alertMessage: res.locals.alertMessage
             });
-
+    
         } catch (error) {
             console.error('Checkout error:', error);
             res.status(500).render('error', { message: 'Error loading checkout page' });
@@ -93,7 +148,7 @@ const checkoutController = {
             const userId = req.user._id;
             const { addressId, paymentMethod } = req.body;
 
-    
+
 
             const userAddress = await Address.findOne({
                 userId,
@@ -167,7 +222,7 @@ const checkoutController = {
 
             let order;
 
-        
+
             if (paymentMethod === 'wallet') {
                 const wallet = await Wallet.findOne({ userId });
                 if (!wallet || wallet.balance < finalAmount) {
@@ -181,7 +236,7 @@ const checkoutController = {
                 order = new Order(orderData);
                 await order.save();
 
-              
+
                 await wallet.useForPurchase(finalAmount, order._id);
 
                 // Update user's wallet balance
@@ -189,7 +244,7 @@ const checkoutController = {
                     $inc: { wallet: -finalAmount }
                 });
             }
-           
+
             else {
                 if (paymentMethod === 'cod') {
                     orderData.paymentStatus = 'pending';
@@ -198,7 +253,7 @@ const checkoutController = {
                 await order.save();
             }
 
-         
+
             for (const item of cart.items) {
                 await Product.updateOne(
                     {
@@ -211,12 +266,12 @@ const checkoutController = {
                 );
             }
 
-            
+
             await User.findByIdAndUpdate(userId, {
                 $push: { orderHistory: order._id }
             });
 
-            
+
             await Cart.findByIdAndDelete(cart._id);
 
             res.status(200).json({
@@ -256,6 +311,7 @@ const checkoutController = {
             const subtotal = cart.items.reduce((total, item) => total + item.totalPrice, 0);
             const finalAmount = subtotal - (cart.appliedCoupon?.discount || 0);
 
+           
             const razorpayOrder = await createOrder(finalAmount, userId.toString());
 
             const orderData = {

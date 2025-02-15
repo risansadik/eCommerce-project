@@ -268,6 +268,38 @@
         .table-container tr:hover {
             background-color: #2d3748;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination-btn {
+            background-color: #2d3748;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination-btn:disabled {
+            background-color: #1a1d21;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: #4a5568;
+        }
+
+        .pagination-info {
+            color: #a0aec0;
+            margin: 0 15px;
+        }
     </style>
 
     <style id="pdfStyles">
@@ -454,13 +486,13 @@
 
 
     <div class="main-content">
-        <div class="report-header">
-            <h1 class="report-title">Sales Report</h1>
-            <div class="export-buttons">
-                <button class="export-btn" onclick="downloadPDF()">
-                    Download PDF
-                </button>
-            </div>
+        <div class="export-buttons">
+            <button class="export-btn" onclick="downloadPDF()">
+                Download PDF
+            </button>
+            <button class="export-btn" onclick="downloadExcel()">
+                Download Excel
+            </button>
         </div>
         <div class="stat-card">
             <div class="stat-title">Overall Sales Count</div>
@@ -596,6 +628,7 @@
                         <th>Customer</th>
                         <th>Amount</th>
                         <th>Discount</th>
+                        <th>Payment Method</th>
                         <th>Final Amount</th>
                         <th>Status</th>
                     </tr>
@@ -616,6 +649,9 @@
                             </td>
                             <td>₹<%= order.discount.toLocaleString() %>
                             </td>
+                            <td>
+                                <%= order.paymentMethod %>
+                            </td>
                             <td>₹<%= order.finalAmount.toLocaleString() %>
                             </td>
                             <td>
@@ -627,6 +663,13 @@
                         <% }); %>
                 </tbody>
             </table>
+        </div>
+        <div class="pagination">
+            <button class="pagination-btn" id="prevPage" onclick="changePage(-1)">Previous</button>
+            <span class="pagination-info">
+                Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+            </span>
+            <button class="pagination-btn" id="nextPage" onclick="changePage(1)">Next</button>
         </div>
     </div>
 
@@ -691,6 +734,7 @@
                     <th>Customer</th>
                     <th>Amount</th>
                     <th>Discount</th>
+                    <th>Payment Method</th>
                     <th>Final Amount</th>
                     <th>Status</th>
                 </tr>
@@ -818,34 +862,22 @@
 
                 pdfTableBody.innerHTML = Array.from(originalRows).map(row => {
                     const cells = row.getElementsByTagName('td');
-                    const statusBadge = cells[6].querySelector('.status-badge');
+                    const statusBadge = cells[7].querySelector('.status-badge');
                     const statusClass = statusBadge ? statusBadge.classList[1]?.split('-')[1] || 'default' : 'default';
-                    const statusText = cells[6].textContent.trim();
-
-                    const topProductsBody = document.getElementById('pdfTopProducts');
-                    const productsTable = document.querySelector('.stat-card:nth-child(1) tbody');
-                    if (productsTable) {
-                        topProductsBody.innerHTML = productsTable.innerHTML;
-                    }
-
-
-                    const topCategoriesBody = document.getElementById('pdfTopCategories');
-                    const categoriesTable = document.querySelector('.stat-card:nth-child(2) tbody');
-                    if (categoriesTable) {
-                        topCategoriesBody.innerHTML = categoriesTable.innerHTML;
-                    }
+                    const statusText = cells[7].textContent.trim();
 
                     return `
-                <tr>
-                    <td>${cells[0]?.textContent || ''}</td>
-                    <td>${cells[1]?.textContent || ''}</td>
-                    <td>${cells[2]?.textContent || ''}</td>
-                    <td class="amount">${cells[3]?.textContent || ''}</td>
-                    <td class="amount">${cells[4]?.textContent || ''}</td>
-                    <td class="amount">${cells[5]?.textContent || ''}</td>
-                    <td><span class="status status-${statusClass}">${statusText}</span></td>
-                </tr>
-            `;
+    <tr>
+        <td>${cells[0]?.textContent || ''}</td>
+        <td>${cells[1]?.textContent || ''}</td>
+        <td>${cells[2]?.textContent || ''}</td>
+        <td class="amount">${cells[3]?.textContent || ''}</td>
+        <td class="amount">${cells[4]?.textContent || ''}</td>
+        <td>${cells[5]?.textContent || ''}</td>
+        <td class="amount">${cells[6]?.textContent || ''}</td>
+        <td><span class="status status-${statusClass}">${statusText}</span></td>
+    </tr>
+`;
                 }).join('');
 
                 const opt = {
@@ -994,6 +1026,140 @@
             initializeChart('daily');
 
             document.getElementById('dailyBtn').style.backgroundColor = '#4a5568';
+        });
+
+        async function downloadExcel() {
+            try {
+                const dateRange = document.getElementById('dateRange').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                const response = await fetch('/admin/sales-report/excel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ dateRange, startDate, endDate })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate Excel');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sales-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+            } catch (error) {
+                console.error('Error downloading Excel:', error);
+                alert('Error generating Excel report. Please try again.');
+            }
+        }
+    </script>
+    <script>
+        const ITEMS_PER_PAGE = 10; // Number of orders per page
+        let currentPage = 1;
+        let allOrders = []; // Will store all orders
+
+        // Initialize pagination when data is loaded
+        function initializePagination(orders) {
+            allOrders = orders;
+            const totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE);
+            document.getElementById('totalPages').textContent = totalPages;
+            updatePaginationButtons();
+            displayCurrentPage();
+        }
+
+        // Display orders for current page
+        function displayCurrentPage() {
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageOrders = allOrders.slice(start, end);
+
+            const ordersTbody = document.querySelector('.sales-table tbody');
+            ordersTbody.innerHTML = pageOrders.map(order => `
+                <tr>
+                    <td>${order.orderId}</td>
+                    <td>${new Date(order.createdOn).toLocaleDateString()}</td>
+                    <td>${order.userId.name}</td>
+                    <td>₹${order.totalPrice.toLocaleString()}</td>
+                    <td>₹${order.discount.toLocaleString()}</td>
+                    <td>₹${order.finalAmount.toLocaleString()}</td>
+                    <td>
+                        <span class="status-badge status-${order.status.toLowerCase()}">
+                            ${order.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update pagination buttons state
+        function updatePaginationButtons() {
+            const totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE);
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+            document.getElementById('currentPage').textContent = currentPage;
+        }
+
+        // Change page
+        function changePage(delta) {
+            const totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE);
+            const newPage = currentPage + delta;
+
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayCurrentPage();
+                updatePaginationButtons();
+            }
+        }
+
+        function displayCurrentPage() {
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageOrders = allOrders.slice(start, end);
+
+            const ordersTbody = document.querySelector('.sales-table tbody');
+            ordersTbody.innerHTML = pageOrders.map(order => `
+        <tr>
+            <td>${order.orderId}</td>
+            <td>${new Date(order.createdOn).toLocaleDateString()}</td>
+            <td>${order.userId.name}</td>
+            <td>₹${order.totalPrice.toLocaleString()}</td>
+            <td>₹${order.discount.toLocaleString()}</td>
+            <td>${order.paymentMethod}</td>
+            <td>₹${order.finalAmount.toLocaleString()}</td>
+            <td>
+                <span class="status-badge status-${order.status.toLowerCase()}">
+                    ${order.status}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+        }
+
+        // Initialize pagination on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialOrders = Array.from(document.querySelector('.sales-table tbody').getElementsByTagName('tr')).map(row => {
+                const cells = row.getElementsByTagName('td');
+                return {
+                    orderId: cells[0].textContent.trim(),
+                    createdOn: new Date(cells[1].textContent.trim()),
+                    userId: { name: cells[2].textContent.trim() },
+                    totalPrice: parseFloat(cells[3].textContent.replace('₹', '').replace(/,/g, '')),
+                    discount: parseFloat(cells[4].textContent.replace('₹', '').replace(/,/g, '')),
+                    paymentMethod: cells[5].textContent.trim(),
+                    finalAmount: parseFloat(cells[6].textContent.replace('₹', '').replace(/,/g, '')),
+                    status: cells[7].querySelector('.status-badge').textContent.trim()
+                };
+            });
+            initializePagination(initialOrders);
         });
     </script>
 </body>

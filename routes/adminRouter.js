@@ -69,6 +69,7 @@ router.post('/deleteCoupon/:id', adminAuth, adminCouponController.deleteCoupon);
 
 router.get('/sales-report', adminAuth, adminSalesController.loadSalesReport);
 router.post('/sales-report/filter', adminAuth, adminSalesController.filterSalesReport);
+router.post('/sales-report/excel', adminSalesController.downloadExcel);
 
 
 

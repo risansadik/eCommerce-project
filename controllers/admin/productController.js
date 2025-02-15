@@ -34,8 +34,6 @@ const addProducts = async (req, res) => {
         const sizes = req.body.sizes || req.body['sizes[]'];
         const quantities = req.body.quantities || req.body['quantities[]'];
 
-        console.log('Received sizes:', sizes);
-        console.log('Received quantities:', quantities);
 
         
         const sizeArray = Array.isArray(sizes) ? sizes : [sizes];
@@ -54,7 +52,6 @@ const addProducts = async (req, res) => {
             })
             .filter(variant => variant.size !== '');
 
-        console.log('Processed size variants:', sizeVariants);
 
     
         if (!sizeVariants || sizeVariants.length === 0) {
@@ -88,9 +85,6 @@ const addProducts = async (req, res) => {
             status: totalQuantity > 0 ? 'Available' : 'out of stock',
             displayLocation: req.body.displayLocation || 'shop',
         });
-
-
-        console.log('New product object:', newProduct);
 
         await newProduct.save();
 
@@ -133,12 +127,6 @@ const getAllProducts = async (req, res) => {
 
 
         const category = await Category.find({ isListed: true });
-
-        console.log("Product Data:", productData.map(p => ({
-            name: p.productName,
-            images: p.productImage
-        })));
-
 
         if (category) {
             res.render('products', {
@@ -311,11 +299,6 @@ const editProduct = async (req, res) => {
         const id = req.params.id;
         const data = req.body;
 
-        console.log("Form data received:", {
-            sizes: data['sizes[]'],
-            quantities: data['quantities[]']
-        });
-
         
         const product = await Product.findById(id);
         if (!product) {
@@ -366,12 +349,7 @@ const editProduct = async (req, res) => {
 
         let sizes = data.sizes;        
         let quantities = data.quantities;
-
-     
-        console.log("Received sizes:", sizes);
-        console.log("Received quantities:", quantities);
         
-       
         if (!Array.isArray(sizes)) {
             sizes = sizes ? [sizes] : [];
         }
@@ -462,10 +440,8 @@ const deleteSingleImage = async (req, res) => {
         const imagePath = path.join("public", "uploads", "product-images", imageNameToServer);
         if (fs.existsSync(imagePath)) {
             fs.unlinkSync(imagePath);
-            console.log(`Image ${imageNameToServer} deleted successfully`);
             res.json({ status: true });
         } else {
-            console.log(`Image ${imageNameToServer} not found`);
             res.json({ status: false, message: 'Image file not found' });
         }
     } catch (error) {

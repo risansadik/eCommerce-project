@@ -46,7 +46,6 @@ router.get('/auth/google/callback',
     (req, res) => {
        
         req.session.user = req.user._id;
-        console.log('Google auth successful, session user set:', req.session.user);
         res.redirect('/');
     }
 );

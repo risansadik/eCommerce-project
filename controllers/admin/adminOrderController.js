@@ -38,12 +38,6 @@ const getAllOrders = async (req, res) => {
                 }
 
                 
-                console.log('Address Lookup Strategies:', {
-                    orderId: order.orderId,
-                    addressId: order.address,
-                    directLookupFound: !!addressDocument,
-                    nestedLookupFound: addressDocument ? 'Yes' : 'No'
-                });
 
                
                 if (!addressDocument) {
@@ -92,7 +86,6 @@ const getAllOrders = async (req, res) => {
             }
         }));
 
-        console.log('Return Requests:', returnRequests);
         res.render('admin-orders', {
             orders: processedOrders,
             returnRequests, 

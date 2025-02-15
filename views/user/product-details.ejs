@@ -661,359 +661,363 @@
     </style>
 </head>
 
-<body>
+<%-include('../../views/partials/user/header.ejs')%>
 
-    <div class="container">
-        <div class="product-grid">
-            <div class="gallery">
-                <div class="main-image-container" id="imageContainer">
-                    <% if (product.productImage && product.productImage.length> 0) { %>
-                        <img src="/uploads/product-images/<%= product.productImage[0] %>"
-                            alt="<%= product.productName %>" class="main-image" id="mainImage">
-                        <img src="/uploads/product-images/<%= product.productImage[0] %>"
-                            alt="<%= product.productName %> Zoomed" class="zoomed-image" id="zoomedImage">
-                        <% } %>
-                            <button class="gallery-nav gallery-prev" onclick="prevImage()">←</button>
-                            <button class="gallery-nav gallery-next" onclick="nextImage()">→</button>
-                </div>
+    <body>
 
-                <div class="thumbnails" id="thumbnails">
-                    <% if (product.productImage && product.productImage.length> 0) { %>
-                        <% product.productImage.forEach((image, index)=> { %>
-                            <div class="thumbnail <%= index === 0 ? 'active' : '' %>"
-                                onclick="selectImage(<%= index %>)">
-                                <img src="/uploads/product-images/<%= image %>"
-                                    alt="<%= product.productName %> Thumbnail <%= index + 1 %>">
-                            </div>
-                            <% }); %>
-                                <% } %>
-                </div>
-            </div>
+        <div class="container">
+            <div class="product-grid">
+                <div class="gallery">
+                    <div class="main-image-container" id="imageContainer">
+                        <% if (product.productImage && product.productImage.length> 0) { %>
+                            <img src="/uploads/product-images/<%= product.productImage[0] %>"
+                                alt="<%= product.productName %>" class="main-image" id="mainImage">
+                            <img src="/uploads/product-images/<%= product.productImage[0] %>"
+                                alt="<%= product.productName %> Zoomed" class="zoomed-image" id="zoomedImage">
+                            <% } %>
+                                <button class="gallery-nav gallery-prev" onclick="prevImage()">←</button>
+                                <button class="gallery-nav gallery-next" onclick="nextImage()">→</button>
+                    </div>
 
-            <div class="product-info">
-                <div>
-                    <h1 class="product-title">
-                        <%= product.productName %>
-                    </h1>
-                    <div class="price">
-                        <% if (product.regularPrice> product.salePrice) { %>
-                            <span class="original-price">₹<%= product.regularPrice %></span>
-                            <span class="sale-price">₹<%= product.salePrice %></span>
-                            <% const priceDiscount=Math.round(((product.regularPrice - product.salePrice) /
-                                product.regularPrice) * 100); if (priceDiscount> 0) {
-                                %>
-                                <span class="offer-badge">
-                                    <%= priceDiscount %>% OFF
-                                </span>
-                                <% } %>
-                                    <% } else { %>
-                                        <span class="sale-price">₹<%= product.salePrice %></span>
-                                        <% } %>
+                    <div class="thumbnails" id="thumbnails">
+                        <% if (product.productImage && product.productImage.length> 0) { %>
+                            <% product.productImage.forEach((image, index)=> { %>
+                                <div class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                                    onclick="selectImage(<%= index %>)">
+                                    <img src="/uploads/product-images/<%= image %>"
+                                        alt="<%= product.productName %> Thumbnail <%= index + 1 %>">
+                                </div>
+                                <% }); %>
+                                    <% } %>
                     </div>
                 </div>
-                <p class="description">
-                    <%=product.description%>
-                </p>
 
-                <!-- Size Selector -->
-                <div class="form-group">
-                    <label class="form-label">Size</label>
-                    <select class="form-select" id="sizeSelect">
-                        <option value="">Choose an option</option>
-                        <% product.sizeVariants.forEach(variant=> { %>
-                            <option value="<%= variant.size %>" data-quantity="<%= variant.quantity %>"
-                                <%=variant.quantity===0 ? 'disabled' : '' %>>
-                                <%= variant.size %>
-                                    <%= variant.quantity===0 ? '(Out of Stock)' : '' %>
-                            </option>
-                            <% }); %>
-                    </select>
-                    <div id="size-message" class="text-sm mt-1 text-red-600"></div>
-                </div>
-
-                <div class="add-to-cart-section">
-                    <div class="form-group quantity-input">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" min="1" value="1" class="form-input" id="quantityInput" disabled>
-                        <div id="quantity-message" class="text-sm mt-1 text-red-600"></div>
-                    </div>
-                    <button class="add-to-cart-btn" id="addToCartBtn">ADD TO CART</button>
-                </div>
-
-
-
-                <!-- Actions -->
-                <div class="actions">
-                    <button class="action-btn <%= isInWishlist ? 'active' : '' %>" id="wishlistBtn"
-                        data-product-id="<%= product._id %>">
-                        <svg width="24" height="24" viewBox="0 0 24 24"
-                            fill="<%= isInWishlist ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" class="heart-icon">
-                            <path
-                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
-                            </path>
-                        </svg>
-                        Wishlist
-                    </button>
-                </div>
-
-                <!-- Reviews Section -->
-                <div class="reviews-section" data-product-id="<%= product._id %>">
-                    <!-- Reviews Summary Button -->
-                    <button class="reviews-dropdown-btn" id="reviewsToggle">
-                        <div class="reviews-summary-preview">
-                            <div class="stars-preview">
-                                <div id="averageStars">★★★★★</div>
-                                <span id="averageScore">0</span>
-                            </div>
-                            <span id="reviewCount">0 reviews</span>
-                            <span class="dropdown-arrow">▼</span>
+                <div class="product-info">
+                    <div>
+                        <h1 class="product-title">
+                            <%= product.productName %>
+                        </h1>
+                        <div class="price">
+                            <% if (product.regularPrice> product.salePrice) { %>
+                                <span class="original-price">₹<%= product.regularPrice %></span>
+                                <span class="sale-price">₹<%= product.salePrice %></span>
+                                <% const priceDiscount=Math.round(((product.regularPrice - product.salePrice) /
+                                    product.regularPrice) * 100); if (priceDiscount> 0) {
+                                    %>
+                                    <span class="offer-badge">
+                                        <%= priceDiscount %>% OFF
+                                    </span>
+                                    <% } %>
+                                        <% } else { %>
+                                            <span class="sale-price">₹<%= product.salePrice %></span>
+                                            <% } %>
                         </div>
-                    </button>
+                    </div>
+                    <p class="description">
+                        <%=product.description%>
+                    </p>
 
-                    <!-- Dropdown Content -->
-                    <div class="reviews-dropdown-content" id="reviewsContent">
-                        <div class="reviews-container">
-                            <h2 class="reviews-title">Customer Reviews</h2>
+                    <!-- Size Selector -->
+                    <div class="form-group">
+                        <label class="form-label">Size</label>
+                        <select class="form-select" id="sizeSelect">
+                            <option value="">Choose an option</option>
+                            <% product.sizeVariants.forEach(variant=> { %>
+                                <option value="<%= variant.size %>" data-quantity="<%= variant.quantity %>"
+                                    <%=variant.quantity===0 ? 'disabled' : '' %>>
+                                    <%= variant.size %>
+                                        <%= variant.quantity===0 ? '(Out of Stock)' : '' %>
+                                </option>
+                                <% }); %>
+                        </select>
+                        <div id="size-message" class="text-sm mt-1 text-red-600"></div>
+                    </div>
 
-                            <div class="reviews-summary">
-                                <div class="average-rating">
-                                    <div class="average-score-large" id="averageScoreLarge">0</div>
-                                    <div class="stars-large" id="averageStarsLarge">★★★★★</div>
-                                    <div class="review-count-large" id="reviewCountLarge">0 reviews</div>
+                    <div class="add-to-cart-section">
+                        <div class="form-group quantity-input">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" min="1" value="1" class="form-input" id="quantityInput" disabled>
+                            <div id="quantity-message" class="text-sm mt-1 text-red-600"></div>
+                        </div>
+                        <button class="add-to-cart-btn" id="addToCartBtn">ADD TO CART</button>
+                    </div>
+
+
+
+                    <!-- Actions -->
+                    <div class="actions">
+                        <button class="action-btn <%= isInWishlist ? 'active' : '' %>" id="wishlistBtn"
+                            data-product-id="<%= product._id %>">
+                            <svg width="24" height="24" viewBox="0 0 24 24"
+                                fill="<%= isInWishlist ? 'currentColor' : 'none' %>" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heart-icon">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                </path>
+                            </svg>
+                            Wishlist
+                        </button>
+                    </div>
+
+                    <!-- Reviews Section -->
+                    <div class="reviews-section" data-product-id="<%= product._id %>">
+                        <!-- Reviews Summary Button -->
+                        <button class="reviews-dropdown-btn" id="reviewsToggle">
+                            <div class="reviews-summary-preview">
+                                <div class="stars-preview">
+                                    <div id="averageStars">★★★★★</div>
+                                    <span id="averageScore">0</span>
                                 </div>
-
-                                <div class="rating-bars">
-                                    <% for(let i=5; i>= 1; i--) { %>
-                                        <div class="rating-bar">
-                                            <div class="bar-label">
-                                                <%= i %>★
-                                            </div>
-                                            <div class="bar-container">
-                                                <div class="bar-fill" id="bar<%= i %>" style="width: 0%"></div>
-                                            </div>
-                                            <div class="bar-count" id="count<%= i %>">0</div>
-                                        </div>
-                                        <% } %>
-                                </div>
+                                <span id="reviewCount">0 reviews</span>
+                                <span class="dropdown-arrow">▼</span>
                             </div>
+                        </button>
 
-                            <% if (locals.user) { %>
-                                <div class="review-form-container">
-                                    <h3>Write a Review</h3>
-                                    <form id="reviewForm">
-                                        <div class="rating-input">
-                                            <% for(let i=5; i>= 1; i--) { %>
-                                                <input type="radio" id="star<%= i %>" name="rating" value="<%= i %>">
-                                                <label for="star<%= i %>">★</label>
-                                                <% } %>
-                                        </div>
-                                        <textarea name="review" id="reviewText" required
-                                            placeholder="Share your thoughts about this product..."></textarea>
-                                        <button type="submit" class="submit-review-btn">Submit Review</button>
-                                    </form>
-                                </div>
-                                <% } else { %>
-                                    <div class="login-prompt">
-                                        <p>Please <a href="/login">login</a> to write a review</p>
+                        <!-- Dropdown Content -->
+                        <div class="reviews-dropdown-content" id="reviewsContent">
+                            <div class="reviews-container">
+                                <h2 class="reviews-title">Customer Reviews</h2>
+
+                                <div class="reviews-summary">
+                                    <div class="average-rating">
+                                        <div class="average-score-large" id="averageScoreLarge">0</div>
+                                        <div class="stars-large" id="averageStarsLarge">★★★★★</div>
+                                        <div class="review-count-large" id="reviewCountLarge">0 reviews</div>
                                     </div>
-                                    <% } %>
 
-                                        <div class="reviews-list" id="reviewsList">
-                                            <!-- Reviews will be loaded here dynamically -->
+                                    <div class="rating-bars">
+                                        <% for(let i=5; i>= 1; i--) { %>
+                                            <div class="rating-bar">
+                                                <div class="bar-label">
+                                                    <%= i %>★
+                                                </div>
+                                                <div class="bar-container">
+                                                    <div class="bar-fill" id="bar<%= i %>" style="width: 0%"></div>
+                                                </div>
+                                                <div class="bar-count" id="count<%= i %>">0</div>
+                                            </div>
+                                            <% } %>
+                                    </div>
+                                </div>
+
+                                <% if (locals.user) { %>
+                                    <div class="review-form-container">
+                                        <h3>Write a Review</h3>
+                                        <form id="reviewForm">
+                                            <div class="rating-input">
+                                                <% for(let i=5; i>= 1; i--) { %>
+                                                    <input type="radio" id="star<%= i %>" name="rating"
+                                                        value="<%= i %>">
+                                                    <label for="star<%= i %>">★</label>
+                                                    <% } %>
+                                            </div>
+                                            <textarea name="review" id="reviewText" required
+                                                placeholder="Share your thoughts about this product..."></textarea>
+                                            <button type="submit" class="submit-review-btn">Submit Review</button>
+                                        </form>
+                                    </div>
+                                    <% } else { %>
+                                        <div class="login-prompt">
+                                            <p>Please <a href="/login">login</a> to write a review</p>
                                         </div>
+                                        <% } %>
+
+                                            <div class="reviews-list" id="reviewsList">
+                                                <!-- Reviews will be loaded here dynamically -->
+                                            </div>
+                            </div>
                         </div>
                     </div>
+
+
                 </div>
-
-
             </div>
-        </div>
 
-        <div class="related-products">
-            <h2 class="related-title">Related Products</h2>
-            <div class="related-grid">
-                <% relatedProducts.forEach(product=> { %>
-                    <div class="related-product-card">
-                        <a href="/productDetails?id=<%= product._id %>" class="product-link">
-                            <div class="related-image-container">
-                                <% if (product.productImage && product.productImage.length> 0) { %>
-                                    <img src="/uploads/product-images/<%= product.productImage[0] %>"
-                                        alt="<%= product.productName %>" class="related-product-image">
-                                    <% } %>
-                            </div>
-                            <div class="related-product-info">
-                                <h3 class="related-product-title">
-                                    <%= product.productName %>
-                                </h3>
-                                <div class="related-product-price">
-                                    <span class="related-original-price">₹<%= product.regularPrice %></span>
-                                    <span class="related-sale-price">₹<%= product.salePrice %></span>
+            <div class="related-products">
+                <h2 class="related-title">Related Products</h2>
+                <div class="related-grid">
+                    <% relatedProducts.forEach(product=> { %>
+                        <div class="related-product-card">
+                            <a href="/productDetails?id=<%= product._id %>" class="product-link">
+                                <div class="related-image-container">
+                                    <% if (product.productImage && product.productImage.length> 0) { %>
+                                        <img src="/uploads/product-images/<%= product.productImage[0] %>"
+                                            alt="<%= product.productName %>" class="related-product-image">
+                                        <% } %>
                                 </div>
-                            </div>
-                        </a>
-                    </div>
-                    <% }); %>
+                                <div class="related-product-info">
+                                    <h3 class="related-product-title">
+                                        <%= product.productName %>
+                                    </h3>
+                                    <div class="related-product-price">
+                                        <span class="related-original-price">₹<%= product.regularPrice %></span>
+                                        <span class="related-sale-price">₹<%= product.salePrice %></span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <% }); %>
+                </div>
             </div>
+
         </div>
+        <%-include('../../views/partials/user/footer.ejs')%>
 
-    </div>
+            <script>
 
-    <script>
-
-        const images = [
+                const images = [
     <% if (product.productImage && product.productImage.length > 0) { %>
         <% product.productImage.forEach((image, index) => { %>
-            '/uploads/product-images/<%= image %>' <%= index < product.productImage.length - 1 ? ',' : '' %>
+                    '/uploads/product-images/<%= image %>' <%= index < product.productImage.length - 1 ? ',' : '' %>
         <% }); %>
     <% } %>
 ];
-        let currentImageIndex = 0;
+                let currentImageIndex = 0;
 
-        function updateMainImage() {
-            const mainImage = document.getElementById('mainImage');
-            const zoomedImage = document.getElementById('zoomedImage');
+                function updateMainImage() {
+                    const mainImage = document.getElementById('mainImage');
+                    const zoomedImage = document.getElementById('zoomedImage');
 
-            if (mainImage && zoomedImage) {
-                mainImage.src = images[currentImageIndex];
-                zoomedImage.src = images[currentImageIndex];
+                    if (mainImage && zoomedImage) {
+                        mainImage.src = images[currentImageIndex];
+                        zoomedImage.src = images[currentImageIndex];
 
 
-                document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
-                    thumb.classList.toggle('active', index === currentImageIndex);
+                        document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+                            thumb.classList.toggle('active', index === currentImageIndex);
+                        });
+
+
+                        setTimeout(initializeZoom, 100);
+                    }
+                }
+
+                function prevImage() {
+                    if (images.length > 1) {
+                        currentImageIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1;
+                        updateMainImage();
+                    }
+                }
+
+                function nextImage() {
+                    if (images.length > 1) {
+                        currentImageIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1;
+                        updateMainImage();
+                    }
+                }
+
+                function selectImage(index) {
+                    if (index >= 0 && index < images.length) {
+                        currentImageIndex = index;
+                        updateMainImage();
+                    }
+                }
+
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    updateMainImage();
+                    initializeZoom();
+                });
+
+                const quantityInput = document.getElementById('quantityInput');
+                quantityInput.addEventListener('change', (e) => {
+                    const value = parseInt(e.target.value);
+                    if (value < 1) {
+                        e.target.value = 1;
+                    }
                 });
 
 
-                setTimeout(initializeZoom, 100);
-            }
-        }
+                const wishlistBtn = document.getElementById('wishlistBtn');
+                const heartIcon = wishlistBtn.querySelector('.heart-icon');
+                let isWishlist = false;
 
-        function prevImage() {
-            if (images.length > 1) {
-                currentImageIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1;
-                updateMainImage();
-            }
-        }
+                wishlistBtn.addEventListener('click', () => {
+                    isWishlist = !isWishlist;
+                    heartIcon.classList.toggle('active', isWishlist);
+                });
 
-        function nextImage() {
-            if (images.length > 1) {
-                currentImageIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1;
-                updateMainImage();
-            }
-        }
+                function initializeZoom() {
+                    const container = document.getElementById('imageContainer');
+                    const mainImage = document.getElementById('mainImage');
+                    const zoomedImage = document.getElementById('zoomedImage');
 
-        function selectImage(index) {
-            if (index >= 0 && index < images.length) {
-                currentImageIndex = index;
-                updateMainImage();
-            }
-        }
+                    if (!container || !mainImage || !zoomedImage) return;
+
+                    const ZOOM_LEVEL = 2; // 
 
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateMainImage();
-            initializeZoom();
-        });
+                    zoomedImage.style.transition = 'transform 0.1s ease-out';
 
-        const quantityInput = document.getElementById('quantityInput');
-        quantityInput.addEventListener('change', (e) => {
-            const value = parseInt(e.target.value);
-            if (value < 1) {
-                e.target.value = 1;
-            }
-        });
+                    let isZoomed = false;
+                    let containerRect = container.getBoundingClientRect();
 
+                    function updateZoom(e) {
+                        if (!isZoomed) return;
 
-        const wishlistBtn = document.getElementById('wishlistBtn');
-        const heartIcon = wishlistBtn.querySelector('.heart-icon');
-        let isWishlist = false;
-
-        wishlistBtn.addEventListener('click', () => {
-            isWishlist = !isWishlist;
-            heartIcon.classList.toggle('active', isWishlist);
-        });
-
-        function initializeZoom() {
-            const container = document.getElementById('imageContainer');
-            const mainImage = document.getElementById('mainImage');
-            const zoomedImage = document.getElementById('zoomedImage');
-
-            if (!container || !mainImage || !zoomedImage) return;
-
-            const ZOOM_LEVEL = 2; // 
+                        const rect = container.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
 
 
-            zoomedImage.style.transition = 'transform 0.1s ease-out';
-
-            let isZoomed = false;
-            let containerRect = container.getBoundingClientRect();
-
-            function updateZoom(e) {
-                if (!isZoomed) return;
-
-                const rect = container.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                        const xPercent = (x / rect.width) * 100;
+                        const yPercent = (y / rect.height) * 100;
 
 
-                const xPercent = (x / rect.width) * 100;
-                const yPercent = (y / rect.height) * 100;
+                        zoomedImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                        zoomedImage.style.transform = `scale(${ZOOM_LEVEL})`;
+                    }
+
+                    let touchTimeout;
+                    container.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        const touch = e.touches[0];
+                        isZoomed = true;
+                        zoomedImage.classList.add('active');
+                        updateZoom(touch);
 
 
-                zoomedImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-                zoomedImage.style.transform = `scale(${ZOOM_LEVEL})`;
-            }
+                        clearTimeout(touchTimeout);
+                        touchTimeout = setTimeout(() => {
+                            isZoomed = false;
+                            zoomedImage.classList.remove('active');
+                        }, 5000);
+                    });
 
-            let touchTimeout;
-            container.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const touch = e.touches[0];
-                isZoomed = true;
-                zoomedImage.classList.add('active');
-                updateZoom(touch);
+                    container.addEventListener('touchmove', (e) => {
+                        if (!isZoomed) return;
+                        e.preventDefault();
+                        const touch = e.touches[0];
+                        updateZoom(touch);
+                    });
+
+                    container.addEventListener('touchend', () => {
+                        isZoomed = false;
+                        zoomedImage.classList.remove('active');
+                        clearTimeout(touchTimeout);
+                    });
+
+                    container.addEventListener('mouseenter', () => {
+                        isZoomed = true;
+                        zoomedImage.classList.add('active');
+                        containerRect = container.getBoundingClientRect();
+                    });
+
+                    container.addEventListener('mousemove', updateZoom);
+
+                    container.addEventListener('mouseleave', () => {
+                        isZoomed = false;
+                        zoomedImage.classList.remove('active');
+                    });
 
 
-                clearTimeout(touchTimeout);
-                touchTimeout = setTimeout(() => {
-                    isZoomed = false;
-                    zoomedImage.classList.remove('active');
-                }, 5000);
-            });
+                    window.addEventListener('resize', () => {
+                        containerRect = container.getBoundingClientRect();
+                    });
+                }
 
-            container.addEventListener('touchmove', (e) => {
-                if (!isZoomed) return;
-                e.preventDefault();
-                const touch = e.touches[0];
-                updateZoom(touch);
-            });
 
-            container.addEventListener('touchend', () => {
-                isZoomed = false;
-                zoomedImage.classList.remove('active');
-                clearTimeout(touchTimeout);
-            });
-
-            container.addEventListener('mouseenter', () => {
-                isZoomed = true;
-                zoomedImage.classList.add('active');
-                containerRect = container.getBoundingClientRect();
-            });
-
-            container.addEventListener('mousemove', updateZoom);
-
-            container.addEventListener('mouseleave', () => {
-                isZoomed = false;
-                zoomedImage.classList.remove('active');
-            });
-
-           
-            window.addEventListener('resize', () => {
-                containerRect = container.getBoundingClientRect();
-            });
-        }
-
-      
-        const additionalStyles = `
+                const additionalStyles = `
 .zoomed-image {
     position: absolute;
     top: 0;
@@ -1038,324 +1042,323 @@
 `;
 
 
-        const styleSheet = document.createElement("style");
-        styleSheet.textContent = additionalStyles;
-        document.head.appendChild(styleSheet);
-    </script>
+                const styleSheet = document.createElement("style");
+                styleSheet.textContent = additionalStyles;
+                document.head.appendChild(styleSheet);
+            </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const sizeSelect = document.getElementById('sizeSelect');
-            const quantityInput = document.getElementById('quantityInput');
-            const addToCartBtn = document.getElementById('addToCartBtn');
-            const quantityMessage = document.getElementById('quantity-message');
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const sizeSelect = document.getElementById('sizeSelect');
+                    const quantityInput = document.getElementById('quantityInput');
+                    const addToCartBtn = document.getElementById('addToCartBtn');
+                    const quantityMessage = document.getElementById('quantity-message');
 
-            let selectedVariant = null;
+                    let selectedVariant = null;
 
-            sizeSelect.addEventListener('change', function () {
-                const selectedOption = this.options[this.selectedIndex];
+                    sizeSelect.addEventListener('change', function () {
+                        const selectedOption = this.options[this.selectedIndex];
 
-                if (!this.value) {
-                    resetForm();
-                    return;
-                }
+                        if (!this.value) {
+                            resetForm();
+                            return;
+                        }
 
-                const availableQuantity = parseInt(selectedOption.dataset.quantity);
-                selectedVariant = {
-                    size: this.value,
-                    quantity: availableQuantity
-                };
+                        const availableQuantity = parseInt(selectedOption.dataset.quantity);
+                        selectedVariant = {
+                            size: this.value,
+                            quantity: availableQuantity
+                        };
 
-                quantityInput.disabled = false;
-                quantityInput.max = Math.min(5, availableQuantity);
-                quantityInput.value = 1;
-                quantityMessage.textContent = '';
-                updateAddToCartButton();
-            });
+                        quantityInput.disabled = false;
+                        quantityInput.max = Math.min(5, availableQuantity);
+                        quantityInput.value = 1;
+                        quantityMessage.textContent = '';
+                        updateAddToCartButton();
+                    });
 
-            
-            ['input', 'change'].forEach(eventType => {
-                quantityInput.addEventListener(eventType, handleQuantityChange);
-            });
 
-            
-            quantityInput.addEventListener('keydown', function (e) {
-                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                    setTimeout(handleQuantityChange, 0);
-                }
-            });
+                    ['input', 'change'].forEach(eventType => {
+                        quantityInput.addEventListener(eventType, handleQuantityChange);
+                    });
 
-            function handleQuantityChange() {
-                let value = parseInt(quantityInput.value);
-                const availableQuantity = selectedVariant ? selectedVariant.quantity : 0;
-                const maxAllowed = Math.min(5, availableQuantity);
 
-                // Clear previous message
-                quantityMessage.textContent = '';
+                    quantityInput.addEventListener('keydown', function (e) {
+                        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                            setTimeout(handleQuantityChange, 0);
+                        }
+                    });
 
-                if (!value || value < 1) {
-                    value = 1;
-                    quantityInput.value = value;
-                    quantityMessage.textContent = 'Minimum 1 item required';
-                } else if (value > 5) {
-                    value = 5;
-                    quantityInput.value = value;
-                    quantityMessage.textContent = 'Maximum 5 items allowed per order';
-                } else if (value > availableQuantity) {
-                    value = availableQuantity;
-                    quantityInput.value = value;
-                    quantityMessage.textContent = 'Not enough stock available';
-                }
+                    function handleQuantityChange() {
+                        let value = parseInt(quantityInput.value);
+                        const availableQuantity = selectedVariant ? selectedVariant.quantity : 0;
+                        const maxAllowed = Math.min(5, availableQuantity);
 
-                updateAddToCartButton();
-            }
+                        // Clear previous message
+                        quantityMessage.textContent = '';
 
-            function resetForm() {
-                quantityInput.disabled = true;
-                quantityInput.value = 1;
-                addToCartBtn.disabled = true;
-                quantityMessage.textContent = '';
-                selectedVariant = null;
-            }
+                        if (!value || value < 1) {
+                            value = 1;
+                            quantityInput.value = value;
+                            quantityMessage.textContent = 'Minimum 1 item required';
+                        } else if (value > 5) {
+                            value = 5;
+                            quantityInput.value = value;
+                            quantityMessage.textContent = 'Maximum 5 items allowed per order';
+                        } else if (value > availableQuantity) {
+                            value = availableQuantity;
+                            quantityInput.value = value;
+                            quantityMessage.textContent = 'Not enough stock available';
+                        }
 
-            function updateAddToCartButton() {
-                const quantity = parseInt(quantityInput.value);
-                addToCartBtn.disabled = !selectedVariant ||
-                    isNaN(quantity) ||
-                    quantity < 1 ||
-                    quantity > Math.min(5, selectedVariant.quantity);
-            }
-
-            function showMessage(message, type) {
-
-                alert(message);
-            }
-
-            function updateCartCount(count) {
-
-                const cartCountElement = document.getElementById('cartCount');
-                if (cartCountElement) {
-                    cartCountElement.textContent = count;
-                }
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('Product ID:', '<%= product._id %>');
-            console.log('Is in wishlist:', '<%= isInWishlist %>');
-
-            const addToCartBtn = document.getElementById('addToCartBtn');
-            const sizeSelect = document.getElementById('sizeSelect');
-            const quantityInput = document.getElementById('quantityInput');
-
-            if (addToCartBtn) {
-                addToCartBtn.onclick = function (e) {
-                    e.preventDefault();
-
-                    if (!sizeSelect.value) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Size Required',
-                            text: 'Please select a size before adding to cart',
-                            confirmButtonColor: '#4A665B'
-                        });
-                        return;
+                        updateAddToCartButton();
                     }
 
-                    const quantity = parseInt(quantityInput.value);
-                    if (!quantity || quantity < 1) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Invalid Quantity',
-                            text: 'Please select a valid quantity',
-                            confirmButtonColor: '#4A665B'
-                        });
-                        return;
+                    function resetForm() {
+                        quantityInput.disabled = true;
+                        quantityInput.value = 1;
+                        addToCartBtn.disabled = true;
+                        quantityMessage.textContent = '';
+                        selectedVariant = null;
                     }
 
-                    if (quantity > 5) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Quantity Limit Exceeded',
-                            text: 'Maximum 5 items allowed per order',
-                            confirmButtonColor: '#4A665B'
-                        });
-                        return;
+                    function updateAddToCartButton() {
+                        const quantity = parseInt(quantityInput.value);
+                        addToCartBtn.disabled = !selectedVariant ||
+                            isNaN(quantity) ||
+                            quantity < 1 ||
+                            quantity > Math.min(5, selectedVariant.quantity);
                     }
 
-                    fetch('/addCart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            productId: '<%= product._id %>',
-                            size: sizeSelect.value,
-                            quantity: quantity
-                        })
-                    })
-                        .then(response => {
-                            if (response.status === 401) {
-                                window.location.href = '/signin';
+                    function showMessage(message, type) {
+
+                        alert(message);
+                    }
+
+                    function updateCartCount(count) {
+
+                        const cartCountElement = document.getElementById('cartCount');
+                        if (cartCountElement) {
+                            cartCountElement.textContent = count;
+                        }
+                    }
+                });
+
+                document.addEventListener('DOMContentLoaded', function () {
+
+
+                    const addToCartBtn = document.getElementById('addToCartBtn');
+                    const sizeSelect = document.getElementById('sizeSelect');
+                    const quantityInput = document.getElementById('quantityInput');
+
+                    if (addToCartBtn) {
+                        addToCartBtn.onclick = function (e) {
+                            e.preventDefault();
+
+                            if (!sizeSelect.value) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Size Required',
+                                    text: 'Please select a size before adding to cart',
+                                    confirmButtonColor: '#4A665B'
+                                });
                                 return;
                             }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data && data.success) {
+
+                            const quantity = parseInt(quantityInput.value);
+                            if (!quantity || quantity < 1) {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Product added to cart successfully',
+                                    icon: 'warning',
+                                    title: 'Invalid Quantity',
+                                    text: 'Please select a valid quantity',
                                     confirmButtonColor: '#4A665B'
-                                }).then((result) => {
-                                    if (result.isConfirmed && data.redirect) {
-                                        window.location.href = data.redirect;
+                                });
+                                return;
+                            }
+
+                            if (quantity > 5) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Quantity Limit Exceeded',
+                                    text: 'Maximum 5 items allowed per order',
+                                    confirmButtonColor: '#4A665B'
+                                });
+                                return;
+                            }
+
+                            fetch('/addCart', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    productId: '<%= product._id %>',
+                                    size: sizeSelect.value,
+                                    quantity: quantity
+                                })
+                            })
+                                .then(response => {
+                                    if (response.status === 401) {
+                                        window.location.href = '/signin';
+                                        return;
                                     }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    if (data && data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Success!',
+                                            text: 'Product added to cart successfully',
+                                            confirmButtonColor: '#4A665B'
+                                        }).then((result) => {
+                                            if (result.isConfirmed && data.redirect) {
+                                                window.location.href = data.redirect;
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: 'Please signin to continue',
+                                        confirmButtonColor: '#4A665B'
+                                    }).then(() => {
+
+                                        window.location.href = '/signin'
+                                    });
+                                });
+                        };
+                    }
+
+
+                    const wishlistBtn = document.getElementById('wishlistBtn');
+                    if (wishlistBtn) {
+                        const heartIcon = wishlistBtn.querySelector('.heart-icon');
+                        const productId = wishlistBtn.dataset.productId;
+
+                        wishlistBtn.addEventListener('click', async function () {
+                            try {
+                                const isInWishlist = wishlistBtn.classList.contains('active');
+                                const url = isInWishlist
+                                    ? `/wishlist/remove/${productId}`
+                                    : '/wishlist/add';
+
+                                const method = isInWishlist ? 'DELETE' : 'POST';
+
+                                const response = await fetch(url, {
+                                    method,
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: method === 'POST' ? JSON.stringify({ productId }) : undefined
+                                });
+
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    if (isInWishlist) {
+                                        heartIcon.setAttribute('fill', 'none');
+                                        wishlistBtn.classList.remove('active');
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Removed from Wishlist',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        });
+                                    } else {
+                                        heartIcon.setAttribute('fill', 'currentColor');
+                                        wishlistBtn.classList.add('active');
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Added to Wishlist',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        });
+                                    }
+                                }
+                            } catch (error) {
+                                console.error('Error updating wishlist:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Please Sign in to continue!'
+                                }).then(() => {
+
+                                    window.location = '/signin'
                                 });
                             }
-                        })
-                        .catch(error => {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'Please signin to continue',
-                                confirmButtonColor: '#4A665B'
-                            }).then(() => {
-
-                                window.location.href = '/signin'
-                            });
-                        });
-                };
-            }
-
-
-            const wishlistBtn = document.getElementById('wishlistBtn');
-            if (wishlistBtn) {
-                const heartIcon = wishlistBtn.querySelector('.heart-icon');
-                const productId = wishlistBtn.dataset.productId;
-
-                wishlistBtn.addEventListener('click', async function () {
-                    try {
-                        const isInWishlist = wishlistBtn.classList.contains('active');
-                        const url = isInWishlist
-                            ? `/wishlist/remove/${productId}`
-                            : '/wishlist/add';
-
-                        const method = isInWishlist ? 'DELETE' : 'POST';
-
-                        const response = await fetch(url, {
-                            method,
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: method === 'POST' ? JSON.stringify({ productId }) : undefined
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            if (isInWishlist) {
-                                heartIcon.setAttribute('fill', 'none');
-                                wishlistBtn.classList.remove('active');
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Removed from Wishlist',
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            } else {
-                                heartIcon.setAttribute('fill', 'currentColor');
-                                wishlistBtn.classList.add('active');
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Added to Wishlist',
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error updating wishlist:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Please Sign in to continue!'
-                        }).then(() => {
-
-                            window.location = '/signin'
                         });
                     }
                 });
-            }
-        });
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const productId = document.querySelector('.reviews-section').dataset.productId;
-            const reviewsToggle = document.getElementById('reviewsToggle');
-            const reviewsContent = document.getElementById('reviewsContent');
-            let reviewsLoaded = false;
+                document.addEventListener('DOMContentLoaded', function () {
+                    const productId = document.querySelector('.reviews-section').dataset.productId;
+                    const reviewsToggle = document.getElementById('reviewsToggle');
+                    const reviewsContent = document.getElementById('reviewsContent');
+                    let reviewsLoaded = false;
 
-            
-            reviewsToggle.addEventListener('click', function () {
-                const isActive = reviewsContent.classList.toggle('active');
-                reviewsToggle.querySelector('.dropdown-arrow').style.transform =
-                    isActive ? 'rotate(180deg)' : 'rotate(0)';
 
-                
-                if (isActive && !reviewsLoaded) {
-                    loadReviews();
-                    reviewsLoaded = true;
-                }
-            });
+                    reviewsToggle.addEventListener('click', function () {
+                        const isActive = reviewsContent.classList.toggle('active');
+                        reviewsToggle.querySelector('.dropdown-arrow').style.transform =
+                            isActive ? 'rotate(180deg)' : 'rotate(0)';
 
-            async function loadReviews() {
-                try {
-                    const response = await fetch(`/${productId}/reviews`);
-                    const data = await response.json();
 
-                    if (data.success) {
-                        updateReviewStats(data.stats);
-                        displayReviews(data.reviews);
-                    } else {
-                        throw new Error('Failed to load reviews');
-                    }
-                } catch (error) {
-                    console.error('Error loading reviews:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Failed to load reviews. Please try again later.',
-                        confirmButtonColor: '#3b7254'
+                        if (isActive && !reviewsLoaded) {
+                            loadReviews();
+                            reviewsLoaded = true;
+                        }
                     });
-                }
-            }
 
-            function updateReviewStats(stats) {
-                // Update preview (in button)
-                document.getElementById('averageScore').textContent = stats.averageRating.toFixed(1);
-                document.getElementById('reviewCount').textContent = `${stats.totalReviews} reviews`;
+                    async function loadReviews() {
+                        try {
+                            const response = await fetch(`/${productId}/reviews`);
+                            const data = await response.json();
 
-                // Update detailed view
-                document.getElementById('averageScoreLarge').textContent = stats.averageRating.toFixed(1);
-                document.getElementById('reviewCountLarge').textContent = `${stats.totalReviews} reviews`;
+                            if (data.success) {
+                                updateReviewStats(data.stats);
+                                displayReviews(data.reviews);
+                            } else {
+                                throw new Error('Failed to load reviews');
+                            }
+                        } catch (error) {
+                            console.error('Error loading reviews:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Failed to load reviews. Please try again later.',
+                                confirmButtonColor: '#3b7254'
+                            });
+                        }
+                    }
 
-                const starsDisplay = '★'.repeat(Math.round(stats.averageRating)) +
-                    '☆'.repeat(5 - Math.round(stats.averageRating));
-                document.getElementById('averageStars').textContent = starsDisplay;
-                document.getElementById('averageStarsLarge').textContent = starsDisplay;
+                    function updateReviewStats(stats) {
+                        // Update preview (in button)
+                        document.getElementById('averageScore').textContent = stats.averageRating.toFixed(1);
+                        document.getElementById('reviewCount').textContent = `${stats.totalReviews} reviews`;
 
-                // Update bars
-                for (let i = 1; i <= 5; i++) {
-                    const percentage = (stats.ratingDistribution[i] / stats.totalReviews * 100) || 0;
-                    document.getElementById(`bar${i}`).style.width = `${percentage}%`;
-                    document.getElementById(`count${i}`).textContent = stats.ratingDistribution[i];
-                }
-            }
+                        // Update detailed view
+                        document.getElementById('averageScoreLarge').textContent = stats.averageRating.toFixed(1);
+                        document.getElementById('reviewCountLarge').textContent = `${stats.totalReviews} reviews`;
 
-            function displayReviews(reviews) {
-                const reviewsList = document.getElementById('reviewsList');
-                reviewsList.innerHTML = reviews.map(review => `
+                        const starsDisplay = '★'.repeat(Math.round(stats.averageRating)) +
+                            '☆'.repeat(5 - Math.round(stats.averageRating));
+                        document.getElementById('averageStars').textContent = starsDisplay;
+                        document.getElementById('averageStarsLarge').textContent = starsDisplay;
+
+                        // Update bars
+                        for (let i = 1; i <= 5; i++) {
+                            const percentage = (stats.ratingDistribution[i] / stats.totalReviews * 100) || 0;
+                            document.getElementById(`bar${i}`).style.width = `${percentage}%`;
+                            document.getElementById(`count${i}`).textContent = stats.ratingDistribution[i];
+                        }
+                    }
+
+                    function displayReviews(reviews) {
+                        const reviewsList = document.getElementById('reviewsList');
+                        reviewsList.innerHTML = reviews.map(review => `
             <div class="review-item">
                 <div class="review-header">
                     <span class="reviewer-name">${review.userId.name}</span>
@@ -1367,89 +1370,89 @@
                 <div class="review-text">${review.review}</div>
             </div>
         `).join('');
-            }
-
-            const reviewForm = document.getElementById('reviewForm');
-            if (reviewForm) {
-                reviewForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    const rating = document.querySelector('input[name="rating"]:checked')?.value;
-                    const review = document.getElementById('reviewText').value;
-
-                    if (!rating) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Rating Required',
-                            text: 'Please select a rating before submitting your review',
-                            confirmButtonColor: '#3b7254',
-                            toast: true,
-                            position: 'top-end',
-                            timer: 3000,
-                            timerProgressBar: true,
-                            showConfirmButton: false
-                        });
-                        return;
                     }
 
-                    try {
-                        // Show loading state
-                        Swal.fire({
-                            title: 'Submitting Review...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
+                    const reviewForm = document.getElementById('reviewForm');
+                    if (reviewForm) {
+                        reviewForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+
+                            const rating = document.querySelector('input[name="rating"]:checked')?.value;
+                            const review = document.getElementById('reviewText').value;
+
+                            if (!rating) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Rating Required',
+                                    text: 'Please select a rating before submitting your review',
+                                    confirmButtonColor: '#3b7254',
+                                    toast: true,
+                                    position: 'top-end',
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                                return;
+                            }
+
+                            try {
+                                // Show loading state
+                                Swal.fire({
+                                    title: 'Submitting Review...',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
+
+                                const response = await fetch(`/${productId}/reviews`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ rating, review })
+                                });
+
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    // Close loading indicator
+                                    Swal.close();
+
+                                    // Show success message
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Review Submitted!',
+                                        text: 'Thank you for your feedback',
+                                        confirmButtonColor: '#3b7254',
+                                        toast: true,
+                                        position: 'top-end',
+                                        timer: 3000,
+                                        timerProgressBar: true,
+                                        showConfirmButton: false
+                                    });
+
+                                    reviewForm.reset();
+                                    loadReviews();
+                                } else {
+                                    throw new Error(data.message || 'Error submitting review');
+                                }
+                            } catch (error) {
+                                console.error('Error submitting review:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Submission Failed',
+                                    text: error.message || 'Failed to submit review. Please try again.',
+                                    confirmButtonColor: '#3b7254'
+                                });
                             }
                         });
-
-                        const response = await fetch(`/${productId}/reviews`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ rating, review })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            // Close loading indicator
-                            Swal.close();
-
-                            // Show success message
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Review Submitted!',
-                                text: 'Thank you for your feedback',
-                                confirmButtonColor: '#3b7254',
-                                toast: true,
-                                position: 'top-end',
-                                timer: 3000,
-                                timerProgressBar: true,
-                                showConfirmButton: false
-                            });
-
-                            reviewForm.reset();
-                            loadReviews();
-                        } else {
-                            throw new Error(data.message || 'Error submitting review');
-                        }
-                    } catch (error) {
-                        console.error('Error submitting review:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Submission Failed',
-                            text: error.message || 'Failed to submit review. Please try again.',
-                            confirmButtonColor: '#3b7254'
-                        });
                     }
-                });
-            }
 
-            // Load initial preview stats
-            loadReviews();
-        });
-    </script>
-</body>
+                    // Load initial preview stats
+                    loadReviews();
+                });
+            </script>
+    </body>
 
 </html>

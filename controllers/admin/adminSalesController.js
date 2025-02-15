@@ -1,5 +1,6 @@
 const Order = require('../../models/orderSchema');
 const User = require('../../models/userSchema');
+const ExcelJS = require('exceljs');
 
 const loadSalesReport = async (req, res) => {
     try {
@@ -260,11 +261,9 @@ async function getStats(startDate, endDate) {
             }
         ]);
 
-        console.log('Aggregation Stats Raw:', stats);
 
 
         if (stats.length === 0) {
-            console.log('No orders found in the specified date range');
             return {
                 salesCount: 0,
                 orderAmount: 0,
@@ -393,7 +392,175 @@ async function getTopCategories(startDate, endDate) {
         return [];
     }
 }
+
+const downloadExcel = async (req, res) => {
+    try {
+        const { dateRange, startDate, endDate } = req.body;
+        let start, end;
+
+        if (dateRange && dateRange !== 'custom') {
+            const today = new Date();
+
+            switch (dateRange) {
+                case 'today':
+                    start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+                    break;
+                case 'week':
+                    start = new Date(today);
+                    start.setDate(today.getDate() - today.getDay());
+                    start.setHours(0, 0, 0, 0);
+                    end = new Date(today);
+                    end.setDate(today.getDate() + (6 - today.getDay()));
+                    end.setHours(23, 59, 59, 999);
+                    break;
+                case 'month':
+                    start = new Date(today.getFullYear(), today.getMonth(), 1);
+                    end = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+                    break;
+                case 'year':
+                    start = new Date(today.getFullYear(), 0, 1);
+                    end = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+                    break;
+                default:
+                    throw new Error('Invalid date range');
+            }
+        } else {
+            if (!startDate || !endDate) {
+                throw new Error('Start date and end date are required for custom range');
+            }
+
+            start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+        }
+
+        const [stats, orders, topProducts, topCategories] = await Promise.all([
+            getStats(start, end),
+            Order.find({
+                createdOn: { $gte: start, $lte: end }
+            })
+                .populate('userId', 'name')
+                .sort({ createdOn: -1 }),
+            getTopProducts(start, end),
+            getTopCategories(start, end)
+        ]);
+
+        // Create a new workbook
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Sales Report System';
+        workbook.created = new Date();
+
+        // Create Summary sheet
+        const summarySheet = workbook.addWorksheet('Summary');
+        summarySheet.columns = [
+            { header: 'Metric', key: 'metric', width: 20 },
+            { header: 'Value', key: 'value', width: 15 }
+        ];
+
+        // Add summary data
+        summarySheet.addRows([
+            { metric: 'Total Sales Count', value: stats.salesCount },
+            { metric: 'Total Order Amount', value: stats.orderAmount },
+            { metric: 'Total Discount', value: stats.discount }
+        ]);
+
+        // Style summary sheet
+        summarySheet.getRow(1).font = { bold: true };
+        summarySheet.getColumn('value').numFmt = '₹#,##0.00';
+
+        // Create Orders sheet
+        const ordersSheet = workbook.addWorksheet('Orders');
+        ordersSheet.columns = [
+            { header: 'Order ID', key: 'orderId', width: 15 },
+            { header: 'Date', key: 'date', width: 12 },
+            { header: 'Customer', key: 'customer', width: 20 },
+            { header: 'Amount', key: 'amount', width: 15 },
+            { header: 'Discount', key: 'discount', width: 15 },
+            { header: 'Final Amount', key: 'finalAmount', width: 15 },
+            { header: 'Status', key: 'status', width: 12 }
+        ];
+
+        // Add orders data
+        orders.forEach(order => {
+            ordersSheet.addRow({
+                orderId: order.orderId,
+                date: new Date(order.createdOn).toLocaleDateString(),
+                customer: order.userId.name,
+                amount: order.totalPrice,
+                discount: order.discount,
+                finalAmount: order.finalAmount,
+                status: order.status
+            });
+        });
+
+        // Style orders sheet
+        ordersSheet.getRow(1).font = { bold: true };
+        ['amount', 'discount', 'finalAmount'].forEach(col => {
+            ordersSheet.getColumn(col).numFmt = '₹#,##0.00';
+        });
+
+        // Create Top Products sheet
+        const productsSheet = workbook.addWorksheet('Top Products');
+        productsSheet.columns = [
+            { header: 'Product Name', key: 'name', width: 30 },
+            { header: 'Quantity Sold', key: 'quantity', width: 15 },
+            { header: 'Revenue', key: 'revenue', width: 15 }
+        ];
+
+        // Add products data
+        topProducts.forEach(product => {
+            productsSheet.addRow({
+                name: product.productName,
+                quantity: product.totalQuantity,
+                revenue: product.totalRevenue
+            });
+        });
+
+        // Style products sheet
+        productsSheet.getRow(1).font = { bold: true };
+        productsSheet.getColumn('revenue').numFmt = '₹#,##0.00';
+
+        // Create Top Categories sheet
+        const categoriesSheet = workbook.addWorksheet('Top Categories');
+        categoriesSheet.columns = [
+            { header: 'Category Name', key: 'name', width: 30 },
+            { header: 'Quantity Sold', key: 'quantity', width: 15 },
+            { header: 'Revenue', key: 'revenue', width: 15 }
+        ];
+
+        // Add categories data
+        topCategories.forEach(category => {
+            categoriesSheet.addRow({
+                name: category.categoryName,
+                quantity: category.totalQuantity,
+                revenue: category.totalRevenue
+            });
+        });
+
+        // Style categories sheet
+        categoriesSheet.getRow(1).font = { bold: true };
+        categoriesSheet.getColumn('revenue').numFmt = '₹#,##0.00';
+
+        // Write to buffer
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        // Send response
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=sales-report-${new Date().toISOString().split('T')[0]}.xlsx`);
+        res.send(buffer);
+
+    } catch (error) {
+        console.error('Error in downloadExcel:', error);
+        res.status(500).json({
+            error: error.message || 'Internal server error',
+            success: false
+        });
+    }
+};
 module.exports = {
     loadSalesReport,
-    filterSalesReport
+    filterSalesReport,
+    downloadExcel
 };

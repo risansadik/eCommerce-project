@@ -18,9 +18,6 @@ const getAddAddressPage = async (req, res) => {
 
 const addAddress = async (req, res) => {
     try {
-        console.log('Session:', req.session);
-        console.log('User ID from session:', req.session.user);
-        console.log('Form data received:', req.body);
         
         const userId = req.session.user;
         
@@ -38,19 +35,15 @@ const addAddress = async (req, res) => {
         let userAddress = await Address.findOne({ userId: userId });
 
         if (userAddress) {
-            console.log('Existing user address found, adding new address');
             userAddress.address.push(addressData);
             await userAddress.save();
         } else {
-            console.log('Creating new user address document');
             userAddress = new Address({
                 userId: userId,
                 address: [addressData]
             });
             await userAddress.save();
         }
-
-        console.log('Address saved successfully');
         return res.redirect('/addresses');
         
     } catch (error) {
@@ -61,11 +54,9 @@ const addAddress = async (req, res) => {
 
 const loadAddresses = async (req, res) => {
     try {
-        console.log('Loading addresses for user:', req.session.user);
         const userId = req.session.user;
         const addressData = await Address.findOne({ userId: userId });
         
-        console.log('Found address data:', addressData);
 
         res.render('addresses', {
             addresses: addressData ? addressData.address : [],
@@ -185,9 +176,6 @@ const editAddress = async (req, res) => {
 
 const updateAddress = async (req, res) => {
     try {
-        console.log('Incoming update request body:', req.body);
-        console.log('User ID from session:', req.session.user);
-        
         const userId = req.session.user;
         const addressIndex = parseInt(req.body.addressIndex);
 
@@ -215,10 +203,6 @@ const updateAddress = async (req, res) => {
                 message: 'Address not found'
             });
         }
-
-      
-        console.log('Current address before update:', userAddress.address[addressIndex]);
-
        
         userAddress.address[addressIndex] = {
             addressType: req.body.addressType,
@@ -232,7 +216,7 @@ const updateAddress = async (req, res) => {
         };
 
        
-        console.log('Address after update:', userAddress.address[addressIndex]);
+        ('Address after update:', userAddress.address[addressIndex]);
 
         await userAddress.save();
 

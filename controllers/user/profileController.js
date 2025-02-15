@@ -16,10 +16,6 @@ function generateOtp() {
 const sendVerificationEmail = async (email, otp) => {
     try {
 
-        console.log('Checking email config:', {
-            email: process.env.NODEMAILER_EMAIL ? 'Found' : 'Missing',
-            password: process.env.NODEMAILER_PASSWORD ? 'Found' : 'Missing'
-        });
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -35,7 +31,6 @@ const sendVerificationEmail = async (email, otp) => {
 
        
         await transporter.verify();
-        console.log('Transporter verified successfully');
 
         const mailOptions = {
             from: process.env.NODEMAILER_EMAIL,
@@ -46,7 +41,6 @@ const sendVerificationEmail = async (email, otp) => {
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent:", info.messageId);
         return true;
     } catch (error) {
         console.error("Detailed error in sending email:", error);
@@ -88,7 +82,6 @@ const forgotEmailValid = async (req, res) => {
             if (emailSent) {
                 req.session.userOtp = otp;
                 req.session.email = email;
-                console.log(`OTP is ${otp}`)
                 return res.render('forgotPass-otp');  
             } else {
                 return res.status(500).json({
@@ -147,10 +140,8 @@ const resendOtp = async (req, res) => {
         const otp = generateOtp();
         req.session.userOtp = otp;
         const email = req.session.email;
-        console.log("Resending Otp to email : ", email);
         const emailSent = await sendVerificationEmail(email, otp);
         if (emailSent) {
-            console.log("Resend OTP : ", otp);
             res.status(200).json({ success: true, message: "Resend OTP successful" });
 
         }

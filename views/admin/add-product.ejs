@@ -411,11 +411,7 @@
                     }
                 });
 
-                // Debug log
-                console.log('Submitting size variants:');
-                for (let [key, value] of formData.entries()) {
-                    console.log(`${key}: ${value}`);
-                }
+
 
                 fetch('/admin/addProducts', {
                     method: 'POST',
@@ -564,7 +560,7 @@
                         // Update the main image preview
                         image.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
 
-                        console.log('Added cropped image:', imgFile.name);
+                        ('Added cropped image:', imgFile.name);
                     });
                 });
             };
@@ -623,8 +619,6 @@
             const sizes = document.querySelectorAll('input[name="sizes"]');
             const quantities = document.querySelectorAll('input[name="quantities"]');
 
-            console.log('Validating sizes:', Array.from(sizes).map(s => s.value));
-            console.log('Validating quantities:', Array.from(quantities).map(q => q.value));
 
             let isValid = true
             if (!name.trim()) {

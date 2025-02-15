@@ -230,7 +230,6 @@
                                                     <span id="finalAmount">₹<%= finalAmount.toFixed(2) %></span>
                                                 </div>
                                     </div>
-                                    <%# console.log('Coupons received in template:', coupons); %>
                                         <div class="available-coupons mt-3">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <h6 class="mb-0">Available Coupons</h6>
@@ -403,6 +402,27 @@
     <script src="js/tiny-slider.js"></script>
     <script src="js/custom.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            <% if (typeof showAlert !== 'undefined' && showAlert && alertMessage) { %>
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cart Updated',
+                    html: `Some items in your cart needed attention:<br><br><%= alertMessage %>`,
+                    confirmButtonText: 'Continue Shopping',
+                    confirmButtonColor: '#4A665B',
+                    showCancelButton: true,
+                    cancelButtonText: 'Proceed to Checkout',
+                    cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/shop';
+                    }
+                });
+            <% } %>
+        });
+    </script>
 
     <script>
 
@@ -651,7 +671,6 @@
                         })
                             .then(async response => {
                                 const result = await response.json();
-                                console.log('COD Response:', result);
                                 if (!response.ok) {
                                     throw new Error(result.message || 'Server error');
                                 }

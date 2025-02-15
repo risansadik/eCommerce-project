@@ -11,8 +11,6 @@ const getWishlist = async (req, res) => {
             select: 'productName productImage regularPrice salePrice sizeVariants'
         });
 
-        console.log('Wishlist data:', wishlist); // Add this for debugging
-
         res.render('wishlist', {
             wishlist: wishlist || { products: [] }
         });
@@ -30,7 +28,6 @@ const addToWishlist = async (req, res) => {
         const userId = req.session.user;
         const productId = req.body.productId;
 
-        console.log('Adding to wishlist:', { userId, productId }); // Debug log
 
         let wishlist = await Wishlist.findOne({ userId });
 
@@ -51,7 +48,6 @@ const addToWishlist = async (req, res) => {
         }
 
         await wishlist.save();
-        console.log('Wishlist saved successfully'); // Debug log
         res.json({ success: true });
     } catch (error) {
         console.error('Add to wishlist error:', error);

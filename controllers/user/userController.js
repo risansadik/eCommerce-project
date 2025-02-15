@@ -29,8 +29,6 @@ const loadHomePage = async (req, res) => {
             .populate('category')
             .sort({ createdAt: -1 });
 
-        console.log(`Found ${productData.length} products for home page`);
-
         const renderData = {
             products: productData,
             error: null
@@ -70,9 +68,6 @@ const about = async (req, res) => {
             if (userData) {
 
                 renderObj.user = userData;
-            } else {
-
-                console.log('user not found');
             }
         }
 
@@ -102,10 +97,7 @@ const contact = async (req, res) => {
             if (userData) {
 
                 renderObj.user = userData;
-            } else {
-
-                console.log('user not found');
-            }
+            } 
         }
 
 
@@ -277,7 +269,6 @@ const verifyOtp = async (req, res) => {
         if (userOtp === otp) {
             const newUser = new User(pendingUser);
             await newUser.save();
-            console.log("New user saved after OTP verification:", newUser);
 
            
             const newWallet = new Wallet({
@@ -556,7 +547,6 @@ const getShopPage = async (req, res) => {
             if (userData) {
                 renderObj.user = userData;
             } else {
-                console.log("User data not found");
                 return res.redirect('/signin');
             }
         }
