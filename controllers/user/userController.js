@@ -496,6 +496,7 @@ const getShopPage = async (req, res) => {
 
 
         let productData = await Product.find(query).populate('category');
+        
 
 
         const customSort = (a, b) => {
