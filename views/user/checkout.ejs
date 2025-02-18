@@ -16,7 +16,7 @@
     <link href="css/style.css" rel="stylesheet">
     <title>checkout</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .coupon-wrapper {
             padding: 10px;
@@ -715,160 +715,153 @@
         let couponInput, applyButton, removeButton;
 
 
-        async function removeCouponCode() {
-            try {
-                const response = await fetch('/remove-coupon', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+        document.addEventListener('DOMContentLoaded', function () {
+    
+    couponInput = document.querySelector('[name="couponCode"]');
+    applyButton = document.querySelector('.apply-coupon-btn');
+    removeButton = document.querySelector('.remove-coupon-btn');
 
-                const result = await response.json();
+   
+    const discountElement = document.querySelector('#discountAmount');
+    if (discountElement && discountElement.textContent !== '₹0.00') {
+        removeButton.classList.remove('d-none');
+    }
 
+    
+    couponInput.addEventListener('input', (e) => {
+        applyButton.disabled = !e.target.value.trim();
+    });
+
+  
+    applyButton.addEventListener('click', () => {
+        const code = couponInput.value.trim();
+        if (!code) return;
+
+        $.ajax({
+            url: '/apply-coupon',
+            method: 'POST',
+            data: JSON.stringify({ couponCode: code }),
+            contentType: 'application/json',
+            success: function(result) {
                 if (result.success) {
-                    showMessage('success', 'Coupon removed successfully!');
+                    $('.alert').remove();
+                    $('.coupon-form').parent().append(
+                        `<div class="alert alert-success mt-2">${result.message || 'Coupon applied successfully!'}</div>`
+                    );
+                    
+                    removeButton.classList.remove('d-none');
 
-                    // Reset the input and buttons
+                    if (result.data) {
+    document.querySelector('#finalAmount').textContent = 
+        `₹${result.data.finalTotal.toFixed(2)}`;
+    
+    // Check if discount container exists
+    let discountContainer = document.querySelector('.text-success');
+    if (!discountContainer) {
+     
+        const subtotalElement = document.querySelector('.d-flex.justify-content-between.mb-2');
+        const discountHTML = `
+            <div class="d-flex justify-content-between mb-2 text-success">
+                <span>Discount:</span>
+                <span id="discountAmount">-₹${result.data.discount.toFixed(2)}</span>
+            </div>
+            <hr class="my-2">
+        `;
+        subtotalElement.insertAdjacentHTML('afterend', discountHTML);
+    } else {
+    
+        document.querySelector('#discountAmount').textContent = 
+            `-₹${result.data.discount.toFixed(2)}`;
+    }
+}}
+                setTimeout(() => $('.alert').fadeOut('slow', function() { $(this).remove(); }), 3000);
+            },
+            error: function() {
+                $('.alert').remove();
+                $('.coupon-form').parent().append(
+                    '<div class="alert alert-danger mt-2">Error applying coupon</div>'
+                );
+                setTimeout(() => $('.alert').fadeOut('slow', function() { $(this).remove(); }), 3000);
+            }
+        });
+    });
+
+   
+    removeButton.addEventListener('click', () => {
+        $.ajax({
+            url: '/remove-coupon',
+            method: 'POST',
+            contentType: 'application/json',
+            success: function(result) {
+                if (result.success) {
+                    $('.alert').remove();
+                    $('.coupon-form').parent().append(
+                        '<div class="alert alert-success mt-2">Coupon removed successfully!</div>'
+                    );
+
                     couponInput.value = '';
                     applyButton.disabled = true;
                     removeButton.classList.add('d-none');
 
-                    // Update total amount if result contains the data
                     if (result.data) {
-                        const totalElement = document.querySelector('#finalAmount');
-                        if (totalElement) {
-                            totalElement.textContent = `₹${result.data.finalTotal.toFixed(2)}`;
-                        }
-
-                        // Reset discount amount
-                        const discountElement = document.querySelector('#discountAmount');
-                        if (discountElement) {
-                            discountElement.textContent = '₹0.00';
-                        }
-
-                        // Reload page after brief delay
-                        setTimeout(() => window.location.reload(), 1500);
-                    }
-                } else {
-                    showMessage('error', result.message || 'Error removing coupon');
-                }
-            } catch (error) {
-                console.error('Error removing coupon:', error);
-                showMessage('error', 'Error removing coupon');
+    document.querySelector('#finalAmount').textContent = 
+        `₹${result.data.finalTotal.toFixed(2)}`;
+    
+    // Remove the discount container and hr if they exist
+    const discountContainer = document.querySelector('.text-success');
+    const hr = discountContainer?.nextElementSibling;
+    if (discountContainer) {
+        discountContainer.remove();
+        hr?.remove();
+    }
+    
+  
+    document.querySelectorAll('.coupon-card').forEach(card => {
+        const statusElement = card.querySelector('small');
+        if (statusElement.textContent.trim() === 'Already used') {
+          
+            const min = parseFloat(card.querySelector('.text-muted').textContent.split('₹')[1]);
+            const max = parseFloat(card.querySelector('.text-muted').textContent.split('₹')[2]);
+            const cartTotal = parseFloat(document.querySelector('#finalAmount').textContent.slice(1));
+            
+            if (cartTotal >= min && cartTotal <= max) {
+                statusElement.className = 'd-block text-success';
+                statusElement.textContent = 'Eligible ✓';
+                card.querySelector('.copy-code-btn').disabled = false;
             }
         }
+    });
+}
+         }}     });
+    });
 
+    
+    document.querySelectorAll('.copy-code-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const code = e.target.dataset.code;
+            couponInput.value = code;
+            applyButton.disabled = false;
 
-
-        // Move applyCouponCode function outside DOMContentLoaded
-        async function applyCouponCode(code) {
             try {
-                const response = await fetch('/apply-coupon', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ couponCode: code })
+                navigator.clipboard.writeText(code).then(() => {
+                    $('.alert').remove();
+                    $('.coupon-form').parent().append(
+                        '<div class="alert alert-success mt-2">Coupon code copied!</div>'
+                    );
+                    setTimeout(() => $('.alert').fadeOut('slow', function() { $(this).remove(); }), 3000);
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showMessage('success', result.message || 'Coupon applied successfully!');
-                    removeButton.classList.remove('d-none');  // Now removeButton will be accessible
-
-                    // Update price displays if result contains the data
-                    if (result.data) {
-                        const { discount, finalTotal } = result.data;
-
-                        // Update total amount
-                        const totalElement = document.querySelector('#finalAmount');
-                        if (totalElement) {
-                            totalElement.textContent = `₹${finalTotal.toFixed(2)}`;
-                        }
-
-                        // Update discount amount
-                        const discountElement = document.querySelector('#discountAmount');
-                        if (discountElement) {
-                            discountElement.textContent = `-₹${discount.toFixed(2)}`;
-                        }
-
-                        // Reload page after brief delay
-                        setTimeout(() => window.location.reload(), 1500);
-                    }
-                } else {
-                    showMessage('error', result.message || 'Invalid coupon code');
-                }
-            } catch (error) {
-                console.error('Error applying coupon:', error);
-                showMessage('error', 'Error applying coupon');
+            } catch (err) {
+                couponInput.select();
+                document.execCommand('copy');
+                $('.alert').remove();
+                $('.coupon-form').parent().append(
+                    '<div class="alert alert-success mt-2">Coupon code copied!</div>'
+                );
+                setTimeout(() => $('.alert').fadeOut('slow', function() { $(this).remove(); }), 3000);
             }
-        }
-        function showMessage(type, message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} mt-2`;
-            messageDiv.textContent = message;
-
-            const container = document.querySelector('.coupon-form').parentElement;
-            const existingAlert = container.querySelector('.alert');
-            if (existingAlert) existingAlert.remove();
-
-            container.appendChild(messageDiv);
-            setTimeout(() => messageDiv.remove(), 3000);
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            couponInput = document.querySelector('[name="couponCode"]');
-            applyButton = document.querySelector('.apply-coupon-btn');
-            removeButton = document.querySelector('.remove-coupon-btn');
-
-            const discountElement = document.querySelector('#discountAmount');
-            if (discountElement && discountElement.textContent !== '₹0.00') {
-                removeButton.classList.remove('d-none');
-            }
-
-
-            // Handle manual coupon input
-            couponInput.addEventListener('input', (e) => {
-                applyButton.disabled = !e.target.value.trim();
-            });
-
-            // Handle apply button click
-            applyButton.addEventListener('click', async () => {
-                const code = couponInput.value.trim();
-                if (!code) return;
-                await applyCouponCode(code);
-            });
-
-            removeButton.addEventListener('click', async () => {
-                await removeCouponCode();
-            });
-
-            // Handle copy code buttons
-            document.querySelectorAll('.copy-code-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const code = e.target.dataset.code;
-                    const couponInput = document.querySelector('[name="couponCode"]');
-
-                    // Set the value in the input
-                    couponInput.value = code;
-
-                    // Enable the apply button
-                    document.querySelector('.apply-coupon-btn').disabled = false;
-
-                    // Copy to clipboard
-                    try {
-                        await navigator.clipboard.writeText(code);
-                        showMessage('success', 'Coupon code copied!');
-                    } catch (err) {
-                        couponInput.select();
-                        document.execCommand('copy');
-                        showMessage('success', 'Coupon code copied!');
-                    }
-                });
-            });
         });
+    });
+});
 
 
     </script>
