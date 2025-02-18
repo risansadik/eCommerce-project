@@ -8,10 +8,13 @@ const connectDB = async () =>{
         
         const conn = await mongoose.connect(process.env.MONGODB_URI);
         console.log('MongoDb connected');
-        console.log(`Host: ${conn.connection.host}`);
-        console.log(`Database Name: ${conn.connection.name}`); 
-        console.log('MongoDB URI:', process.env.MONGODB_URI);
+<<<<<<< HEAD
+	console.log(`databse host name ${conn.connection.host}`)
+	console.log(`database name is: ${conn.connection.name}`)
+=======
+        
 
+>>>>>>> 336a036ddc5595da46491801d5e74daa5d8fac39
 
     } catch (error) {
 
