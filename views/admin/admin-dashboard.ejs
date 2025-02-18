@@ -762,23 +762,40 @@
                 const data = await response.json();
 
                 if (!data.success && data.error) {
-
                     alert(data.error);
                     return;
                 }
 
+              
                 updateDisplay(data);
+
+                
+                currentPage = 1;
+                allOrders = data.orders;
+                initializePagination(data.orders);
+
             } catch (error) {
                 console.error('Error applying filters:', error);
                 alert('An error occurred while filtering the sales report');
             }
         }
 
+        function initializePagination(orders) {
+            allOrders = orders;
+            const totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE);
+            document.getElementById('totalPages').textContent = totalPages;
+            document.getElementById('currentPage').textContent = '1';
+            updatePaginationButtons();
+            displayCurrentPage();
+        }
+
+
         function updateDisplay(data) {
             // Update stats
             document.querySelectorAll('.stat-value')[0].textContent = data.stats.salesCount;
             document.querySelectorAll('.stat-value')[1].textContent = '₹' + data.stats.orderAmount.toLocaleString();
             document.querySelectorAll('.stat-value')[2].textContent = '₹' + data.stats.discount.toLocaleString();
+
 
 
             const ordersTbody = document.querySelector('.sales-table tbody');
@@ -812,6 +829,7 @@
         `).join('');
             }
 
+            // Update top categories
             const topCategoriesBody = document.querySelector('.stat-card:nth-child(2) tbody');
             if (topCategoriesBody && data.topCategories) {
                 topCategoriesBody.innerHTML = data.topCategories.map(category => `
@@ -823,6 +841,52 @@
         `).join('');
             }
         }
+
+        function displayCurrentPage() {
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageOrders = allOrders.slice(start, end);
+
+            const ordersTbody = document.querySelector('.sales-table tbody');
+            ordersTbody.innerHTML = pageOrders.map(order => `
+        <tr>
+            <td>${order.orderId}</td>
+            <td>${new Date(order.createdOn).toLocaleDateString()}</td>
+            <td>${order.userId.name}</td>
+            <td>₹${order.totalPrice.toLocaleString()}</td>
+            <td>₹${order.discount.toLocaleString()}</td>
+            <td>${order.paymentMethod}</td>
+            <td>₹${order.finalAmount.toLocaleString()}</td>
+            <td>
+                <span class="status-badge status-${order.status.toLowerCase()}">
+                    ${order.status}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const initialOrders = Array.from(document.querySelector('.sales-table tbody').getElementsByTagName('tr')).map(row => {
+                const cells = row.getElementsByTagName('td');
+                return {
+                    orderId: cells[0].textContent.trim(),
+                    createdOn: new Date(cells[1].textContent.trim()),
+                    userId: { name: cells[2].textContent.trim() },
+                    totalPrice: parseFloat(cells[3].textContent.replace('₹', '').replace(/,/g, '')),
+                    discount: parseFloat(cells[4].textContent.replace('₹', '').replace(/,/g, '')),
+                    paymentMethod: cells[5].textContent.trim(),
+                    finalAmount: parseFloat(cells[6].textContent.replace('₹', '').replace(/,/g, '')),
+                    status: cells[7].querySelector('.status-badge').textContent.trim()
+                };
+            });
+
+            initializePagination(initialOrders);
+            initializeChart('daily');
+            document.getElementById('dailyBtn').style.backgroundColor = '#4a5568';
+        });
 
 
 
@@ -934,7 +998,7 @@
 
         function initializeChart(period = 'daily') {
             const ctx = document.getElementById('salesChart');
-            const chartData = <%-chartData%>;
+            const chartData = <%-chartData %>;
 
             if (salesChart) {
                 salesChart.destroy();
