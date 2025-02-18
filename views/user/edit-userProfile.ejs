@@ -15,7 +15,7 @@
     <meta http-equiv="Expires" content="0">
 
     <style>
-        * {
+       * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -32,6 +32,7 @@
         }
 
         .profile-card {
+            position: relative;
             background: white;
             border-radius: 15px;
             padding: 30px;
@@ -137,11 +138,38 @@
             font-size: 32px;
             color: #666;
         }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            color: #2c5840;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            background: none;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-button:hover {
+            transform: translateX(-5px);
+            background-color: rgba(44, 88, 64, 0.1);
+        }
     </style>
 </head>
 
 <body>
     <div class="profile-card">
+
+        <a href="/userProfile" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
         <div class="profile-header">
             <div class="profile-avatar">
                 <i class="fa-solid fa-user"></i>

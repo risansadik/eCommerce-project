@@ -811,7 +811,7 @@
             <span class="close-modal" onclick="closeReturnModal()">&times;</span>
             <h3>Return Order</h3>
             <form id="returnForm">
-                <input type="hidden" id="returnOrderId" name="orderId" value="<%= order._id %>">
+                <input type="hidden" id="returnOrderId" name="orderId" value="">
                 <div class="form-group">
                     <label for="returnReason">Reason for Return</label>
                     <textarea id="returnReason" name="returnReason" rows="4" required></textarea>
@@ -1317,14 +1317,14 @@
 </html>
 `;
 
-                // Create a temporary element to generate PDF
+
                 const element = document.createElement('div');
                 element.innerHTML = invoiceHtml;
                 document.body.appendChild(element);
 
                 // Generate PDF
                 const opt = {
-                    margin: [0.5, 0.5, 0.5, 0.5], // Adjust margins
+                    margin: [0.5, 0.5, 0.5, 0.5],
                     filename: `invoice-${order.orderId}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
@@ -1334,14 +1334,14 @@
                     },
                     jsPDF: {
                         unit: 'in',
-                        format: 'a4', // Use A4 format
+                        format: 'a4',
                         orientation: 'portrait'
                     }
                 };
 
                 html2pdf().set(opt).from(element).save();
 
-                // Remove temporary element
+
                 document.body.removeChild(element);
 
             } catch (error) {
@@ -1358,6 +1358,80 @@
                 }
             }
         }
+
+        function openReturnModal(orderId) {
+            document.getElementById('returnModal').style.display = 'block';
+            document.getElementById('returnOrderId').value = orderId;
+        }
+
+        function closeReturnModal() {
+            document.getElementById('returnModal').style.display = 'none';
+            document.getElementById('returnForm').reset();
+        }
+
+
+        document.getElementById('returnForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const orderId = document.getElementById('returnOrderId').value;
+            const returnReason = document.getElementById('returnReason').value;
+
+            if (!returnReason.trim()) {
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'Please provide a reason for return',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/submit-return', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        returnReason: returnReason
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        title: 'Return Requested',
+                        text: 'Your return request has been submitted successfully.',
+                        icon: 'success'
+                    });
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to submit return request');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'An error occurred while submitting the return request',
+                    icon: 'error'
+                });
+            } finally {
+                closeReturnModal();
+            }
+        });
+
+
+        window.addEventListener('click', function (event) {
+            const returnModal = document.getElementById('returnModal');
+            if (event.target === returnModal) {
+                closeReturnModal();
+            }
+        });
+
+
+        window.onclick = null;
     </script>
 </body>
 
