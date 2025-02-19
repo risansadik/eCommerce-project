@@ -248,7 +248,7 @@ async function getStats(startDate, endDate) {
             {
                 $match: {
                     createdOn: { $gte: startDate, $lte: endDate },
-                    status: { $nin: ['Cancelled'] }
+                    status: { $nin: ['Cancelled' , 'Returned'] }
                 }
             },
             {

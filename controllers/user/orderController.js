@@ -139,42 +139,43 @@ const createOrder = async (req, res) => {
 const getUserOrders = async (req, res) => {
     try {
         const userId = req.user._id;
-
+        
         const orders = await Order.find({
             userId,
             $or: [
-                { paymentStatus: 'completed' },
-                { paymentMethod: 'COD' }
+               
+                {
+                    paymentMethod: { $in: ['razorpay', 'wallet'] },
+                    paymentStatus: 'completed'
+                },
+               
+                {
+                    paymentMethod: 'cod'
+                }
             ]
         })
-            .populate({
-                path: 'orderedItems.product',
-                select: 'productName productImage'
-            })
-            .sort({ createdOn: -1 });
-
+        .populate({
+            path: 'orderedItems.product',
+            select: 'productName productImage'
+        })
+        .sort({ createdOn: -1 });
 
         const processedOrders = orders.map(order => {
             const orderObj = order.toObject();
-
-
+            
             orderObj.orderedItems = orderObj.orderedItems.map(item => ({
                 ...item,
-
                 product: item.product || {
                     productName: 'Product Unavailable',
                     productImage: []
                 },
-
                 canCancel: ['Pending', 'Processing'].includes(orderObj.status) &&
                     item.status !== 'Cancelled'
             }));
 
             return {
                 ...orderObj,
-
                 createdOn: order.createdOn,
-
                 totalPrice: order.totalPrice.toFixed(2),
                 finalAmount: order.finalAmount.toFixed(2),
                 discount: order.discount.toFixed(2)
@@ -183,10 +184,8 @@ const getUserOrders = async (req, res) => {
 
         res.render('orders', {
             orders: processedOrders,
-
             handleImageError: (imagePath) => imagePath || '/path/to/default/image.jpg'
         });
-
     } catch (error) {
         console.error('Error fetching user orders:', {
             error: error.message,
