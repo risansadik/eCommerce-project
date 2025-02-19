@@ -640,7 +640,7 @@
                                 <%= order.orderId %>
                             </td>
                             <td>
-                                <%= new Date(order.createdOn).toLocaleDateString() %>
+                                <%= order.createdOn %> 
                             </td>
                             <td>
                                 <%= order.userId.name %>
@@ -841,52 +841,6 @@
         `).join('');
             }
         }
-
-        function displayCurrentPage() {
-            const start = (currentPage - 1) * ITEMS_PER_PAGE;
-            const end = start + ITEMS_PER_PAGE;
-            const pageOrders = allOrders.slice(start, end);
-
-            const ordersTbody = document.querySelector('.sales-table tbody');
-            ordersTbody.innerHTML = pageOrders.map(order => `
-        <tr>
-            <td>${order.orderId}</td>
-            <td>${new Date(order.createdOn).toLocaleDateString()}</td>
-            <td>${order.userId.name}</td>
-            <td>₹${order.totalPrice.toLocaleString()}</td>
-            <td>₹${order.discount.toLocaleString()}</td>
-            <td>${order.paymentMethod}</td>
-            <td>₹${order.finalAmount.toLocaleString()}</td>
-            <td>
-                <span class="status-badge status-${order.status.toLowerCase()}">
-                    ${order.status}
-                </span>
-            </td>
-        </tr>
-    `).join('');
-        }
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-
-            const initialOrders = Array.from(document.querySelector('.sales-table tbody').getElementsByTagName('tr')).map(row => {
-                const cells = row.getElementsByTagName('td');
-                return {
-                    orderId: cells[0].textContent.trim(),
-                    createdOn: new Date(cells[1].textContent.trim()),
-                    userId: { name: cells[2].textContent.trim() },
-                    totalPrice: parseFloat(cells[3].textContent.replace('₹', '').replace(/,/g, '')),
-                    discount: parseFloat(cells[4].textContent.replace('₹', '').replace(/,/g, '')),
-                    paymentMethod: cells[5].textContent.trim(),
-                    finalAmount: parseFloat(cells[6].textContent.replace('₹', '').replace(/,/g, '')),
-                    status: cells[7].querySelector('.status-badge').textContent.trim()
-                };
-            });
-
-            initializePagination(initialOrders);
-            initializeChart('daily');
-            document.getElementById('dailyBtn').style.backgroundColor = '#4a5568';
-        });
 
 
 
@@ -1127,44 +1081,13 @@
         }
     </script>
     <script>
-        const ITEMS_PER_PAGE = 10; // Number of orders per page
+        const ITEMS_PER_PAGE = 10; 
         let currentPage = 1;
-        let allOrders = []; // Will store all orders
+        let allOrders = []; 
 
-        // Initialize pagination when data is loaded
-        function initializePagination(orders) {
-            allOrders = orders;
-            const totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE);
-            document.getElementById('totalPages').textContent = totalPages;
-            updatePaginationButtons();
-            displayCurrentPage();
-        }
 
-        // Display orders for current page
-        function displayCurrentPage() {
-            const start = (currentPage - 1) * ITEMS_PER_PAGE;
-            const end = start + ITEMS_PER_PAGE;
-            const pageOrders = allOrders.slice(start, end);
 
-            const ordersTbody = document.querySelector('.sales-table tbody');
-            ordersTbody.innerHTML = pageOrders.map(order => `
-                <tr>
-                    <td>${order.orderId}</td>
-                    <td>${new Date(order.createdOn).toLocaleDateString()}</td>
-                    <td>${order.userId.name}</td>
-                    <td>₹${order.totalPrice.toLocaleString()}</td>
-                    <td>₹${order.discount.toLocaleString()}</td>
-                    <td>₹${order.finalAmount.toLocaleString()}</td>
-                    <td>
-                        <span class="status-badge status-${order.status.toLowerCase()}">
-                            ${order.status}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // Update pagination buttons state
+       
         function updatePaginationButtons() {
             const totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE);
             document.getElementById('prevPage').disabled = currentPage === 1;
@@ -1208,23 +1131,33 @@
     `).join('');
         }
 
-        // Initialize pagination on page load
         document.addEventListener('DOMContentLoaded', () => {
-            const initialOrders = Array.from(document.querySelector('.sales-table tbody').getElementsByTagName('tr')).map(row => {
-                const cells = row.getElementsByTagName('td');
-                return {
-                    orderId: cells[0].textContent.trim(),
-                    createdOn: new Date(cells[1].textContent.trim()),
-                    userId: { name: cells[2].textContent.trim() },
-                    totalPrice: parseFloat(cells[3].textContent.replace('₹', '').replace(/,/g, '')),
-                    discount: parseFloat(cells[4].textContent.replace('₹', '').replace(/,/g, '')),
-                    paymentMethod: cells[5].textContent.trim(),
-                    finalAmount: parseFloat(cells[6].textContent.replace('₹', '').replace(/,/g, '')),
-                    status: cells[7].querySelector('.status-badge').textContent.trim()
-                };
-            });
-            initializePagination(initialOrders);
-        });
+    // Initialize orders
+    const initialOrders = Array.from(document.querySelector('.sales-table tbody').getElementsByTagName('tr')).map(row => {
+        const cells = row.getElementsByTagName('td');
+        return {
+            orderId: cells[0].textContent.trim(),
+            createdOn: new Date(cells[1].textContent.trim()),
+            userId: { name: cells[2].textContent.trim() },
+            totalPrice: parseFloat(cells[3].textContent.replace('₹', '').replace(/,/g, '')),
+            discount: parseFloat(cells[4].textContent.replace('₹', '').replace(/,/g, '')),
+            paymentMethod: cells[5].textContent.trim(),
+            finalAmount: parseFloat(cells[6].textContent.replace('₹', '').replace(/,/g, '')),
+            status: cells[7].querySelector('.status-badge').textContent.trim()
+        };
+    });
+
+   
+    if (initialOrders && initialOrders.length > 0) {
+        allOrders = initialOrders;
+        currentPage = 1;
+        initializePagination(initialOrders);
+    }
+
+    
+    initializeChart('daily');
+    document.getElementById('dailyBtn').style.backgroundColor = '#4a5568';
+});
     </script>
 </body>
 
