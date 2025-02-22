@@ -447,30 +447,30 @@ const downloadExcel = async (req, res) => {
             getTopCategories(start, end)
         ]);
 
-        // Create a new workbook
+       
         const workbook = new ExcelJS.Workbook();
         workbook.creator = 'Sales Report System';
         workbook.created = new Date();
 
-        // Create Summary sheet
+ 
         const summarySheet = workbook.addWorksheet('Summary');
         summarySheet.columns = [
             { header: 'Metric', key: 'metric', width: 20 },
             { header: 'Value', key: 'value', width: 15 }
         ];
 
-        // Add summary data
+       
         summarySheet.addRows([
             { metric: 'Total Sales Count', value: stats.salesCount },
             { metric: 'Total Order Amount', value: stats.orderAmount },
             { metric: 'Total Discount', value: stats.discount }
         ]);
 
-        // Style summary sheet
+      
         summarySheet.getRow(1).font = { bold: true };
         summarySheet.getColumn('value').numFmt = '₹#,##0.00';
 
-        // Create Orders sheet
+       
         const ordersSheet = workbook.addWorksheet('Orders');
         ordersSheet.columns = [
             { header: 'Order ID', key: 'orderId', width: 15 },
@@ -482,7 +482,7 @@ const downloadExcel = async (req, res) => {
             { header: 'Status', key: 'status', width: 12 }
         ];
 
-        // Add orders data
+   
         orders.forEach(order => {
             ordersSheet.addRow({
                 orderId: order.orderId,
@@ -495,13 +495,13 @@ const downloadExcel = async (req, res) => {
             });
         });
 
-        // Style orders sheet
+  
         ordersSheet.getRow(1).font = { bold: true };
         ['amount', 'discount', 'finalAmount'].forEach(col => {
             ordersSheet.getColumn(col).numFmt = '₹#,##0.00';
         });
 
-        // Create Top Products sheet
+       
         const productsSheet = workbook.addWorksheet('Top Products');
         productsSheet.columns = [
             { header: 'Product Name', key: 'name', width: 30 },
@@ -509,7 +509,7 @@ const downloadExcel = async (req, res) => {
             { header: 'Revenue', key: 'revenue', width: 15 }
         ];
 
-        // Add products data
+      
         topProducts.forEach(product => {
             productsSheet.addRow({
                 name: product.productName,
@@ -518,11 +518,11 @@ const downloadExcel = async (req, res) => {
             });
         });
 
-        // Style products sheet
+       
         productsSheet.getRow(1).font = { bold: true };
         productsSheet.getColumn('revenue').numFmt = '₹#,##0.00';
 
-        // Create Top Categories sheet
+       
         const categoriesSheet = workbook.addWorksheet('Top Categories');
         categoriesSheet.columns = [
             { header: 'Category Name', key: 'name', width: 30 },
@@ -530,7 +530,7 @@ const downloadExcel = async (req, res) => {
             { header: 'Revenue', key: 'revenue', width: 15 }
         ];
 
-        // Add categories data
+        
         topCategories.forEach(category => {
             categoriesSheet.addRow({
                 name: category.categoryName,
@@ -539,14 +539,14 @@ const downloadExcel = async (req, res) => {
             });
         });
 
-        // Style categories sheet
+      
         categoriesSheet.getRow(1).font = { bold: true };
         categoriesSheet.getColumn('revenue').numFmt = '₹#,##0.00';
 
-        // Write to buffer
+        
         const buffer = await workbook.xlsx.writeBuffer();
 
-        // Send response
+    
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename=sales-report-${new Date().toISOString().split('T')[0]}.xlsx`);
         res.send(buffer);
