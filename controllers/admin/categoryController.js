@@ -198,7 +198,8 @@ const editCategory = async (req, res) => {
 
         const existingCategory = await Category.findOne({
             name: categoryName,
-            _id: { $ne: id }
+            _id: { $ne: id },
+            
         });
 
         if (existingCategory) {

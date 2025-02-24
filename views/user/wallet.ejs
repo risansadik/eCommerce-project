@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -197,7 +198,8 @@
         }
 
         .hidden-transactions.expanded {
-            max-height: 1000px; /* Adjust based on your needs */
+            max-height: 1000px;
+            /* Adjust based on your needs */
         }
 
         .show-more-btn {
@@ -225,9 +227,38 @@
         .show-more-btn.active i {
             transform: rotate(180deg);
         }
-        .txt{
+
+        .txt {
 
             text-decoration: none;
+            color: white;
+        }
+
+       
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .pagination a {
+            padding: 0.5rem 1rem;
+            background-color: var(--secondary-color);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #e8e8e8;
+        }
+
+        .pagination span {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            border-radius: 4px;
             color: white;
         }
     </style>
@@ -265,7 +296,8 @@
             <div class="wallet-container">
                 <div class="balance-card">
                     <div class="balance-label">Available Balance</div>
-                    <div class="balance-amount">₹<%= (wallet?.balance || 0).toFixed(2) %></div>
+                    <div class="balance-amount">₹<%= (wallet?.balance || 0).toFixed(2) %>
+                    </div>
                     <div class="wallet-info">
                         <small class="text-white-50">
                             * Balance can only be used for purchases or received from refunds
@@ -278,56 +310,62 @@
                         <h3>Transaction History</h3>
                     </div>
                     <div class="transaction-list">
-                        <% if (wallet?.transactions?.length > 0) { %>
-                            <% const sortedTransactions = wallet.transactions
-                                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                            %>
-                            
-                            <% sortedTransactions.slice(0, 3).forEach(transaction => { %>
+                        <% if (wallet?.transactions?.length> 0) { %>
+                            <% wallet.transactions.forEach(transaction=> { %>
                                 <div class="transaction-item">
                                     <div class="transaction-info">
                                         <div class="transaction-icon">
-                                            <i class="fa-solid <%= transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
+                                            <i
+                                                class="fa-solid <%= transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
                                         </div>
                                         <div class="transaction-details">
-                                            <h4><%= transaction.description || 'Transaction' %></h4>
-                                            <p><%= new Date(transaction.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) %></p>
+                                            <h4>
+                                                <%= transaction.description || 'Transaction' %>
+                                            </h4>
+                                            <p>
+                                                <%= new Date(transaction.createdAt).toLocaleDateString('en-IN', {
+                                                    year: 'numeric' , month: 'short' , day: 'numeric' }) %>
+                                            </p>
                                         </div>
                                     </div>
-                                    <div class="transaction-amount <%= transaction.type === 'credit' ? 'credit' : 'debit' %>">
-                                        <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= (transaction.amount || 0).toFixed(2) %>
+                                    <div
+                                        class="transaction-amount <%= transaction.type === 'credit' ? 'credit' : 'debit' %>">
+                                        <%= transaction.type==='credit' ? '+' : '-' %>₹<%= (transaction.amount ||
+                                                0).toFixed(2) %>
                                     </div>
                                 </div>
-                            <% }); %>
+                                <% }); %>
 
-                            <% if (sortedTransactions.length > 3) { %>
-                                <div class="hidden-transactions">
-                                    <% sortedTransactions.slice(3).forEach(transaction => { %>
-                                        <div class="transaction-item">
-                                            <div class="transaction-info">
-                                                <div class="transaction-icon">
-                                                    <i class="fa-solid <%= transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
-                                                </div>
-                                                <div class="transaction-details">
-                                                    <h4><%= transaction.description ||'Transaction' %></h4>
-                                                    <p><%= new Date(transaction.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) %></p>
-                                                </div>
-                                            </div>
-                                            <div class="transaction-amount <%= transaction.type === 'credit' ? 'credit' : 'debit' %>">
-                                                <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= (transaction.amount || 0).toFixed(2) %>
-                                            </div>
+                                    <!-- Pagination controls -->
+                                    <% if (wallet.pagination && wallet.pagination.totalPages> 1) { %>
+                                        <div class="pagination"
+                                            style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 0.5rem;">
+                                            <% if (wallet.pagination.hasPrevPage) { %>
+                                                <a href="/wallet?page=<%= wallet.pagination.currentPage - 1 %>"
+                                                    style="padding: 0.5rem 1rem; background-color: var(--secondary-color); border-radius: 4px; text-decoration: none; color: var(--text-color);">
+                                                    <i class="fa-solid fa-chevron-left"></i> Prev
+                                                </a>
+                                                <% } %>
+
+                                                    <span
+                                                        style="padding: 0.5rem 1rem; background-color: var(--primary-color); border-radius: 4px; color: white;">
+                                                        <%= wallet.pagination.currentPage %> of <%=
+                                                                wallet.pagination.totalPages %>
+                                                    </span>
+
+                                                    <% if (wallet.pagination.hasNextPage) { %>
+                                                        <a href="/wallet?page=<%= wallet.pagination.currentPage + 1 %>"
+                                                            style="padding: 0.5rem 1rem; background-color: var(--secondary-color); border-radius: 4px; text-decoration: none; color: var(--text-color);">
+                                                            Next <i class="fa-solid fa-chevron-right"></i>
+                                                        </a>
+                                                        <% } %>
                                         </div>
-                                    <% }); %>
-                                </div>
-                                <button class="show-more-btn">
-                                    Show More <i class="fa-solid fa-chevron-down"></i>
-                                </button>
-                            <% } %>
-                        <% } else { %>
-                            <div class="text-center py-4">
-                                <p class="text-muted">No transactions yet</p>
-                            </div>
-                        <% } %>
+                                        <% } %>
+                                            <% } else { %>
+                                                <div class="text-center py-4">
+                                                    <p class="text-muted">No transactions yet</p>
+                                                </div>
+                                                <% } %>
                     </div>
                 </div>
             </div>
@@ -335,12 +373,12 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const showMoreBtn = document.querySelector('.show-more-btn');
             const hiddenTransactions = document.querySelector('.hidden-transactions');
 
             if (showMoreBtn && hiddenTransactions) {
-                showMoreBtn.addEventListener('click', function() {
+                showMoreBtn.addEventListener('click', function () {
                     hiddenTransactions.classList.toggle('expanded');
                     showMoreBtn.classList.toggle('active');
                     showMoreBtn.innerHTML = hiddenTransactions.classList.contains('expanded')
@@ -351,4 +389,5 @@
         });
     </script>
 </body>
+
 </html>

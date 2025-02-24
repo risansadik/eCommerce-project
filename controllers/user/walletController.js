@@ -13,12 +13,15 @@ const walletController = {
             const userId = req.user._id;
             
           
+            const page = parseInt(req.query.page) || 1;
+            const limit = 5; 
+            
             let wallet = await Wallet.findOne({ userId })
                 .populate({
                     path: 'transactions.orderId',
                     select: 'orderId finalAmount'
                 });
-
+    
             if (!wallet) {
                 wallet = new Wallet({
                     userId,
@@ -27,11 +30,24 @@ const walletController = {
                 });
                 await wallet.save();
             }
+    
+            
+            const sortedTransactions = wallet.transactions.sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            
+         
+            const totalTransactions = sortedTransactions.length;
+            const totalPages = Math.ceil(totalTransactions / limit);
+            const startIndex = (page - 1) * limit;
+            const endIndex = Math.min(startIndex + limit, totalTransactions);
+            
 
-          
+            const paginatedTransactions = sortedTransactions.slice(startIndex, endIndex);
+            
             const formattedWallet = {
                 balance: Number(wallet.balance || 0), 
-                transactions: wallet.transactions.map(transaction => ({
+                transactions: paginatedTransactions.map(transaction => ({
                     type: transaction.type,
                     amount: Number(transaction.amount || 0),
                     description: transaction.description,
@@ -39,27 +55,38 @@ const walletController = {
                     orderId: transaction.orderId?._id || null,
                     orderNumber: transaction.orderId?.orderId || 'N/A',
                     transactionType: transaction.transactionType
-                }))
+                })),
+                pagination: {
+                    currentPage: page,
+                    totalPages: totalPages,
+                    hasNextPage: page < totalPages,
+                    hasPrevPage: page > 1
+                }
             };
-
+    
             res.render('wallet', { 
                 wallet: formattedWallet,
                 user: req.user
             });
-
+    
         } catch (error) {
             console.error('Error fetching wallet:', error);
            
             res.render('wallet', {
                 wallet: {
                     balance: 0,
-                    transactions: []
+                    transactions: [],
+                    pagination: {
+                        currentPage: 1,
+                        totalPages: 1,
+                        hasNextPage: false,
+                        hasPrevPage: false
+                    }
                 },
                 error: 'Unable to fetch wallet details'
             });
         }
     },
-
    
     processReturnRefund: async (req, res) => {
         try {

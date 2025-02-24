@@ -140,15 +140,36 @@ const getUserOrders = async (req, res) => {
     try {
         const userId = req.user._id;
         
-        const orders = await Order.find({
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const ordersPerPage = 5; // Number of orders per page
+        
+        // Query to get total count for pagination
+        const totalOrders = await Order.countDocuments({
             userId,
             $or: [
-               
                 {
                     paymentMethod: { $in: ['razorpay', 'wallet'] },
                     paymentStatus: 'completed'
                 },
-               
+                {
+                    paymentMethod: 'cod'
+                }
+            ]
+        });
+        
+        // Calculate pagination values
+        const totalPages = Math.ceil(totalOrders / ordersPerPage);
+        const skip = (page - 1) * ordersPerPage;
+        
+        // Get paginated orders
+        const orders = await Order.find({
+            userId,
+            $or: [
+                {
+                    paymentMethod: { $in: ['razorpay', 'wallet'] },
+                    paymentStatus: 'completed'
+                },
                 {
                     paymentMethod: 'cod'
                 }
@@ -158,8 +179,10 @@ const getUserOrders = async (req, res) => {
             path: 'orderedItems.product',
             select: 'productName productImage'
         })
-        .sort({ createdOn: -1 });
-
+        .sort({ createdOn: -1 })
+        .skip(skip)
+        .limit(ordersPerPage);
+        
         const processedOrders = orders.map(order => {
             const orderObj = order.toObject();
             
@@ -172,7 +195,7 @@ const getUserOrders = async (req, res) => {
                 canCancel: ['Pending', 'Processing'].includes(orderObj.status) &&
                     item.status !== 'Cancelled'
             }));
-
+            
             return {
                 ...orderObj,
                 createdOn: order.createdOn,
@@ -181,9 +204,17 @@ const getUserOrders = async (req, res) => {
                 discount: order.discount.toFixed(2)
             };
         });
-
+        
         res.render('orders', {
             orders: processedOrders,
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1
+            },
             handleImageError: (imagePath) => imagePath || '/path/to/default/image.jpg'
         });
     } catch (error) {
@@ -191,14 +222,13 @@ const getUserOrders = async (req, res) => {
             error: error.message,
             stack: error.stack
         });
-
+        
         res.status(500).render('error', {
             message: 'Failed to fetch orders',
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
-
 const cancelOrder = async (req, res) => {
     const { orderId } = req.params;
     const { reason } = req.body;
@@ -355,12 +385,12 @@ const cancelOrderItem = async (req, res) => {
             });
         }
 
-        // Mark item as cancelled
+      
         orderItem.status = 'Cancelled';
         orderItem.cancellationReason = reason;
         orderItem.cancelledAt = new Date();
 
-        // Update inventory first
+      
         try {
             const productUpdate = await Product.findOneAndUpdate(
                 {
@@ -387,29 +417,29 @@ const cancelOrderItem = async (req, res) => {
             order.totalPrice = remainingTotal;
             let refundAmount = cancelledItemTotal;
 
-            // Handle coupon validation and updates
+          
             if (order.couponApplied && order.couponApplied.couponId) {
                 const coupon = await Coupon.findById(order.couponApplied.couponId);
                 if (coupon) {
-                    // Check if remaining order still meets coupon criteria
+                  
                     if (remainingTotal < coupon.minimumPurchase) {
-                        // Remove coupon completely as criteria is no longer met
+                        
                         order.couponApplied = {
                             couponCode: null,
                             couponId: null,
                             discountAmount: 0
                         };
-                        // Deduct full original discount from refund amount
+                       
                         refundAmount = cancelledItemTotal - originalDiscount;
                         order.discount = 0;
                         
-                        // Remove user from coupon usage
+                       
                         await Coupon.findByIdAndUpdate(
                             coupon._id,
                             { $pull: { userId: userId } }
                         );
                     } else {
-                        // Order still meets criteria, recalculate discount
+                        
                         let newDiscountAmount = 0;
                         if (coupon.discountPercentage) {
                             newDiscountAmount = (remainingTotal * coupon.discountPercentage) / 100;
@@ -420,15 +450,16 @@ const cancelOrderItem = async (req, res) => {
                             newDiscountAmount = coupon.maxDiscount;
                         }
                         order.discount = newDiscountAmount;
-                        // Deduct proportional discount
+                        
                         refundAmount = cancelledItemTotal - originalDiscount;
                     }
                 }
             }
 
             order.finalAmount = order.totalPrice - order.discount;
+            
 
-            // Process refund if payment was made
+           
             if (['razorpay', 'wallet'].includes(order.paymentMethod) && order.paymentStatus === 'completed') {
                 try {
                     let wallet = await Wallet.findOne({ userId });
@@ -439,7 +470,7 @@ const cancelOrderItem = async (req, res) => {
                             transactions: []
                         });
                     }
-                    // Add refund amount (already adjusted for discount)
+                  
                     if (refundAmount > 0) {
                         await wallet.addRefund(refundAmount, order._id);
                         orderItem.paymentStatus = 'refunded';
@@ -449,7 +480,7 @@ const cancelOrderItem = async (req, res) => {
                 }
             }
 
-            // Check if all items are cancelled
+            
             if (remainingActiveItems.length === 0) {
                 order.status = 'Cancelled';
                 order.cancellationReason = 'All items cancelled';
@@ -856,51 +887,7 @@ const generateInvoicePDF = async (req, res) => {
     }
 };
 
-const retryPayment = async (req, res) => {
-    try {
-        const { razorpayOrderId } = req.body;
-        const orderId = req.params.orderId;
 
-        const order = await Order.findById(orderId);
-        if (!order) {
-            return res.status(404).json({
-                success: false,
-                message: 'Order not found'
-            });
-        }
-
-        if (order.paymentStatus !== 'pending') {
-            return res.status(400).json({
-                success: false,
-                message: 'Payment is not in pending state'
-            });
-        }
-
-        // Create a new Razorpay order
-        const razorpayOrder = await createOrder(order.finalAmount, order._id.toString());
-
-        // Update order with new Razorpay order ID
-        order.razorpayOrderId = razorpayOrder.id;
-        await order.save();
-
-        res.json({
-            success: true,
-            order: {
-                id: razorpayOrder.id,
-                amount: razorpayOrder.amount,
-                currency: razorpayOrder.currency
-            },
-            key: process.env.RAZORPAY_KEY_ID
-        });
-
-    } catch (error) {
-        console.error('Payment retry error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Unable to retry payment'
-        });
-    }
-};
 module.exports = {
 
     createOrder,
