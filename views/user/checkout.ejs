@@ -326,6 +326,7 @@
 
                                         <input type="hidden" id="finalAmount" value="<%= finalAmount %>">
                                         <input type="hidden" id="walletBalance" value="<%= walletBalance %>">
+                                        <% if (finalAmount > 0){%>
                                         <div class="border p-3 mb-3">
                                             <h3 class="h6 mb-0">Payment Method</h3>
 
@@ -379,6 +380,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <%}%>
 
 
 
@@ -454,10 +456,29 @@
             }
 
             if (checkoutForm) {
-                checkoutForm.onsubmit = async function (e) {
-                    e.preventDefault();
+    checkoutForm.onsubmit = async function (e) {
+        e.preventDefault();
+        
+        // Check if amount is 0 or less
+        const finalAmountStr = document.getElementById('finalAmount').textContent || '₹0';
+        const finalAmount = parseFloat(finalAmountStr.replace('₹', ''));
+        
+        if (finalAmount <= 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Order Amount',
+                text: 'Your order total must be greater than 0 to proceed with checkout.',
+                confirmButtonText: 'Continue Shopping',
+                confirmButtonColor: '#4A665B'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/shop';
+                }
+            });
+            return false;
+        }
 
-                    const selectedAddress = document.querySelector('input[name="addressId"]:checked');
+        const selectedAddress = document.querySelector('input[name="addressId"]:checked');
                     const addressSection = document.querySelector('.p-3.p-lg-5.border');
                     const addressErrorDiv = document.getElementById('address-error');
 
