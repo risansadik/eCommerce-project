@@ -406,6 +406,52 @@
 								</div>
 								<% } %>
 			</div>
+			<!-- Pagination -->
+			<div class="container mt-4 mb-5">
+				<nav aria-label="Product navigation">
+					<ul class="pagination justify-content-center">
+						<% if (pagination.currentPage> 1) { %>
+							<li class="page-item">
+								<a class="page-link" href="#" data-page="<%= pagination.currentPage - 1 %>"
+									aria-label="Previous">
+									<span aria-hidden="true">&laquo;</span>
+								</a>
+							</li>
+							<% } %>
+
+								<% for(let i=1; i <=pagination.totalPages; i++) { %>
+									<% if (i===1 || i===pagination.totalPages || (i>= pagination.currentPage - 2 && i <=
+											pagination.currentPage + 2)) { %>
+											<li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+												<a class="page-link" href="#" data-page="<%= i %>">
+													<%= i %>
+												</a>
+											</li>
+											<% } else if (i===pagination.currentPage - 3 || i===pagination.currentPage +
+												3) { %>
+												<li class="page-item disabled">
+													<a class="page-link" href="#">...</a>
+												</li>
+												<% } %>
+													<% } %>
+
+														<% if (pagination.currentPage < pagination.totalPages) { %>
+															<li class="page-item">
+																<a class="page-link" href="#"
+																	data-page="<%= pagination.currentPage + 1 %>"
+																	aria-label="Next">
+																	<span aria-hidden="true">&raquo;</span>
+																</a>
+															</li>
+															<% } %>
+					</ul>
+				</nav>
+				<div class="text-center text-muted">
+					Showing <%= (pagination.currentPage - 1) * pagination.limit + 1 %>-<%=
+							Math.min(pagination.currentPage * pagination.limit, pagination.totalProducts) %> of <%=
+								pagination.totalProducts %> products
+				</div>
+			</div>
 		</div>
 
 		<!-- Scripts -->
@@ -413,6 +459,11 @@
 		<script src="js/tiny-slider.js"></script>
 		<script src="js/custom.js"></script>
 		<script>
+
+			function handlePagination(page) {
+				const params = updateQueryParams({ page: page });
+				fetchAndRender(params);
+			}
 			function updateQueryParams(newParams) {
 				const urlParams = new URLSearchParams(window.location.search);
 				for (const [key, value] of Object.entries(newParams)) {
@@ -435,7 +486,7 @@
 					if (!response.ok) throw new Error('Network response was not ok');
 					const data = await response.json();
 
-				
+
 					const newUrl = `${window.location.pathname}?${params}`;
 					window.history.pushState({ path: newUrl }, '', newUrl);
 
@@ -455,7 +506,7 @@
 				fetchAndRender(params);
 			}
 
-	
+
 			document.querySelector('.search-bar form').addEventListener('submit', function (e) {
 				e.preventDefault();
 				const searchValue = this.querySelector('input[name="search"]').value;
@@ -465,14 +516,16 @@
 
 			document.querySelectorAll('.category-pills .nav-link').forEach(link => {
 				link.addEventListener('click', function (e) {
+					
 					e.preventDefault();
+					
 					let params;
 
 					if (this.getAttribute('href') === '/shop') {
-					
+
 						params = updateQueryParams({ category: '' });
 					} else {
-					
+
 						const categoryId = new URL(this.href).searchParams.get('category');
 						params = updateQueryParams({ category: categoryId });
 					}
@@ -480,6 +533,17 @@
 					fetchAndRender(params);
 				});
 			});
+
+			document.addEventListener('click', function(e) {
+    if (e.target.closest('.pagination .page-link')) {
+        e.preventDefault();
+        const pageLink = e.target.closest('.pagination .page-link');
+        const page = pageLink.getAttribute('data-page');
+        if (page) {
+            handlePagination(page);
+        }
+    }
+});
 		</script>
 </body>
 
