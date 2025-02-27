@@ -229,6 +229,35 @@
         .tab-content.active {
             display: block;
         }
+        .pagination-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .pagination {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .pagination-link {
+        padding: 8px 12px;
+        background-color: var(--bg-secondary);
+        color: var(--text-secondary);
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .pagination-link:hover {
+        background-color: var(--accent-blue);
+        color: white;
+    }
+    
+    .pagination-link.current {
+        background-color: var(--accent-blue);
+        color: white;
+    }
     </style>
 </head>
 
@@ -271,14 +300,15 @@
 
         <main class="main-content">
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('orders')">Orders</button>
-                <button class="tab" onclick="switchTab('returns')">Return Requests</button>
+                <button class="tab <%= activeTab === 'orders' ? 'active' : '' %>" onclick="switchTab('orders')">Orders</button>
+                <button class="tab <%= activeTab === 'returns' ? 'active' : '' %>" onclick="switchTab('returns')">Return Requests</button>
             </div>
         
-            <input type="search" class="search-bar" placeholder="Search orders by ID or customer name">
+            <input type="search" class="search-bar" placeholder="<%= activeTab === 'orders' ? 'Search orders by ID or customer name' : 'Search return requests by ID or customer name' %>">
+
             
             <!-- Orders Tab -->
-            <div id="orders-tab" class="tab-content active">
+            <div id="orders-tab" class="tab-content <%= activeTab === 'orders' ? 'active' : '' %>">
                 <% orders.forEach(order => { %>
                     <div class="order-card">
                         <div class="order-header">
@@ -327,49 +357,94 @@
                         </table>
                     </div>
                 <% }); %>
-            </div>
-        
-            <!-- Returns Tab -->
-            <div id="returns-tab" class="tab-content">
-                <% if (typeof returnRequests !== 'undefined' && returnRequests && returnRequests.length > 0) { %>
-                    <% returnRequests.forEach(function(request) { %>
-                        <div class="order-card">
-                            <div class="order-header">
-                                <h3>Return Request #<%= request._id %></h3>
-                                <div>
-                                    <span class="status-badge status-<%= request.returnStatus ? request.returnStatus.toLowerCase() : 'pending' %>">
-                                        <%= request.returnStatus || 'Pending' %>
-                                    </span>
-                                </div>
-                            </div>
-        
-                            <table class="orders-table">
-                                <tr>
-                                    <td class="customer-info">
-                                        <strong>Order ID:</strong> #<%= request.orderId ? request.orderId.orderId : 'N/A' %><br>
-                                        <strong>Customer:</strong> <%= request.userId ? request.userId.name : 'N/A' %><br>
-                                        <strong>Reason:</strong> <%= request.returnReason || 'N/A' %>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <strong>Refund Amount:</strong> ₹<%= request.refundAmount || '0' %>
-                                    </td>
-                                </tr>
-                            </table>
-        
-                            <div class="action-buttons">
-                                <% if (request.returnStatus === 'Pending') { %>
-                                    <button onclick="approveReturnRequest('<%= request._id %>')" class="btn btn-primary">Approve</button>
-                                    <button onclick="rejectReturnRequest('<%= request._id %>')" class="btn btn-danger">Reject</button>
-                                <% } %>
-                            </div>
+                <% if (totalPages > 1) { %>
+                    <div class="pagination-container">
+                        <div class="pagination">
+                            <% if (currentPage > 1) { %>
+                                <a href="/admin/orders?page=1&tab=orders" class="pagination-link">First</a>
+                                <a href="/admin/orders?page=<%= currentPage - 1 %>&tab=orders" class="pagination-link">Previous</a>
+                            <% } %>
+                            
+                            <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                                <a href="/admin/orders?page=<%= i %>&tab=orders" class="pagination-link <%= i === currentPage ? 'current' : '' %>"><%= i %></a>
+                            <% } %>
+                            
+                            <% if (currentPage < totalPages) { %>
+                                <a href="/admin/orders?page=<%= currentPage + 1 %>&tab=orders" class="pagination-link">Next</a>
+                                <a href="/admin/orders?page=<%= totalPages %>&tab=orders" class="pagination-link">Last</a>
+                            <% } %>
                         </div>
-                    <% }); %>
-                <% } else { %>
-                    <p>No return requests found.</p>
+                    </div>
+                <% } else if (orders.length === 0) { %>
+                    <p>No orders found.</p>
                 <% } %>
             </div>
+
+             <!-- Returns Tab -->
+           <div id="returns-tab" class="tab-content <%= activeTab === 'returns' ? 'active' : '' %>">
+            <% if (typeof returnRequests !== 'undefined' && returnRequests && returnRequests.length > 0) { %>
+                <% returnRequests.forEach(function(request) { %>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Return Request #<%= request._id %></h3>
+                            <div>
+                                <span class="status-badge status-<%= request.returnStatus ? request.returnStatus.toLowerCase() : 'pending' %>">
+                                    <%= request.returnStatus || 'Pending' %>
+                                </span>
+                            </div>
+                        </div>
+    
+                        <table class="orders-table">
+                            <tr>
+                                <td class="customer-info">
+                                    <strong>Order ID:</strong> #<%= request.orderId ? request.orderId.orderId : 'N/A' %><br>
+                                    <strong>Customer:</strong> <%= request.userId ? request.userId.name : 'N/A' %><br>
+                                    <strong>Reason:</strong> <%= request.returnReason || 'N/A' %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Refund Amount:</strong> ₹<%= request.refundAmount || '0' %>
+                                </td>
+                            </tr>
+                        </table>
+    
+                        <div class="action-buttons">
+                            <% if (request.returnStatus === 'Pending') { %>
+                                <button onclick="approveReturnRequest('<%= request._id %>')" class="btn btn-primary">Approve</button>
+                                <button onclick="rejectReturnRequest('<%= request._id %>')" class="btn btn-danger">Reject</button>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+                <% if (totalReturnPages > 0) { %>
+                    <div class="pagination-container">
+                        <div class="pagination">
+                            <% if (currentPage > 1) { %>
+                                <a href="/admin/orders?page=1&tab=returns" class="pagination-link">First</a>
+                                <a href="/admin/orders?page=<%= currentPage - 1 %>&tab=returns" class="pagination-link">Previous</a>
+                            <% } %>
+                            
+                            <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalReturnPages, currentPage + 2); i++) { %>
+                                <a href="/admin/orders?page=<%= i %>&tab=returns" class="pagination-link <%= i === currentPage ? 'current' : '' %>"><%= i %></a>
+                            <% } %>
+                            
+                            <% if (currentPage < totalReturnPages) { %>
+                                <a href="/admin/orders?page=<%= currentPage + 1 %>&tab=returns" class="pagination-link">Next</a>
+                                <a href="/admin/orders?page=<%= totalReturnPages %>&tab=returns" class="pagination-link">Last</a>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% } else { %>
+                        <p>No return requests found.</p>
+                    <% } %>
+                <% } %>
+           
+        </div>
+            
+            </div>
+        
+           
         </main>
     </div>
 
@@ -541,42 +616,34 @@
             }
         }
 
-        // Add tab switching function
+       
         function switchTab(tabName) {
-            // Update search bar placeholder
-            const searchBar = document.querySelector('.search-bar');
-            searchBar.placeholder = tabName === 'orders'
-                ? 'Search orders by ID or customer name'
-                : 'Search return requests by ID or customer name';
-
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-
-            // Deactivate all tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.add('active');
-
-            // Activate selected tab button
-            event.target.classList.add('active');
+        // Get current URL and parameters
+        const url = new URL(window.location);
+        
+        // Update tab parameter
+        url.searchParams.set('tab', tabName);
+        
+        // If switching tabs, reset to page 1
+        if (tabName !== '<%= activeTab %>') {
+            url.searchParams.set('page', 1);
         }
+        
+        // Redirect to the new URL
+        window.location.href = url.toString();
+    }
 
-        // Update search functionality to work with active tab
-        document.querySelector('.search-bar').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const activeTab = document.querySelector('.tab-content.active');
-            const cards = activeTab.querySelectorAll('.order-card');
+    // Keep the search functionality working with the active tab
+    document.querySelector('.search-bar').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const activeTab = document.querySelector('.tab-content.active');
+        const cards = activeTab.querySelectorAll('.order-card');
 
-            cards.forEach(card => {
-                const cardText = card.textContent.toLowerCase();
-                card.style.display = cardText.includes(searchTerm) ? 'block' : 'none';
-            });
+        cards.forEach(card => {
+            const cardText = card.textContent.toLowerCase();
+            card.style.display = cardText.includes(searchTerm) ? 'block' : 'none';
         });
+    });
     </script>
 </body>
 

@@ -8,11 +8,26 @@ const Wallet = require('../../models/walletSchema');
 const getAllOrders = async (req, res) => {
     try {
        
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5; 
+        const skip = (page - 1) * limit;
+        
+      
+        const totalOrders = await Order.countDocuments({});
+        const totalPages = Math.ceil(totalOrders / limit);
+        
+       
         const orders = await Order.find({})
             .populate('orderedItems.product', 'productName')
             .populate('userId', 'name email phone')
-            .sort({ createdOn: -1 });
+            .sort({ createdOn: -1 })
+            .skip(skip)
+            .limit(limit);
 
+       
+        const totalReturnRequests = await ReturnOrder.countDocuments({});
+        const totalReturnPages = Math.ceil(totalReturnRequests / limit);
+            
       
         const returnRequests = await ReturnOrder.find({})
             .populate({
@@ -20,15 +35,16 @@ const getAllOrders = async (req, res) => {
                 select: 'orderId' 
             })
             .populate('userId', 'name')
-            .sort({ requestDate: -1 });
+            .sort({ requestDate: -1 })
+            .skip(skip)
+            .limit(limit);
+            
+        
         const processedOrders = await Promise.all(orders.map(async (order) => {
             try {
-           
+             
                 let addressDocument = null;
-
-                
                 addressDocument = await Address.findById(order.address);
-
     
                 if (!addressDocument) {
                     addressDocument = await Address.findOne({ 
@@ -36,10 +52,7 @@ const getAllOrders = async (req, res) => {
                         'address._id': order.address 
                     });
                 }
-
-                
-
-               
+    
                 if (!addressDocument) {
                     return {
                         ...order._doc,
@@ -53,12 +66,11 @@ const getAllOrders = async (req, res) => {
                         }
                     };
                 }
-
-             
+    
                 const addressData = addressDocument.address.find(
                     addr => addr._id.toString() === order.address.toString()
                 ) || addressDocument.address[0];
-
+    
                 return {
                     ...order._doc,
                     address: {
@@ -86,9 +98,16 @@ const getAllOrders = async (req, res) => {
             }
         }));
 
+      
+        const activeTab = req.query.tab || 'orders';
+
         res.render('admin-orders', {
             orders: processedOrders,
-            returnRequests, 
+            returnRequests,
+            currentPage: page,
+            totalPages,
+            totalReturnPages,
+            activeTab,
             title: 'Order Management'
         });
 
@@ -103,6 +122,7 @@ const getAllOrders = async (req, res) => {
         });
     }
 };
+
 const updateOrderStatus = async (req, res) => {
     try {
         const { orderId } = req.params;
@@ -326,14 +346,30 @@ const processReturnRequest = async (req, res) => {
 
 const getReturnRequests = async (req, res) => {
     try {
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5; // Items per page
+        const skip = (page - 1) * limit;
+        
+        // Get total count
+        const totalReturnRequests = await ReturnOrder.countDocuments({});
+        const totalPages = Math.ceil(totalReturnRequests / limit);
+        
         const returnRequests = await ReturnOrder.find({})
             .populate('orderId')
             .populate('userId', 'name email')
-            .sort({ requestDate: -1 });
+            .sort({ requestDate: -1 })
+            .skip(skip)
+            .limit(limit);
 
         return res.json({
             success: true,
-            returnRequests
+            returnRequests,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems: totalReturnRequests
+            }
         });
 
     } catch (error) {

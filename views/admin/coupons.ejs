@@ -139,6 +139,49 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        /* Add these styles to your existing CSS */
+.pagination-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    margin: 0 5px;
+    background-color: #2d3339;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.page-link:hover {
+    background-color: #0095ff;
+}
+
+.page-link.current {
+    background-color: #0095ff;
+    cursor: default;
+}
+
+.page-link.disabled {
+    background-color: #1a1d21;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.page-info {
+    color: #9ba1a6;
+    font-size: 14px;
+}
     </style>
 </head>
 <body>
@@ -230,6 +273,35 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <div class="pagination-container">
+        <% if (totalPages > 1) { %>
+            <div class="pagination">
+                <% if (hasPrevPage) { %>
+                    <a href="/admin/coupons?page=<%= prevPage %>" class="page-link">&laquo; Previous</a>
+                <% } else { %>
+                    <span class="page-link disabled">&laquo; Previous</span>
+                <% } %>
+                
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <% if (i === currentPage) { %>
+                        <span class="page-link current"><%= i %></span>
+                    <% } else { %>
+                        <a href="/admin/coupons?page=<%= i %>" class="page-link"><%= i %></a>
+                    <% } %>
+                <% } %>
+                
+                <% if (hasNextPage) { %>
+                    <a href="/admin/coupons?page=<%= nextPage %>" class="page-link">Next &raquo;</a>
+                <% } else { %>
+                    <span class="page-link disabled">Next &raquo;</span>
+                <% } %>
+            </div>
+            <div class="page-info">
+                Page <%= currentPage %> of <%= totalPages %>
+            </div>
+        <% } %>
     </div>
 
     <script>

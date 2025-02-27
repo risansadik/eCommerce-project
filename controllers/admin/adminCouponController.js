@@ -2,35 +2,44 @@ const Coupon = require('../../models/couponSchema');
 
 const getCoupon = async (req, res) => {
     try {
-        const coupons = await Coupon.find().sort({ createdAt: -1 });
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
         
-       
+        // Count total documents for pagination
+        const totalCoupons = await Coupon.countDocuments();
+        const totalPages = Math.ceil(totalCoupons / limit);
+        
+        // Fetch paginated coupons
+        const coupons = await Coupon.find()
+                                    .sort({ createdAt: -1 })
+                                    .skip(skip)
+                                    .limit(limit);
+        
         const successMessage = req.session.successMessage;
         const errorMessage = req.session.errorMessage;
         
-       
         delete req.session.successMessage;
         delete req.session.errorMessage;
         
-      
-        if (successMessage) {
-            res.render('coupons', { 
-                coupons,
-                successMessage,
-                errorMessage 
-            });
-        } else {
-            res.render('coupons', { 
-                coupons,
-                successMessage: null,
-                errorMessage 
-            });
-        }
+        res.render('coupons', {
+            coupons,
+            successMessage: successMessage || null,
+            errorMessage: errorMessage || null,
+            currentPage: page,
+            totalPages: totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
+            nextPage: page + 1,
+            prevPage: page - 1
+        });
     } catch (error) {
         console.error('Error fetching coupons:', error);
         res.redirect('/admin/dashboard');
     }
 };
+
 const addCoupon = async (req, res) => {
     try {
         res.render('add-coupons');
@@ -51,13 +60,12 @@ const createCoupon = async (req, res) => {
             maximumPurchase,
             expireOn
         } = req.body;
-
-       
+        
         const existingCoupon = await Coupon.findOne({ code });
         if (existingCoupon) {
             return res.redirect('/admin/addCoupons');
         }
-
+        
         const coupon = new Coupon({
             code: code.toUpperCase(),
             description,
@@ -69,7 +77,7 @@ const createCoupon = async (req, res) => {
             status: 'active',
             isList: true
         });
-
+        
         await coupon.save();
         res.redirect('/admin/coupons');
     } catch (error) {
@@ -77,8 +85,6 @@ const createCoupon = async (req, res) => {
         res.redirect('/admin/addCoupons');
     }
 };
-
-
 
 const deleteCoupon = async (req, res) => {
     try {
@@ -88,10 +94,9 @@ const deleteCoupon = async (req, res) => {
         if (!coupon) {
             return res.redirect('/admin/coupons');
         }
-
+        
         await Coupon.findByIdAndDelete(id);
         
-       
         req.session.successMessage = 'Coupon deleted successfully!';
         res.redirect('/admin/coupons');
     } catch (error) {
@@ -100,6 +105,7 @@ const deleteCoupon = async (req, res) => {
         res.redirect('/admin/coupons');
     }
 };
+
 module.exports = {
     getCoupon,
     addCoupon,
