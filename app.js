@@ -8,6 +8,7 @@ const db = require('./config/db');
 const nocache = require('nocache');
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
+const {StatusCode} = require('./config/statusCodes')
 
 
 
@@ -70,7 +71,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Something broke!');
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).send('Something broke!');
 });
 
 app.set('view engine','ejs');

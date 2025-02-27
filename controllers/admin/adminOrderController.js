@@ -4,6 +4,7 @@ const Product = require('../../models/productSchema');
 const Address = require('../../models/addressSchema');
 const ReturnOrder = require('../../models/returnOrderSchema');
 const Wallet = require('../../models/walletSchema');
+const {StatusCode} = require('../../config/statusCodes');
 
 const getAllOrders = async (req, res) => {
     try {
@@ -116,7 +117,7 @@ const getAllOrders = async (req, res) => {
             message: error.message,
             stack: error.stack
         });
-        res.status(500).render('error', {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).render('errorPage', {
             message: 'Failed to fetch orders',
             error: error.message
         });
@@ -130,7 +131,7 @@ const updateOrderStatus = async (req, res) => {
 
     
         if (status === 'Return Request') {
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 success: false,
                 message: 'Return requests can only be initiated by customers'
             });
@@ -139,7 +140,7 @@ const updateOrderStatus = async (req, res) => {
         
         const validStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'];
         if (!validStatuses.includes(status)) {
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 success: false,
                 message: 'Invalid status'
             });
@@ -147,7 +148,7 @@ const updateOrderStatus = async (req, res) => {
 
         const order = await Order.findOne({ orderId });
         if (!order) {
-            return res.status(404).json({
+            return res.status(StatusCode.NOT_FOUND).json({
                 success: false,
                 message: 'Order not found'
             });
@@ -155,7 +156,7 @@ const updateOrderStatus = async (req, res) => {
 
       
         if (order.isReturnProcessed && order.status === 'Returned') {
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 success: false,
                 message: 'Cannot update status of returned order'
             });
@@ -163,7 +164,7 @@ const updateOrderStatus = async (req, res) => {
 
      
         if (order.status === 'Cancelled') {
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 success: false,
                 message: 'Cannot update status of cancelled order'
             });
@@ -173,7 +174,7 @@ const updateOrderStatus = async (req, res) => {
         order.status = status;
         await order.save();
 
-        return res.json({
+        return res.status(StatusCode.SUCCESS).json({
             success: true,
             message: 'Order status updated successfully',
             newStatus: status
@@ -181,7 +182,7 @@ const updateOrderStatus = async (req, res) => {
 
     } catch (error) {
         console.error('Error updating order status:', error);
-        return res.status(500).json({
+        return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Failed to update order status'
         });
@@ -194,7 +195,7 @@ const cancelOrder = async (req, res) => {
 
         const order = await Order.findOne({ orderId });
         if (!order) {
-            return res.status(404).json({
+            return res.status(StatusCode.NOT_FOUND).json({
                 success: false,
                 message: 'Order not found'
             });
@@ -202,7 +203,7 @@ const cancelOrder = async (req, res) => {
 
       
         if (['Delivered', 'Cancelled'].includes(order.status)) {
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 success: false,
                 message: 'Cannot cancel order at this stage'
             });
@@ -223,14 +224,14 @@ const cancelOrder = async (req, res) => {
         order.status = 'Cancelled';
         await order.save();
 
-        res.json({
+        res.status(StatusCode.SUCCESS).json({
             success: true,
             message: 'Order cancelled successfully'
         });
 
     } catch (error) {
         console.error('Error cancelling order:', error);
-        res.status(500).json({
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Failed to cancel order'
         });
@@ -245,7 +246,7 @@ const submitReturnRequest = async (req, res) => {
      
         const order = await Order.findOne({ orderId: orderId });
         if (!order) {
-            return res.status(404).json({
+            return res.status(StatusCode.NOT_FOUND).json({
                 success: false,
                 message: 'Order not found'
             });
@@ -253,7 +254,7 @@ const submitReturnRequest = async (req, res) => {
 
        
         if (order.status !== 'Delivered') {
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 success: false,
                 message: 'Order is not eligible for return'
             });
@@ -273,7 +274,7 @@ const submitReturnRequest = async (req, res) => {
         order.status = 'Return Request';
         await order.save();
 
-        return res.json({
+        return res.status(StatusCode.SUCCESS).json({
             success: true,
             message: 'Return request submitted successfully',
             returnOrder
@@ -281,7 +282,7 @@ const submitReturnRequest = async (req, res) => {
 
     } catch (error) {
         console.error('Error submitting return request:', error);
-        return res.status(500).json({
+        return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Failed to submit return request'
         });
@@ -293,7 +294,7 @@ const processReturnRequest = async (req, res) => {
 
         const returnOrder = await ReturnOrder.findById(returnId).populate('orderId');
         if (!returnOrder) {
-            return res.status(404).json({
+            return res.status(StatusCode.NOT_FOUND).json({
                 success: false,
                 message: 'Return request not found'
             });
@@ -329,7 +330,7 @@ const processReturnRequest = async (req, res) => {
 
         await returnOrder.save();
 
-        return res.json({
+        return res.status(StatusCode.SUCCESS).json({
             success: true,
             message: `Return request ${action === 'approve' ? 'approved' : 'rejected'}`,
             returnOrder
@@ -337,7 +338,7 @@ const processReturnRequest = async (req, res) => {
 
     } catch (error) {
         console.error('Error processing return request:', error);
-        return res.status(500).json({
+        return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Failed to process return request'
         });
@@ -362,7 +363,7 @@ const getReturnRequests = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        return res.json({
+            return res.status(StatusCode.SUCCESS).json({
             success: true,
             returnRequests,
             pagination: {
@@ -374,7 +375,7 @@ const getReturnRequests = async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching return requests:', error);
-        return res.status(500).json({
+        return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Failed to fetch return requests'
         });
@@ -394,7 +395,7 @@ const approveReturnRequest = async (req, res) => {
             .populate('userId');
 
         if (!returnRequest) {
-            return res.status(404).json({
+            return res.status(StatusCode.NOT_FOUND).json({
                 success: false,
                 message: 'Return request not found'
             });
@@ -439,7 +440,7 @@ const approveReturnRequest = async (req, res) => {
         await order.save();
         await wallet.save();
 
-        return res.json({
+        return res.status(StatusCode.SUCCESS).json({
             success: true,
             message: 'Return request approved and refund processed successfully',
             returnRequest,
@@ -455,7 +456,7 @@ const approveReturnRequest = async (req, res) => {
             returnId: returnId
         });
         
-        return res.status(500).json({
+        return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Failed to approve return request',
             error: error.message
@@ -468,7 +469,7 @@ const rejectReturnRequest = async (req, res) => {
 
         const returnRequest = await ReturnOrder.findById(returnId).populate('orderId');
         if (!returnRequest) {
-            return res.status(404).json({
+            return res.status(StatusCode.NOT_FOUND).json({
                 success: false,
                 message: 'Return request not found'
             });
@@ -483,7 +484,7 @@ const rejectReturnRequest = async (req, res) => {
         order.status = 'Delivered';
         await order.save();
 
-        return res.json({
+        return res.status(StatusCode.SUCCESS).json({
             success: true,
             message: 'Return request rejected successfully',
             returnRequest
@@ -491,7 +492,7 @@ const rejectReturnRequest = async (req, res) => {
 
     } catch (error) {
         console.error('Error rejecting return request:', error);
-        return res.status(500).json({
+        return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Failed to reject return request'
         });

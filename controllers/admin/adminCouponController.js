@@ -1,4 +1,5 @@
 const Coupon = require('../../models/couponSchema');
+const {StatusCode} = require('../../config/statusCodes');
 
 const getCoupon = async (req, res) => {
     try {

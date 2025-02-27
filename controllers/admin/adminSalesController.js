@@ -1,6 +1,7 @@
 const Order = require('../../models/orderSchema');
 const User = require('../../models/userSchema');
 const ExcelJS = require('exceljs');
+const {StatusCode} = require('../../config/statusCodes');
 
 const loadSalesReport = async (req, res) => {
     try {
@@ -235,7 +236,7 @@ const filterSalesReport = async (req, res) => {
 
     } catch (error) {
         console.error('Error in filterSalesReport:', error);
-        res.status(500).json({
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             error: error.message || 'Internal server error',
             success: false
         });
@@ -553,7 +554,7 @@ const downloadExcel = async (req, res) => {
 
     } catch (error) {
         console.error('Error in downloadExcel:', error);
-        res.status(500).json({
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             error: error.message || 'Internal server error',
             success: false
         });
