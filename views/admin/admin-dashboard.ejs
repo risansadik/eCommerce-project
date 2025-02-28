@@ -303,16 +303,16 @@
     </style>
 
     <style id="pdfStyles">
-        .pdf-content {
-            display: none;
-            background: white;
-            color: black;
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
+       .pdf-content {
+    display: none;
+    background: white;
+    color: black;
+    font-family: Arial, sans-serif;
+    padding: 15px;
+    max-width: 1100px; /* Force wider content area */
+    margin: 0 auto;
+    font-size: 9px; /* Smaller font size for better fitting */
+}
         .pdf-content .header {
             text-align: center;
             margin-bottom: 30px;
@@ -358,11 +358,11 @@
         }
 
         .pdf-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            table-layout: fixed;
-        }
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; 
+    font-size: 8px;
+}
 
         .pdf-content th,
         .pdf-content td {
@@ -381,47 +381,47 @@
             text-align: left;
         }
 
-        /* Specific column widths */
         .pdf-content th:nth-child(1),
-        .pdf-content td:nth-child(1) {
-            width: 18%;
-            /* Order ID */
-        }
+.pdf-content td:nth-child(1) {
+    width: 10%; 
+}
 
-        .pdf-content th:nth-child(2),
-        .pdf-content td:nth-child(2) {
-            width: 12%;
-            /* Date */
-        }
 
-        .pdf-content th:nth-child(3),
-        .pdf-content td:nth-child(3) {
-            width: 18%;
-            /* Customer */
-        }
+.pdf-content th:nth-child(2),
+.pdf-content td:nth-child(2) {
+    width: 8%;
+}
 
-        .pdf-content th:nth-child(4),
-        .pdf-content td:nth-child(4),
-        .pdf-content th:nth-child(5),
-        .pdf-content td:nth-child(5),
-        .pdf-content th:nth-child(6),
-        .pdf-content td:nth-child(6) {
-            width: 13%;
-            /* Amount columns */
-            text-align: right;
-        }
+.pdf-content th:nth-child(3),
+.pdf-content td:nth-child(3) {
+    width: 15%; 
+}
 
-        .pdf-content th:nth-child(7),
-        .pdf-content td:nth-child(7) {
-            width: 10%;
-            /* Status */
-            text-align: center;
-        }
+.pdf-content th:nth-child(4),
+.pdf-content td:nth-child(4),
+.pdf-content th:nth-child(5),
+.pdf-content td:nth-child(5),
+.pdf-content th:nth-child(6),
+.pdf-content td:nth-child(6),
+.pdf-content th:nth-child(7),
+.pdf-content td:nth-child(7) {
+    width: 12%; 
+    text-align: right;
+}
 
-        .pdf-content td {
-            color: #333;
-            vertical-align: middle;
-        }
+.pdf-content th:nth-child(8),
+.pdf-content td:nth-child(8) {
+    width: 7%;
+    text-align: center;
+}
+
+
+.pdf-content td, .pdf-content th {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 5px 2px;
+}
 
         .pdf-content .status {
             display: inline-block;
@@ -798,7 +798,7 @@
         `).join('');
             }
 
-            // Update top categories
+           
             const topCategoriesBody = document.querySelector('.stat-card:nth-child(2) tbody');
             if (topCategoriesBody && data.topCategories) {
                 topCategoriesBody.innerHTML = data.topCategories.map(category => `
@@ -824,83 +824,93 @@
         });
 
         async function downloadPDF() {
-            try {
+    try {
+       
+        document.getElementById('reportDate').textContent = new Date().toLocaleDateString();
 
-                document.getElementById('reportDate').textContent = new Date().toLocaleDateString();
-
-
-                const statElements = document.querySelectorAll('.stat-value');
-                if (statElements.length >= 3) {
-                    document.getElementById('pdfSalesCount').textContent = statElements[0].textContent;
-                    document.getElementById('pdfRevenue').textContent = statElements[1].textContent;
-                    document.getElementById('pdfDiscount').textContent = statElements[2].textContent;
-                }
-
-
-                const pdfTableBody = document.getElementById('pdfTableBody');
-                const salesTable = document.querySelector('.sales-table tbody');
-
-                if (!salesTable) {
-                    throw new Error('Sales table not found');
-                }
-
-                const originalRows = salesTable.getElementsByTagName('tr');
-
-
-                pdfTableBody.innerHTML = Array.from(originalRows).map(row => {
-                    const cells = row.getElementsByTagName('td');
-                    const statusBadge = cells[7].querySelector('.status-badge');
-                    const statusClass = statusBadge ? statusBadge.classList[1]?.split('-')[1] || 'default' : 'default';
-                    const statusText = cells[7].textContent.trim();
-
-                    return `
-    <tr>
-        <td>${cells[0]?.textContent || ''}</td>
-        <td>${cells[1]?.textContent || ''}</td>
-        <td>${cells[2]?.textContent || ''}</td>
-        <td class="amount">${cells[3]?.textContent || ''}</td>
-        <td class="amount">${cells[4]?.textContent || ''}</td>
-        <td>${cells[5]?.textContent || ''}</td>
-        <td class="amount">${cells[6]?.textContent || ''}</td>
-        <td><span class="status status-${statusClass}">${statusText}</span></td>
-    </tr>
-`;
-                }).join('');
-
-                const opt = {
-                    margin: [15, 10],
-                    filename: `sales-report-${new Date().toISOString().split('T')[0]}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: {
-                        scale: 2,
-                        useCORS: true,
-                        logging: false
-                    },
-                    jsPDF: {
-                        unit: 'mm',
-                        format: 'a4',
-                        orientation: 'landscape'
-                    }
-                };
-
-                const element = document.getElementById('pdfContent');
-                if (!element) {
-                    throw new Error('PDF content element not found');
-                }
-
-                element.style.display = 'block';
-                await html2pdf().set(opt).from(element).save();
-
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF. Please try again.');
-            } finally {
-                const element = document.getElementById('pdfContent');
-                if (element) {
-                    element.style.display = 'none';
-                }
-            }
+       
+        const statElements = document.querySelectorAll('.stat-value');
+        if (statElements.length >= 3) {
+            document.getElementById('pdfSalesCount').textContent = statElements[0].textContent;
+            document.getElementById('pdfRevenue').textContent = statElements[1].textContent;
+            document.getElementById('pdfDiscount').textContent = statElements[2].textContent;
         }
+
+       
+        const pdfTableBody = document.getElementById('pdfTableBody');
+        const salesTable = document.querySelector('.sales-table tbody');
+
+        if (!salesTable) {
+            throw new Error('Sales table not found');
+        }
+
+        const originalRows = salesTable.getElementsByTagName('tr');
+        
+      
+        pdfTableBody.innerHTML = '';
+        
+        Array.from(originalRows).forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            const statusBadge = cells[7].querySelector('.status-badge');
+            const statusClass = statusBadge ? statusBadge.classList[1]?.split('-')[1] || 'default' : 'default';
+            const statusText = cells[7].textContent.trim();
+            
+           
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${cells[0]?.textContent.substring(0, 10) || ''}</td>
+                <td>${cells[1]?.textContent.substring(0, 10) || ''}</td>
+                <td>${cells[2]?.textContent.substring(0, 15) || ''}</td>
+                <td class="amount">${cells[3]?.textContent || ''}</td>
+                <td class="amount">${cells[4]?.textContent || ''}</td>
+                <td>${cells[5]?.textContent.substring(0, 10) || ''}</td>
+                <td class="amount">${cells[6]?.textContent || ''}</td>
+                <td><span class="status status-${statusClass}">${statusText}</span></td>
+            `;
+            pdfTableBody.appendChild(newRow);
+        });
+
+        const opt = {
+            margin: [10, 5, 10, 5], 
+            filename: `sales-report-${new Date().toISOString().split('T')[0]}.pdf`,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: {
+                scale: 1.2, 
+                useCORS: true,
+                logging: false,
+                width: 1200,
+                windowWidth: 1200 
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a3', 
+                orientation: 'landscape',
+                compress: true,
+                hotfixes: ["px_scaling"] 
+            }
+        };
+
+        const element = document.getElementById('pdfContent');
+        if (!element) {
+            throw new Error('PDF content element not found');
+        }
+
+        
+        const originalDisplay = element.style.display;
+        element.style.display = 'block';
+        element.style.width = '1100px';
+        
+        await html2pdf().set(opt).from(element).save();
+
+       
+        element.style.display = originalDisplay;
+        element.style.width = '';
+
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Error generating PDF. Please try again.');
+    }
+}
 
 
     </script>

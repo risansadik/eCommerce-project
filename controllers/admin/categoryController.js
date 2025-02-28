@@ -104,7 +104,7 @@ const removeCategoryOffer = async (req, res) => {
 
         if (!category) {
 
-            return res.status(404).json({ status: false, message: "Category not found" });
+            return res.status(StatusCode.NOT_FOUND).json({ status: false, message: "Category not found" });
         }
 
         const percentage = category.categoryOffer;
@@ -123,7 +123,7 @@ const removeCategoryOffer = async (req, res) => {
         res.json({ status: true })
     } catch (error) {
 
-        res.status(500).json({ status: false, message: "Internal Server Error" });
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ status: false, message: "Internal Server Error" });
 
     }
 }
